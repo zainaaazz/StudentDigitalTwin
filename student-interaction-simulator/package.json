@@ -1,0 +1,23 @@
+{
+  "name": "student-interaction-simulator",
+  "version": "1.0.0",
+  "description": "Social interaction simulation for Student Digital Twin",
+  "scripts": {
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend:dev": "cd frontend && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build:all": "cd backend && npm run build && cd ../frontend && npm run build",
+    "test:all": "cd backend && npm test && cd ../frontend && npm test"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "keywords": [
+    "student-digital-twin",
+    "social-network",
+    "interaction-tracking"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

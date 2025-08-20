@@ -1,1 +1,7 @@
+# dependencies
+/node_modules
 .env
+.pnp.js
+
+# testing
+/coverage

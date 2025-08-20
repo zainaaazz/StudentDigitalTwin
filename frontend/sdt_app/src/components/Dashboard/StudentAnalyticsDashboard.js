@@ -10,7 +10,7 @@ import ErrorMessage from '../UI/ErrorMessage';
 // Chart components
 import MetricsGrid from './MetricsGrid';
 import ActivityChart from './ActivityChart';
-import ActivityBreakDown from './ActivityBreakdown';
+import ActivityBreakDown from './ActivityBreakDown';
 import ActivityBarChart from './ActivityBarChart';
 import StudentSelector from './StudentSelector';
 import ApiConnectionGuide from './ApiConnectionGuide';
@@ -61,6 +61,14 @@ const StudentAnalyticsDashboard = () => {
               onStudentChange={setSelectedStudent}
             />
           }
+          onLogout={() => {
+            // Clear authentication token or session
+            localStorage.removeItem('token'); 
+
+            // Redirect to login page
+            window.location.href = '/login';
+
+          }}
         />
 
         {/* Enhanced Metrics Grid with Evaluation Indicators */}

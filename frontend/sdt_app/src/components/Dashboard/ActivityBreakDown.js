@@ -1,11 +1,11 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
-const ActivityBreakdown = ({ data }) => {
+const ActivityBreakDown = ({ data }) => {
   if (!data || data.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Activity Breakdown</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-4">Activity BreakDown</h3>
         <div className="flex items-center justify-center h-64 text-gray-500">
           No activity data available
         </div>
@@ -15,7 +15,7 @@ const ActivityBreakdown = ({ data }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">Activity Breakdown</h3>
+      <h3 className="text-xl font-bold text-gray-800 mb-4">Activity BreakDown</h3>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
@@ -38,4 +38,4 @@ const ActivityBreakdown = ({ data }) => {
   );
 };
 
-export default ActivityBreakdown;
+export default ActivityBreakDown;

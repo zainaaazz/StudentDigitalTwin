@@ -10,7 +10,7 @@ import ErrorMessage from '../UI/ErrorMessage';
 // Chart components
 import MetricsGrid from './MetricsGrid';
 import ActivityChart from './ActivityChart';
-import ActivityBreakDown from './ActivityBreakDown';
+import ActivityBreakDown from './ActivityBreakdown';
 import ActivityBarChart from './ActivityBarChart';
 import StudentSelector from './StudentSelector';
 import ApiConnectionGuide from './ApiConnectionGuide';

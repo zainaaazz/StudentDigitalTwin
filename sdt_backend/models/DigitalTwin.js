@@ -39,16 +39,61 @@ const digitalTwinSchema = new mongoose.Schema({
   code_presentation_2013J: Number,
   code_presentation_2014B: Number,
   code_presentation_2014J: Number,
-  password: String
+  password: { type: String, select: false }
 }, {
-  collection: 'digitaltwin', // Explicitly specify collection name
-  timestamps: true // Adds createdAt and updatedAt fields
+  collection: 'digitaltwin',
+  timestamps: true
 });
 
-// Add indexes for better query performance
+// Indexes
 digitalTwinSchema.index({ id_student: 1 });
 digitalTwinSchema.index({ final_result: 1 });
+// Important: compound index used to allow index-backed sorts per student
+digitalTwinSchema.index({ id_student: 1, date: 1 });
 
-const DigitalTwin = mongoose.model('DigitalTwin', digitalTwinSchema);
+// Statics / helpers kept as before
+digitalTwinSchema.statics.getUniqueStudents = async function() {
+  const students = await this.distinct('id_student');
+  return students.sort((a, b) => a - b);
+};
 
-module.exports = DigitalTwin;
+digitalTwinSchema.statics.getStudentSummary = function(studentId) {
+  const id = typeof studentId === 'string' ? parseInt(studentId, 10) : studentId;
+  return this.aggregate([
+    { $match: { id_student: id } },
+    {
+      $group: {
+        _id: '$id_student',
+        totalClicks: {
+          $sum: {
+            $add: [
+              { $ifNull: ['$homepage', 0] },
+              { $ifNull: ['$oucontent', 0] },
+              { $ifNull: ['$subpage', 0] },
+              { $ifNull: ['$url', 0] },
+              { $ifNull: ['$forumng', 0] },
+              { $ifNull: ['$resource', 0] }
+            ]
+          }
+        },
+        avgDailyActivity: {
+          $avg: {
+            $add: [
+              { $ifNull: ['$homepage', 0] },
+              { $ifNull: ['$oucontent', 0] },
+              { $ifNull: ['$subpage', 0] },
+              { $ifNull: ['$url', 0] },
+              { $ifNull: ['$forumng', 0] },
+              { $ifNull: ['$resource', 0] }
+            ]
+          }
+        },
+        recordCount: { $sum: 1 },
+        finalResult: { $first: '$final_result' },
+        studiedCredits: { $first: '$studied_credits' }
+      }
+    }
+  ]);
+};
+
+module.exports = mongoose.models.DigitalTwin || mongoose.model('DigitalTwin', digitalTwinSchema, 'digitaltwin');

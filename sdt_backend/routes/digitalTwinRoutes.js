@@ -1,43 +1,63 @@
 // routes/digitalTwinRoutes.js
 const express = require('express');
 const router = express.Router();
-const {
-  getAllRecords,
-  getRecordById,
-  getRecordsByStudentId,
-  getRecordsWithPagination,
-  getRecordsByResult,
-  getStatistics,
-  createRecord,
-  updateRecord,
-  deleteRecord
-} = require('../controllers/digitalTwinController');
+const controller = require('../controllers/digitalTwinController');
 
-// GET /digitaltwin - Get all records
-router.get('/', getAllRecords);
+/**
+ * Returns a handler function. If the controller function exists and is a function,
+ * returns it. Otherwise returns a fallback 501 responder and logs a warning.
+ */
+function safeHandler(fn, name) {
+  if (typeof fn === 'function') return fn;
+  return (req, res) => {
+    console.warn(`[ROUTES] Missing handler for ${name}; responding 501`);
+    res.status(501).json({ error: `${name} not implemented` });
+  };
+}
 
-// GET /digitaltwin/paginated - Get records with pagination
-router.get('/paginated', getRecordsWithPagination);
+// -----------------------------
+// DEBUG / HEALTH
+// -----------------------------
+router.get('/debug', safeHandler(controller.debugDatabase, 'debugDatabase'));
+router.get('/test', safeHandler(controller.testConnection, 'testConnection'));
 
-// GET /digitaltwin/statistics - Get statistics
-router.get('/statistics', getStatistics);
+// -----------------------------
+// DASHBOARD endpoints (frontend)
+// -----------------------------
+// list unique students
+router.get('/dashboard/students', safeHandler(controller.getUniqueStudents, 'getUniqueStudents'));
 
-// GET /digitaltwin/student/:studentId - Get records by student ID
-router.get('/student/:studentId', getRecordsByStudentId);
+// get student records for dashboard (studentId query param, or studentId=all)
+router.get('/dashboard/student-data', safeHandler(controller.getStudentData, 'getStudentData'));
 
-// GET /digitaltwin/result/:result - Get records by final result
-router.get('/result/:result', getRecordsByResult);
+// analytics summary (aggregated)
+router.get('/dashboard/analytics-summary', safeHandler(controller.getAnalyticsSummary, 'getAnalyticsSummary'));
 
-// GET /digitaltwin/:id - Get single record by ID
-router.get('/:id', getRecordById);
+// daily activity trends
+router.get('/dashboard/daily-activity', safeHandler(controller.getDailyActivity, 'getDailyActivity'));
 
-// POST /digitaltwin - Create new record
-router.post('/', createRecord);
+// performance by final_result
+router.get('/dashboard/performance', safeHandler(controller.getStudentPerformance, 'getStudentPerformance'));
 
-// PUT /digitaltwin/:id - Update record
-router.put('/:id', updateRecord);
+// activity breakdown (for charts)
+router.get('/dashboard/activity-breakdown', safeHandler(controller.getActivityBreakdown, 'getActivityBreakdown'));
 
-// DELETE /digitaltwin/:id - Delete record
-router.delete('/:id', deleteRecord);
+// -----------------------------
+// STANDARD CRUD and helpers
+// Base path for this router should be mounted by app.js e.g. app.use('/api/digitaltwin', router)
+// -----------------------------
+router.get('/records', safeHandler(controller.getAllRecords, 'getAllRecords'));
+router.get('/paginated', safeHandler(controller.getRecordsWithPagination, 'getRecordsWithPagination'));
+router.get('/statistics', safeHandler(controller.getStatistics, 'getStatistics'));
+
+// record CRUD
+router.get('/records/:id', safeHandler(controller.getRecordById, 'getRecordById'));
+router.post('/records', safeHandler(controller.createRecord, 'createRecord'));
+router.put('/records/:id', safeHandler(controller.updateRecord, 'updateRecord'));
+router.delete('/records/:id', safeHandler(controller.deleteRecord, 'deleteRecord'));
+
+// convenience routes
+router.get('/student/:studentId', safeHandler(controller.getRecordsByStudentId, 'getRecordsByStudentId'));
+router.get('/result/:result', safeHandler(controller.getRecordsByResult, 'getRecordsByResult'));
 
 module.exports = router;

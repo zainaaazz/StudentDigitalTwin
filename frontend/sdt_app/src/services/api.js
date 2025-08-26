@@ -1,11 +1,66 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:7071/api';
+// services/api.js
+const API_BASE_URL = 'http://localhost:5000';
 
 export const apiService = {
+  // Updated to use the correct backend endpoint
   async getStudentData(studentId = null) {
     try {
       const url = studentId 
-        ? `${API_BASE_URL}/getStudentData?studentId=${studentId}`
-        : `${API_BASE_URL}/getStudentData`;
+        ? `${API_BASE_URL}/digitaltwin/dashboard/student-data?studentId=${studentId}`
+        : `${API_BASE_URL}/digitaltwin/dashboard/student-data`;
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      // Return the data array from the response
+      return result.success ? result.data : [];
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  // Additional methods matching your backend routes
+  async getUniqueStudents() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/digitaltwin/dashboard/students`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  async getAnalyticsSummary() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/digitaltwin/dashboard/analytics-summary`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  async getDailyActivity(studentId = null) {
+    try {
+      const url = studentId 
+        ? `${API_BASE_URL}/digitaltwin/dashboard/daily-activity?studentId=${studentId}`
+        : `${API_BASE_URL}/digitaltwin/dashboard/daily-activity`;
       
       const response = await fetch(url);
       
@@ -22,7 +77,7 @@ export const apiService = {
 
   async createStudentRecord(data) {
     try {
-      const response = await fetch(`${API_BASE_URL}/createStudentRecord`, {
+      const response = await fetch(`${API_BASE_URL}/digitaltwin/records`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,7 +97,7 @@ export const apiService = {
   }
 };
 
-// Mock data function for development
+// Keep mock data for development/testing
 export const getMockData = () => {
   return Promise.resolve([
     {

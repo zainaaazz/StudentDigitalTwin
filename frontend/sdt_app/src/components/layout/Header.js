@@ -1,9 +1,48 @@
+// import React from 'react';
+
+// const Header = ({ title, subtitle, rightContent, onLogout }) => {
+//   return (
+//     <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+//       <div className="flex items-center justify-between">
+//         <div>
+//           <h1 className="text-3xl font-bold text-gray-800 mb-2">
+//             {title}
+//           </h1>
+//           {subtitle && (
+//             <p className="text-gray-600">{subtitle}</p>
+//           )}
+//         </div>
+//          <div className="flex items-center space-x-4">
+//           {/* Right content passed from props */}
+//           {rightContent && rightContent}
+
+          
+//         </div>
+//         {rightContent && (
+//           <div className="flex items-center">
+//             {rightContent}
+            
+//           </div>
+          
+//         )}
+
+        
+//       </div>
+      
+//     </div>
+    
+//   );
+// };
+
+// export default Header;
+
 import React from 'react';
 
 const Header = ({ title, subtitle, rightContent, onLogout }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
       <div className="flex items-center justify-between">
+        {/* Left side: title + subtitle */}
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             {title}
@@ -12,11 +51,11 @@ const Header = ({ title, subtitle, rightContent, onLogout }) => {
             <p className="text-gray-600">{subtitle}</p>
           )}
         </div>
-         <div className="flex items-center space-x-4">
-          {/* Right content passed from props */}
+
+        {/* Right side: rightContent + Logout button */}
+        <div className="flex items-center space-x-4">
           {rightContent && rightContent}
 
-          {/* Logout button */}
           {onLogout && (
             <button
               onClick={onLogout}
@@ -26,11 +65,6 @@ const Header = ({ title, subtitle, rightContent, onLogout }) => {
             </button>
           )}
         </div>
-        {rightContent && (
-          <div className="flex items-center">
-            {rightContent}
-          </div>
-        )}
       </div>
     </div>
   );

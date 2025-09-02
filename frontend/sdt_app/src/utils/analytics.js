@@ -217,23 +217,35 @@ export class StudentAnalytics {
 
     const metrics = analytics.evaluation;
     let riskScore = 0;
-    let totalMetrics = 0;
+    const numMetrics = Object.keys(metrics).length;
 
-    Object.keys(metrics).forEach(key => {
-      const metric = metrics[key];
-      totalMetrics++;
-      
-      const absDeviation = Math.abs(metric.deviation);
-      if (absDeviation > 100) riskScore += 3;
-      else if (absDeviation > 50) riskScore += 2;
-      else if (absDeviation > 25) riskScore += 1;
+    Object.values(metrics).forEach(metricEval => {
+      const absDev = Math.abs(metricEval.deviation);
+      let points = 0;
+
+      if (metricEval.status === 'below') {
+        // Higher risk for low activity (potential failure)
+        if (absDev > 100) points = 4;
+        else if (absDev > 50) points = 3;
+        else if (absDev > 25) points = 2;
+      } else if (metricEval.status === 'above') {
+        // Moderate risk for high activity (potential burnout)
+        if (absDev > 100) points = 3;
+        else if (absDev > 50) points = 2;
+        else if (absDev > 25) points = 1;
+      } else {
+        // Average: no points, no concern
+        points = 0;
+      }
+
+      riskScore += points;
     });
 
-    const avgRisk = riskScore / totalMetrics;
-    
-    if (avgRisk >= 2.5) return 'high';
-    if (avgRisk >= 1.5) return 'medium';
-    if (avgRisk >= 0.5) return 'low';
+    const avgRisk = riskScore / numMetrics;
+
+    if (avgRisk >= 3) return 'high';
+    if (avgRisk >= 2) return 'medium';
+    if (avgRisk >= 1) return 'low';
     return 'normal';
   }
 
@@ -243,23 +255,49 @@ export class StudentAnalytics {
     if (!analytics.evaluation) return [];
 
     const recommendations = [];
-    const metrics = analytics.evaluation;
+    const metricNames = {
+      totalClicks: 'total clicks',
+      homepageViews: 'homepage views',
+      contentViews: 'content views',
+      dailyActivity: 'daily activity'
+    };
 
-    if (metrics.totalClicks.status === 'above' && metrics.totalClicks.deviation > 100) {
-      recommendations.push({
-        type: 'security',
-        priority: 'high',
-        message: 'Unusually high click activity detected. Verify if this is legitimate usage.'
-      });
-    }
+    Object.keys(analytics.evaluation).forEach(key => {
+      const metricEval = analytics.evaluation[key];
+      const displayName = metricNames[key] || key;
+      const absDev = Math.abs(metricEval.deviation);
 
-    if (metrics.totalClicks.status === 'below' && metrics.totalClicks.deviation < -75) {
-      recommendations.push({
-        type: 'engagement',
-        priority: 'medium',
-        message: 'Very low activity detected. Student may need additional support.'
-      });
-    }
+      if (metricEval.status === 'above') {
+        if (absDev > 75) {
+          recommendations.push({
+            type: 'burnout',
+            priority: 'medium',
+            message: `Significantly higher than average ${displayName} (${metricEval.deviation}% above). You may be overworking; take breaks to avoid burnout.`
+          });
+        } else if (absDev > 25) {
+          recommendations.push({
+            type: 'balance',
+            priority: 'low',
+            message: `Above average ${displayName} (${metricEval.deviation}% above). Great effort, but ensure you're maintaining a healthy balance.`
+          });
+        }
+      } else if (metricEval.status === 'below') {
+        if (absDev > 75) {
+          recommendations.push({
+            type: 'engagement',
+            priority: 'high',
+            message: `Significantly lower than average ${displayName} (${absDev}% below). Increase your activity to keep up with classmates and reduce risk of falling behind.`
+          });
+        } else if (absDev > 25) {
+          recommendations.push({
+            type: 'improvement',
+            priority: 'medium',
+            message: `Below average ${displayName} (${absDev}% below). Consider increasing your engagement in this area to improve performance.`
+          });
+        }
+      }
+      // No recommendations for 'average' status to avoid unnecessary concern
+    });
 
     return recommendations;
   }

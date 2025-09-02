@@ -1,17 +1,33 @@
 // services/api.js
 const API_BASE_URL = 'http://localhost:5000';
 
+// Helper function to get auth headers
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` })
+  };
+};
+
 export const apiService = {
-  // Updated to use the correct backend endpoint
+  // Updated to use the correct backend endpoint with auth headers
   async getStudentData(studentId = null) {
     try {
       const url = studentId 
         ? `${API_BASE_URL}/digitaltwin/dashboard/student-data?studentId=${studentId}`
         : `${API_BASE_URL}/digitaltwin/dashboard/student-data`;
       
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: getAuthHeaders()
+      });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
@@ -25,12 +41,19 @@ export const apiService = {
     }
   },
 
-  // Additional methods matching your backend routes
+  // Additional methods matching your backend routes with auth headers
   async getUniqueStudents() {
     try {
-      const response = await fetch(`${API_BASE_URL}/digitaltwin/dashboard/students`);
+      const response = await fetch(`${API_BASE_URL}/digitaltwin/dashboard/students`, {
+        headers: getAuthHeaders()
+      });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
@@ -43,9 +66,16 @@ export const apiService = {
 
   async getAnalyticsSummary() {
     try {
-      const response = await fetch(`${API_BASE_URL}/digitaltwin/dashboard/analytics-summary`);
+      const response = await fetch(`${API_BASE_URL}/digitaltwin/dashboard/analytics-summary`, {
+        headers: getAuthHeaders()
+      });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
@@ -62,9 +92,16 @@ export const apiService = {
         ? `${API_BASE_URL}/digitaltwin/dashboard/daily-activity?studentId=${studentId}`
         : `${API_BASE_URL}/digitaltwin/dashboard/daily-activity`;
       
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: getAuthHeaders()
+      });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
@@ -79,13 +116,16 @@ export const apiService = {
     try {
       const response = await fetch(`${API_BASE_URL}/digitaltwin/records`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(data),
       });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       

@@ -13,7 +13,6 @@ import ActivityChart from './ActivityChart';
 import ActivityBreakDown from './ActivityBreakDown';
 import ActivityBarChart from './ActivityBarChart';
 import StudentSelector from './StudentSelector';
-import ApiConnectionGuide from './ApiConnectionGuide';
 
 import { useStudentData } from '../../hooks/useStudentData';
 import { StudentAnalytics } from '../../utils/analytics';
@@ -173,20 +172,18 @@ const StudentAnalyticsDashboard = () => {
           title={userRole === 'student' ? 'Your Detailed Activity Pattern' : 'Detailed Activity Pattern'}
         />
 
-        {/* Student learning assessment / risk panel (only for individual students) */}
-        {effectiveSelectedStudent !== 'all' && (
-          <div className="mb-6">
-            <StudentLearningAssessment
-              studentId={effectiveSelectedStudent}
-              analyticsEngine={analyticsEngine}
-              userRole={userRole}
-            />
-          </div>
-        )}
+      {effectiveSelectedStudent !== 'all' && (
+  <div className="mt-8 mb-6">   {/* <-- added mt-8 */}
+    <StudentLearningAssessment
+      studentId={effectiveSelectedStudent}
+      analyticsEngine={analyticsEngine}
+      userRole={userRole}
+    />
+  </div>
+)}
 
-        {/* API Connection Guide (only for non-student roles) */}
-        {userRole !== 'student' && <ApiConnectionGuide />}
-      </div>
+
+        </div>
     </Layout>
   );
 };

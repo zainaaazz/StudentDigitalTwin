@@ -154,8 +154,8 @@ const StudentAnalyticsDashboard = () => {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Line chart showing daily activity trend */}
-          <ActivityChart 
-            data={analytics.dailyActivity} 
+          <ActivityChart  
+            data={analytics.dailyActivity}
             title={userRole === 'student' ? 'Your Daily Activity' : 'Daily Activity Trend'}
           />
 
@@ -168,10 +168,9 @@ const StudentAnalyticsDashboard = () => {
 
         {/* Detailed Activity Bar Chart */}
         <ActivityBarChart 
-          data={analytics.dailyActivity}
+          data={analytics.dailyActivity}  
           title={userRole === 'student' ? 'Your Detailed Activity Pattern' : 'Detailed Activity Pattern'}
         />
-
       {effectiveSelectedStudent !== 'all' && (
   <div className="mt-8 mb-6">   {/* <-- added mt-8 */}
     <StudentLearningAssessment
@@ -187,5 +186,4 @@ const StudentAnalyticsDashboard = () => {
     </Layout>
   );
 };
-
 export default StudentAnalyticsDashboard;

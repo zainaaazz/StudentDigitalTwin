@@ -51,7 +51,8 @@ export class StudentAnalytics {
 
       // Add daily activity record
       studentStats[studentId].dailyActivity.push({
-        date: `Day ${record.date}`,
+        //date: `Day ${record.date}`,
+        date: record.date || 0,
         homepage: record.homepage || 0,
         content: record.oucontent || 0,
         subpage: record.subpage || 0,

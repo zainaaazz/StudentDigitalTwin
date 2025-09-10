@@ -1,0 +1,60 @@
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: sdt-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: student_interactions
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - sdt-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    container_name: sdt-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongodb:27017/student_interactions
+      - JWT_SECRET=production_jwt_secret_change_this
+      - CORS_ORIGIN=http://localhost:3000
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongodb
+    networks:
+      - sdt-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    container_name: sdt-frontend
+    environment:
+      - REACT_APP_API_BASE_URL=http://localhost:3001/api
+      - REACT_APP_WS_URL=ws://localhost:3001
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - sdt-network
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+
+networks:
+  sdt-network:
+    driver: bridge

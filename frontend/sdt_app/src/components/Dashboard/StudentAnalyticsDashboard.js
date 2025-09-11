@@ -117,12 +117,6 @@ const StudentAnalyticsDashboard = () => {
               </div>
             </div>
           }
-          onLogout={() => {
-            // Clear authentication token or session
-            localStorage.removeItem('token'); 
-            // Redirect to login page
-            window.location.href = '/login';
-          }}
         />
 
         {/* Role-based information banner for students */}

@@ -107,13 +107,16 @@ const InteractionTimeline = ({ currentUser = null }) => {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <TimelineIcon className="w-8 h-8" style={{color: '#6C3D91'}} />
+            <TimelineIcon className="w-8 h-8" style={{color: '#8b57d4'}} />
             <h1 className="text-3xl font-bold text-gray-900">Interaction Timeline</h1>
           </div>
           <div className="flex items-center space-x-3">
             <Link
               to="/student-dashboard"
-              className="inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors" style={{backgroundColor: '#6C3D91'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#5A3177'} onMouseLeave={(e) => e.target.style.backgroundColor = '#6C3D91'}
+              className="inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors"
+              style={{backgroundColor: '#8b57d4'}}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#3E46B6'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#8b57d4'}
             >
               <BarChart3 className="w-4 h-4 mr-2" />
               View Dashboard
@@ -236,7 +239,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-medium" style={{color: '#6C3D91'}}>
+                        <span className="text-xs font-medium" style={{color: '#8b57d4'}}>
                           {interaction.studentId2.slice(-2)}
                         </span>
                       </div>

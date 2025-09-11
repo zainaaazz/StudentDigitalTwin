@@ -1,5 +1,6 @@
 import React from 'react';
 import StudentDashboard from './StudentDashboard';
+import Layout from '../layout/Layout';
 
 const StudentDashboardWrapper = () => {
   // In a real app, you would get the current user from authentication context
@@ -27,7 +28,11 @@ const StudentDashboardWrapper = () => {
 
   const currentUser = getCurrentUser();
 
-  return <StudentDashboard currentUser={currentUser} />;
+  return (
+    <Layout>
+      <StudentDashboard currentUser={currentUser} />
+    </Layout>
+  );
 };
 
 export default StudentDashboardWrapper;

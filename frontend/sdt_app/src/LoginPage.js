@@ -113,9 +113,9 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+    <div className="flex items-center justify-center min-h-screen bg-zinc-900 sdt-dark">
+      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-slate-700">
+        <h2 className="text-2xl font-bold mb-6 text-center text-slate-100">Login</h2>
 
         {error && (
           <div className="mb-4 text-red-600 text-center">{error}</div>
@@ -126,7 +126,7 @@ const LoginPage = () => {
             <label className="block text-gray-700">Student Number</label>
             <input
               type="text"
-              className="w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              className="app-input w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-purple-400"
               value={studentNumber}
               onChange={(e) => setStudentNumber(e.target.value)} // changed here
               required
@@ -137,7 +137,7 @@ const LoginPage = () => {
             <label className="block text-gray-700">Password</label>
             <input
               type="password"
-              className="w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              className="app-input w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-purple-400"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -146,7 +146,10 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-purple-500 text-white py-2 rounded-lg hover:bg-purple-600 transition"
+            className="w-full text-white py-2 rounded-lg transition shadow-sm"
+            style={{ backgroundColor: '#8b57d4' }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#3E46B6')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#8b57d4')}
           >
             Login
           </button>

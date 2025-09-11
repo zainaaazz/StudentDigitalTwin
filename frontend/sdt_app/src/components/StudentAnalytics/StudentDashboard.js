@@ -49,7 +49,7 @@ const StudentDashboard = ({ currentUser = null }) => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#6C3D91'}}></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#8b57d4'}}></div>
       </div>
     );
   }
@@ -93,7 +93,10 @@ const StudentDashboard = ({ currentUser = null }) => {
           </div>
           <Link
             to="/student-interactions"
-            className="inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors" style={{backgroundColor: '#6C3D91'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#5A3177'} onMouseLeave={(e) => e.target.style.backgroundColor = '#6C3D91'}
+            className="inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors"
+            style={{backgroundColor: '#8b57d4'}}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#3E46B6'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#8b57d4'}
           >
             <Timeline className="w-4 h-4 mr-2" />
             View Interaction Timeline
@@ -106,7 +109,7 @@ const StudentDashboard = ({ currentUser = null }) => {
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{backgroundColor: '#6C3D91'}}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{backgroundColor: '#8b57d4'}}>
                 <User className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
@@ -144,7 +147,7 @@ const StudentDashboard = ({ currentUser = null }) => {
                 <div 
                   className="h-2 rounded-full" 
                   style={{ 
-                    backgroundColor: '#6C3D91',
+                    backgroundColor: '#8b57d4',
                     width: `${data.currentStats.weeklyEngagement}%` 
                   }}
                 ></div>
@@ -159,7 +162,7 @@ const StudentDashboard = ({ currentUser = null }) => {
                 <div 
                   className="h-2 rounded-full" 
                   style={{ 
-                    backgroundColor: '#9F7AEA',
+                    backgroundColor: '#8b57d4',
                     width: `${data.currentStats.networkCentrality * 100}%` 
                   }}
                 ></div>
@@ -207,7 +210,7 @@ const StudentDashboard = ({ currentUser = null }) => {
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-purple-100 rounded-lg mr-4">
-              <Users className="w-6 h-6 text-purple-600" />
+              <Users className="w-6 h-6" style={{ color: '#8b57d4' }} />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{data.recentInteractions.topInteractionPartners.length}</p>
@@ -288,8 +291,8 @@ const StudentDashboard = ({ currentUser = null }) => {
           <div className="space-y-3">
             {data.recentInteractions.topInteractionPartners.map((partner, index) => (
               <div key={partner.studentId} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#9F7AEA1A'}}>
-                  <span className="text-sm font-medium" style={{color: '#9F7AEA'}}>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#8b57d41A'}}>
+                  <span className="text-sm font-medium" style={{color: '#8b57d4'}}>
                     {partner.name.charAt(0)}
                   </span>
                 </div>
@@ -310,7 +313,7 @@ const StudentDashboard = ({ currentUser = null }) => {
               <XAxis dataKey="week" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="sessions" fill="#6C3D91" />
+              <Bar dataKey="sessions" fill="#8b57d4" />
             </BarChart>
           </ResponsiveContainer>
         </div>

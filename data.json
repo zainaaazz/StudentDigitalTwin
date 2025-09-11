@@ -1,0 +1,161 @@
+{
+  "info": {
+    "name": "digitalTwin API - Postman Collection",
+    "_postman_id": "digitaltwin-collection-001",
+    "description": "Collection for testing digitalTwin endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Records",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}",
+          "host": ["{{baseUrl}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is JSON array', function () { var json = pm.response.json(); pm.expect(json).to.be.an('array'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Records (paginated)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/paginated?page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["paginated"],
+          "query": [
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response contains an array or object', function () { var json = pm.response.json(); pm.expect(json).to.satisfy(function(v){ return Array.isArray(v) || typeof v === 'object'; }); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Statistics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/statistics", "host": ["{{baseUrl}}"], "path": ["statistics"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "exec": [
+            "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('Response is JSON object', function () { var json = pm.response.json(); pm.expect(json).to.be.an('object'); });"
+          ] }
+        }
+      ]
+    },
+    {
+      "name": "Get Records by Student ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/student/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["student","{{studentId}}"] }
+      },
+      "event": [ { "listen": "test", "script": { "exec": [
+        "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+        "pm.test('Response is array or object', function () { var json = pm.response.json(); pm.expect(json).to.satisfy(function(v){ return Array.isArray(v) || typeof v === 'object' }); });"
+      ] } } ]
+    },
+    {
+      "name": "Get Records by Result",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/result/{{result}}", "host": ["{{baseUrl}}"], "path": ["result","{{result}}"] }
+      },
+      "event": [ { "listen": "test", "script": { "exec": [
+        "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+        "pm.test('Response is array or object', function () { var json = pm.response.json(); pm.expect(json).to.satisfy(function(v){ return Array.isArray(v) || typeof v === 'object' }); });"
+      ] } } ]
+    },
+    {
+      "name": "Get Single Record by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/{{id}}", "host": ["{{baseUrl}}"], "path": ["{{id}}"] }
+      },
+      "event": [ { "listen": "test", "script": { "exec": [
+        "pm.test('Status 200 or 404', function () { pm.expect([200,404]).to.include(pm.response.code); });",
+        "pm.test('If 200, response is object', function () { if (pm.response.code === 200) { var json = pm.response.json(); pm.expect(json).to.be.an('object'); } });"
+      ] } } ]
+    },
+    {
+      "name": "Create Record (POST)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentId\": \"stu-123\",\n  \"name\": \"Jane Doe\",\n  \"year\": 2025,\n  \"courses\": [\"math101\", \"hist201\"],\n  \"finalResult\": \"pass\",\n  \"gpa\": 3.6\n}"
+        },
+        "url": { "raw": "{{baseUrl}}", "host": ["{{baseUrl}}"] }
+      },
+      "event": [ { "listen": "test", "script": { "exec": [
+        "pm.test('Status is 200 or 201', function () { pm.expect([200,201]).to.include(pm.response.code); });",
+        "pm.test('Response contains id or created object', function () { var json = pm.response.json(); pm.expect(json).to.satisfy(function(v){ return (typeof v === 'object'); }); });"
+      ] } } ]
+    },
+    {
+      "name": "Update Record (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Jane Doe Updated\",\n  \"gpa\": 3.8\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/{{id}}", "host": ["{{baseUrl}}"], "path": ["{{id}}"] }
+      },
+      "event": [ { "listen": "test", "script": { "exec": [
+        "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+        "pm.test('Response is object', function () { var json = pm.response.json(); pm.expect(json).to.be.an('object'); });"
+      ] } } ]
+    },
+    {
+      "name": "Delete Record (DELETE)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/{{id}}", "host": ["{{baseUrl}}"], "path": ["{{id}}"] }
+      },
+      "event": [ { "listen": "test", "script": { "exec": [
+        "pm.test('Status is 200 or 204', function () { pm.expect([200,204,404]).to.include(pm.response.code); });"
+      ] } } ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/digitaltwin" },
+    { "key": "studentId", "value": "stu-123" },
+    { "key": "id", "value": "<replace-with-existing-id>" },
+    { "key": "result", "value": "pass" }
+  ]
+}

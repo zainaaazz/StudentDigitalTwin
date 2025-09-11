@@ -1,15 +1,107 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:7071/api';
+// services/api.js
+const API_BASE_URL = 'http://localhost:5000';
+
+// Helper function to get auth headers
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` })
+  };
+};
 
 export const apiService = {
+  // Updated to use the correct backend endpoint with auth headers
   async getStudentData(studentId = null) {
     try {
       const url = studentId 
-        ? `${API_BASE_URL}/getStudentData?studentId=${studentId}`
-        : `${API_BASE_URL}/getStudentData`;
+        ? `${API_BASE_URL}/digitaltwin/dashboard/student-data?studentId=${studentId}`
+        : `${API_BASE_URL}/digitaltwin/dashboard/student-data`;
       
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: getAuthHeaders()
+      });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      // Return the data array from the response
+      return result.success ? result.data : [];
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  // Additional methods matching your backend routes with auth headers
+  async getUniqueStudents() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/digitaltwin/dashboard/students`, {
+        headers: getAuthHeaders()
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  async getAnalyticsSummary() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/digitaltwin/dashboard/analytics-summary`, {
+        headers: getAuthHeaders()
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  async getDailyActivity(studentId = null) {
+    try {
+      const url = studentId 
+        ? `${API_BASE_URL}/digitaltwin/dashboard/daily-activity?studentId=${studentId}`
+        : `${API_BASE_URL}/digitaltwin/dashboard/daily-activity`;
+      
+      const response = await fetch(url, {
+        headers: getAuthHeaders()
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
@@ -22,15 +114,18 @@ export const apiService = {
 
   async createStudentRecord(data) {
     try {
-      const response = await fetch(`${API_BASE_URL}/createStudentRecord`, {
+      const response = await fetch(`${API_BASE_URL}/digitaltwin/records`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(data),
       });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
@@ -42,7 +137,7 @@ export const apiService = {
   }
 };
 
-// Mock data function for development
+// Keep mock data for development/testing
 export const getMockData = () => {
   return Promise.resolve([
     {

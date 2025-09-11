@@ -15,8 +15,8 @@ export const apiService = {
   async getStudentData(studentId = null) {
     try {
       const url = studentId 
-        ? `${API_BASE_URL}/api/getStudentData?studentId=${studentId}`
-        : `${API_BASE_URL}/api/getStudentData`;
+        ? `${API_BASE_URL}/digitaltwin/dashboard/student-data?studentId=${studentId}`
+        : `${API_BASE_URL}/digitaltwin/dashboard/student-data`;
       
       const response = await fetch(url, {
         headers: getAuthHeaders()

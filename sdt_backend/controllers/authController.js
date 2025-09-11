@@ -37,8 +37,14 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Student number and password are required' });
     }
 
+    // Parse and validate student number
+    const parsedStudentId = parseInt(studentNumber);
+    if (isNaN(parsedStudentId)) {
+      return res.status(400).json({ error: 'Invalid student number format' });
+    }
+
     // Find student by id_student
-    const student = await DigitalTwin.findOne({ id_student: parseInt(studentNumber) });
+    const student = await DigitalTwin.findOne({ id_student: parsedStudentId });
     if (!student) {
       return res.status(401).json({ error: 'Invalid student number or password' });
     }

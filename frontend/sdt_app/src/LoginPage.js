@@ -46,7 +46,7 @@
 //             <label className="block text-gray-700">Username</label>
 //             <input
 //               type="username"
-//               className="w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+//               className="w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-purple-400"
 //               value={username}
 //               onChange={(e) => setUsername(e.target.value)}
 //               required
@@ -57,7 +57,7 @@
 //             <label className="block text-gray-700">Password</label>
 //             <input
 //               type="password"
-//               className="w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+//               className="w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-purple-400"
 //               value={password}
 //               onChange={(e) => setPassword(e.target.value)}
 //               required
@@ -126,7 +126,7 @@ const LoginPage = () => {
             <label className="block text-gray-700">Student Number</label>
             <input
               type="text"
-              className="w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-purple-400"
               value={studentNumber}
               onChange={(e) => setStudentNumber(e.target.value)} // changed here
               required
@@ -137,7 +137,7 @@ const LoginPage = () => {
             <label className="block text-gray-700">Password</label>
             <input
               type="password"
-              className="w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-lg mt-1 focus:outline-none focus:ring-2 focus:ring-purple-400"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -146,7 +146,7 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+            className="w-full bg-purple-500 text-white py-2 rounded-lg hover:bg-purple-600 transition"
           >
             Login
           </button>

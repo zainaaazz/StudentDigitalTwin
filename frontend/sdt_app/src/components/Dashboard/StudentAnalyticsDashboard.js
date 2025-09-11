@@ -173,15 +173,15 @@ const StudentAnalyticsDashboard = () => {
           title={userRole === 'student' ? 'Your Detailed Activity Pattern' : 'Detailed Activity Pattern'}
         />
 
-      {effectiveSelectedStudent !== 'all' && (
-  <div className="mt-8 mb-6">   {/* <-- added mt-8 */}
-    <StudentLearningAssessment
-      studentId={effectiveSelectedStudent}
-      analyticsEngine={analyticsEngine}
-      userRole={userRole}
-    />
-  </div>
-)}
+        {effectiveSelectedStudent !== 'all' && (
+          <div className="mt-8 mb-6">
+            <StudentLearningAssessment
+              studentId={effectiveSelectedStudent}
+              analyticsEngine={analyticsEngine}
+              userRole={userRole}
+            />
+          </div>
+        )}
 
         {/* Student Interaction Summary */}
         <div className="mb-6">

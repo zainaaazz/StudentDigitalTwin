@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiService, getMockData } from '../services/api';
 
 export const useStudentData = (studentId = null) => {
@@ -8,7 +8,7 @@ export const useStudentData = (studentId = null) => {
   const [userRole, setUserRole] = useState(null);
   const [currentStudentId, setCurrentStudentId] = useState(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -52,11 +52,11 @@ export const useStudentData = (studentId = null) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [studentId]);
 
   useEffect(() => {
     fetchData();
-  }, [studentId]);
+  }, [fetchData]);
 
   return { 
     data, 

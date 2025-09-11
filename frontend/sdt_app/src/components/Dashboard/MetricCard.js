@@ -1,6 +1,6 @@
 import React from 'react';
 
-const MetricCard = ({ title, value, icon: Icon, colorClass = 'blue' }) => {
+const MetricCard = ({ title, value, icon: Icon, colorClass = 'purple' }) => {
   const colorClasses = {
     blue: 'bg-blue-100 text-blue-600',
     green: 'bg-green-100 text-green-600',

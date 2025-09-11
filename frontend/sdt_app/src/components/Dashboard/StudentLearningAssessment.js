@@ -34,12 +34,13 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
   }
 
   // Color / accent per risk level (stronger, non-blending)
-  const riskConfig = {
+  const riskConfigMap = {
     high:   { label: 'High Attention', color: 'text-orange-700', stripe: 'border-l-4 border-orange-500', badgeBg: 'bg-orange-100', badgeText: 'text-orange-800' },
     medium: { label: 'Moderate Attention', color: 'text-amber-700', stripe: 'border-l-4 border-amber-500', badgeBg: 'bg-amber-100', badgeText: 'text-amber-800' },
     low:    { label: 'Minor Adjustments', color: 'text-teal-700', stripe: 'border-l-4 border-teal-500', badgeBg: 'bg-teal-100', badgeText: 'text-teal-800' },
     normal: { label: 'Monitoring Recommended', color: 'text-indigo-700', stripe: 'border-l-4 border-indigo-500', badgeBg: 'bg-indigo-100', badgeText: 'text-indigo-800' }
-  }[riskLevel] || riskConfig.normal;
+  };
+  const riskConfig = riskConfigMap[riskLevel] || riskConfigMap.normal;
 
   // Group recommendations by type
   const grouped = (recommendations || []).reduce((acc, r) => {

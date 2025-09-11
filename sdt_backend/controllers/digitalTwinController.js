@@ -211,7 +211,23 @@ const controller = {
     }
   },
 
-  // other controller methods (getUniqueStudents, analytics, etc.) can remain as in your original file...
+  // Get unique students
+  getUniqueStudents: async (req, res) => {
+    try {
+      const students = await DigitalTwin.getUniqueStudents();
+      res.json({
+        success: true,
+        data: students,
+        count: students.length
+      });
+    } catch (error) {
+      console.error('Error in getUniqueStudents:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
+      });
+    }
+  }
 };
 
 module.exports = controller;

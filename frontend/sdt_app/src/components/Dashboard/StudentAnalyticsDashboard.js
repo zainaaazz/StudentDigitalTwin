@@ -14,6 +14,7 @@ import ActivityBreakDown from './ActivityBreakDown';
 import ActivityBarChart from './ActivityBarChart';
 import StudentSelector from './StudentSelector';
 import ApiConnectionGuide from './ApiConnectionGuide';
+import InteractionSummary from './InteractionSummary';
 
 import { useStudentData } from '../../hooks/useStudentData';
 import { StudentAnalytics } from '../../utils/analytics';
@@ -87,7 +88,9 @@ const StudentAnalyticsDashboard = () => {
         </div>
 
         {/* Detailed Activity Bar Chart */}
-        <ActivityBarChart data={analytics.dailyActivity} />
+        <div className="mb-6">
+          <ActivityBarChart data={analytics.dailyActivity} />
+        </div>
 
         {/* Risk Assessment Panel (only for individual students) */}
         {selectedStudent !== 'all' && (
@@ -98,6 +101,11 @@ const StudentAnalyticsDashboard = () => {
             />
           </div>
         )}
+
+        {/* Student Interaction Summary */}
+        <div className="mb-6">
+          <InteractionSummary />
+        </div>
 
         {/* API Connection Guide */}
         <ApiConnectionGuide />

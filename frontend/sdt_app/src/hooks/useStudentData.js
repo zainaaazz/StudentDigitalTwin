@@ -45,6 +45,10 @@ export const useStudentData = (studentId = null) => {
         result = await apiService.getStudentData(studentId);
       }
       
+      if (result && result.length > 0) {
+        console.log('Fetched student data from backend:', result);
+      }
+
       setData(result);
     } catch (err) {
       setError(err.message || 'Failed to fetch data');

@@ -41,6 +41,85 @@ const StudentAnalyticsDashboard = () => {
     return analyticsEngine.calculateAnalytics(effectiveSelectedStudent);
   }, [analyticsEngine, effectiveSelectedStudent]);
 
+  // Aggregate daily activity totals for charts
+/*let aggregatedDailyActivity = [];
+if (analytics.dailyActivity && analytics.dailyActivity.length > 0) {
+  const activityMap = {};
+  analytics.dailyActivity.forEach((item) => {
+    const dayKey = item.date; // <-- just use the numeric day
+    if (!activityMap[dayKey]) {
+      activityMap[dayKey] = {
+        date: dayKey,
+        homepage: 0,
+        content: 0,
+        subpage: 0,
+        total: 0,
+      };
+    }
+    activityMap[dayKey].homepage += item.homepage || 0;
+    activityMap[dayKey].content += item.content || 0;
+    activityMap[dayKey].subpage += item.subpage || 0;
+    activityMap[dayKey].total += item.total || 0;
+  });
+
+  aggregatedDailyActivity = Object.values(activityMap);
+  console.log('Aggregated daily activity:', aggregatedDailyActivity);
+  console.log('Raw analytics.dailyActivity:', analytics.dailyActivity);
+}*/
+
+
+  /*console.log('Raw data from useStudentData:', data);
+  console.log('Processed analytics.dailyActivity:', analytics.dailyActivity);
+  if (analytics.dailyActivity) {
+    const datesTotals = analytics.dailyActivity.map(d => ({
+      date: d.date,
+      homepage: d.homepage,
+      content: d.content,
+      subpage: d.subpage,
+      total: d.total
+    }));
+    console.log('Dates and totals:', datesTotals);
+  }*/
+
+    // Process daily activity data based on selected student
+    const dailyActivityForChart = useMemo(() => {
+    if (!analytics.dailyActivity || analytics.dailyActivity.length === 0) {
+      return [];
+    }
+
+    // For individual student: use data directly (no aggregation needed)
+    if (effectiveSelectedStudent !== 'all') {
+      return analytics.dailyActivity.map(day => ({
+        date: day.date.toString(), // Convert to string for categorical x-axis
+        homepage: day.homepage || 0,
+        content: day.content || 0,
+        subpage: day.subpage || 0,
+        total: day.total || 0
+      }));
+    }
+
+    // For 'all' students: aggregate by date (sum multiple students' activity for same dates)
+    const activityMap = {};
+    analytics.dailyActivity.forEach((item) => {
+      const dayKey = item.date;
+      if (!activityMap[dayKey]) {
+        activityMap[dayKey] = {
+          date: dayKey.toString(),
+          homepage: 0,
+          content: 0,
+          subpage: 0,
+          total: 0,
+        };
+      }
+      activityMap[dayKey].homepage += item.homepage || 0;
+      activityMap[dayKey].content += item.content || 0;
+      activityMap[dayKey].subpage += item.subpage || 0;
+      activityMap[dayKey].total += item.total || 0;
+    });
+
+    return Object.values(activityMap).sort((a, b) => parseInt(a.date) - parseInt(b.date));
+  }, [analytics.dailyActivity, effectiveSelectedStudent]);
+
   // Get unique students for the selector (only for admin/teacher roles)
   const students = useMemo(() => {
     if (userRole === 'student') {
@@ -80,6 +159,11 @@ const StudentAnalyticsDashboard = () => {
     }
     return "Real-time insights into student learning activities with intelligent evaluation";
   };
+
+  /*const dailyActivityForChart = (analytics.dailyActivity || []).map(day => ({
+  ...day,
+  date: day.date.toString() // <-- convert to string for categorical x-axis
+}));*/
 
   return (
     <Layout>
@@ -155,7 +239,9 @@ const StudentAnalyticsDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Line chart showing daily activity trend */}
           <ActivityChart  
-            data={analytics.dailyActivity}
+            //data={analytics.dailyActivity}
+            //data={analytics.dailyActivity || []}
+            data={dailyActivityForChart}
             title={userRole === 'student' ? 'Your Daily Activity' : 'Daily Activity Trend'}
           />
 
@@ -167,9 +253,10 @@ const StudentAnalyticsDashboard = () => {
         </div>
 
         {/* Detailed Activity Bar Chart */}
-        <ActivityBarChart 
-          data={analytics.dailyActivity}  
-          title={userRole === 'student' ? 'Your Detailed Activity Pattern' : 'Detailed Activity Pattern'}
+        <ActivityBarChart   
+          //data={analytics.dailyActivity || []}
+          data={dailyActivityForChart}
+          title={userRole === 'student' ? 'Your Activity Breakdown' : 'Activity Breakdown'} 
         />
       {effectiveSelectedStudent !== 'all' && (
   <div className="mt-8 mb-6">   {/* <-- added mt-8 */}

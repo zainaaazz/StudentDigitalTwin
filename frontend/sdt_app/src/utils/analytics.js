@@ -10,7 +10,7 @@ export class StudentAnalytics {
   }
 
   // Calculate individual student statistics
-  getStudentStats() {
+  /*getStudentStats() {
     const studentStats = {};
 
     this.data.forEach(record => {
@@ -61,8 +61,175 @@ export class StudentAnalytics {
     });
 
     return studentStats;
-  }
+  }*/
 
+  // Calculate individual student statistics
+  /*getStudentStats() {
+    const studentStats = {};
+
+    // First pass: collect all records for each student
+    const studentRecords = {};
+    this.data.forEach(record => {
+      const studentId = record.id_student;
+      if (!studentRecords[studentId]) {
+        studentRecords[studentId] = [];
+      }
+      studentRecords[studentId].push(record);
+    });
+
+    // Second pass: process each student's records
+    Object.keys(studentRecords).forEach(studentId => {
+      // Sort student's records by date to ensure correct chronological order
+      const records = studentRecords[studentId].sort((a, b) => (a.date || 0) - (b.date || 0));
+      
+      studentStats[studentId] = {
+        totalClicks: 0,
+        homepageViews: 0,
+        contentViews: 0,
+        subpageViews: 0,
+        resourceViews: 0,
+        forumViews: 0,
+        urlViews: 0,
+        sessionDuration: 0,
+        totalRecords: 0,
+        dailyActivity: []
+      };
+
+      // Process each record with sequential day numbering
+      records.forEach((record, index) => {
+        // Calculate total clicks from all activity types
+        const totalClicks = (record.homepage || 0) + 
+                          (record.oucontent || 0) + 
+                          (record.subpage || 0) + 
+                          (record.url || 0) + 
+                          (record.forumng || 0) + 
+                          (record.resource || 0);
+
+        studentStats[studentId].totalClicks += totalClicks;
+        studentStats[studentId].homepageViews += record.homepage || 0;
+        studentStats[studentId].contentViews += record.oucontent || 0;
+        studentStats[studentId].subpageViews += record.subpage || 0;
+        studentStats[studentId].resourceViews += record.resource || 0;
+        studentStats[studentId].forumViews += record.forumng || 0;
+        studentStats[studentId].urlViews += record.url || 0;
+        studentStats[studentId].sessionDuration += record.session_duration || 0;
+        studentStats[studentId].totalRecords += 1;
+
+        // Add daily activity record with SEQUENTIAL day numbering
+        studentStats[studentId].dailyActivity.push({
+          date: index, // <- Sequential day number: 0, 1, 2, 3...
+          originalDate: record.date, // <- Keep original for reference if needed
+          homepage: record.homepage || 0,
+          content: record.oucontent || 0,
+          subpage: record.subpage || 0,
+          total: totalClicks
+        });
+      });
+    });
+
+    return studentStats;
+  }*/
+
+// Calculate individual student statistics
+  getStudentStats() {
+    const studentStats = {};
+    
+    // First pass: collect all records for each student
+    const studentRecords = {};
+    this.data.forEach(record => {
+      const studentId = record.id_student;
+      if (!studentRecords[studentId]) {
+        studentRecords[studentId] = [];
+      }
+      studentRecords[studentId].push(record);
+    });
+
+    // Second pass: process each student's records
+    Object.keys(studentRecords).forEach(studentId => {
+      const records = studentRecords[studentId];
+      
+      // Group records by date for this student
+      const dateGroups = {};
+      records.forEach(record => {
+        const date = record.date || 0;
+        if (!dateGroups[date]) {
+          dateGroups[date] = [];
+        }
+        dateGroups[date].push(record);
+      });
+
+      studentStats[studentId] = {
+        totalClicks: 0,
+        homepageViews: 0,
+        contentViews: 0,
+        subpageViews: 0,
+        resourceViews: 0,
+        forumViews: 0,
+        urlViews: 0,
+        sessionDuration: 0,
+        totalRecords: 0,
+        dailyActivity: []
+      };
+
+      // Sort dates and process each date group
+      const sortedDates = Object.keys(dateGroups).sort((a, b) => parseInt(a) - parseInt(b));
+      
+      sortedDates.forEach((date, dayIndex) => {
+        const dateRecords = dateGroups[date];
+        
+        // Aggregate all records for this date
+        let dayTotalClicks = 0;
+        let dayHomepage = 0;
+        let dayContent = 0;
+        let daySubpage = 0;
+        let dayResource = 0;
+        let dayForum = 0;
+        let dayUrl = 0;
+        let daySessionDuration = 0;
+
+        dateRecords.forEach(record => {
+          const recordTotalClicks = (record.homepage || 0) + 
+                                  (record.oucontent || 0) + 
+                                  (record.subpage || 0) + 
+                                  (record.url || 0) + 
+                                  (record.forumng || 0) + 
+                                  (record.resource || 0);
+
+          dayTotalClicks += recordTotalClicks;
+          dayHomepage += record.homepage || 0;
+          dayContent += record.oucontent || 0;
+          daySubpage += record.subpage || 0;
+          dayResource += record.resource || 0;
+          dayForum += record.forumng || 0;
+          dayUrl += record.url || 0;
+          daySessionDuration += record.session_duration || 0;
+        });
+
+        // Add to student totals
+        studentStats[studentId].totalClicks += dayTotalClicks;
+        studentStats[studentId].homepageViews += dayHomepage;
+        studentStats[studentId].contentViews += dayContent;
+        studentStats[studentId].subpageViews += daySubpage;
+        studentStats[studentId].resourceViews += dayResource;
+        studentStats[studentId].forumViews += dayForum;
+        studentStats[studentId].urlViews += dayUrl;
+        studentStats[studentId].sessionDuration += daySessionDuration;
+        studentStats[studentId].totalRecords += 1; // One record per day
+
+        // Add daily activity record with sequential day numbering
+        studentStats[studentId].dailyActivity.push({
+          date: dayIndex, // Sequential: 0, 1, 2, 3...
+          originalDate: parseInt(date), // Original database date
+          homepage: dayHomepage,
+          content: dayContent,
+          subpage: daySubpage,
+          total: dayTotalClicks
+        });
+      });
+    });
+
+    return studentStats;
+  }
   // Calculate overall averages
   calculateAverages() {
     const studentStats = this.getStudentStats();
@@ -157,6 +324,20 @@ export class StudentAnalytics {
         return { error: 'Student not found' };
       }
 
+      // DEBUG: Log the student data
+    console.log('=== DEBUG: Student Analytics ===');
+    console.log('Selected student:', selectedStudent);
+    console.log('Raw student data:', student);
+    console.log('Daily activity:', student.dailyActivity);
+    console.log('Number of days:', student.dailyActivity.length);
+    
+    // Check if all days have same values
+    const uniqueHomepage = [...new Set(student.dailyActivity.map(d => d.homepage))];
+    const uniqueContent = [...new Set(student.dailyActivity.map(d => d.content))];
+    console.log('Unique homepage values:', uniqueHomepage);
+    console.log('Unique content values:', uniqueContent);
+    console.log('=== END DEBUG ===');
+
       analytics = {
         totalClicks: student.totalClicks,
         homepageClicks: student.homepageViews,
@@ -184,6 +365,10 @@ export class StudentAnalytics {
 
     if (selectedStudent !== 'all' && studentStats[selectedStudent]) {
       const student = studentStats[selectedStudent];
+      console.log('Selected student data:', selectedStudent);
+      console.log('Student stats:', student);
+      console.log('Daily activity before processing:', student.dailyActivity);
+
       activityBreakdown.push(
         { name: 'Subpages', value: student.subpageViews, color: '#ffc658' },
         { name: 'Resources', value: student.resourceViews, color: '#ff7300' },

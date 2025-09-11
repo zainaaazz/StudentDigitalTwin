@@ -19,7 +19,7 @@ const ActivityBarChart = ({ data, title = "Daily Activity Details" }) => {
       <ResponsiveContainer width="100%" height={400}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" tickFormatter={(tick) => `Day ${tick}`}/>
+          <XAxis dataKey="date" />
           <YAxis />
           <Tooltip />
           <Bar dataKey="homepage" fill="#8884d8" name="Homepage" />

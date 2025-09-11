@@ -1,5 +1,5 @@
 // services/api.js
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
@@ -15,8 +15,8 @@ export const apiService = {
   async getStudentData(studentId = null) {
     try {
       const url = studentId 
-        ? `${API_BASE_URL}/digitaltwin/dashboard/student-data?studentId=${studentId}`
-        : `${API_BASE_URL}/digitaltwin/dashboard/student-data`;
+        ? `${API_BASE_URL}/api/getStudentData?studentId=${studentId}`
+        : `${API_BASE_URL}/api/getStudentData`;
       
       const response = await fetch(url, {
         headers: getAuthHeaders()
@@ -114,7 +114,7 @@ export const apiService = {
 
   async createStudentRecord(data) {
     try {
-      const response = await fetch(`${API_BASE_URL}/digitaltwin/records`, {
+      const response = await fetch(`${API_BASE_URL}/api/createStudentRecord`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(data),

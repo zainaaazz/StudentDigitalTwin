@@ -10,7 +10,7 @@ export class StudentAnalytics {
   }
 
   // Calculate individual student statistics
-  getStudentStats() {
+  /*getStudentStats() {
     const studentStats = {};
 
     this.data.forEach(record => {
@@ -61,8 +61,127 @@ export class StudentAnalytics {
     });
 
     return studentStats;
-  }
+  }*/
 
+  // Calculate individual student statistics
+  getStudentStats() {
+    const studentStats = {};
+
+    console.log('Total raw data records:', this.data.length);
+    console.log('Student 11391 records in raw data:');
+    const student11391Records = this.data.filter(r => r.id_student === 11391);
+    console.log('Count:', student11391Records.length);
+    console.log('Dates found:', student11391Records.map(r => r.date));
+
+    console.log('Sample records for student 11391:');
+    student11391Records.forEach((record, index) => {
+      console.log(`Record ${index}:`, {
+        id: record._id,
+        date: record.date,
+        homepage: record.homepage,
+        content: record.oucontent
+      });
+    });
+    
+    // First pass: collect all records for each student
+    const studentRecords = {};
+    this.data.forEach(record => {
+      const studentId = record.id_student;
+      if (!studentRecords[studentId]) {
+        studentRecords[studentId] = [];
+      }
+      studentRecords[studentId].push(record);
+    });
+
+    // Second pass: process each student's records
+    Object.keys(studentRecords).forEach(studentId => {
+      const records = studentRecords[studentId];
+      
+      // Group records by date for this student
+      const dateGroups = {};
+      records.forEach(record => {
+        const date = record.date || 0;
+        if (!dateGroups[date]) {
+          dateGroups[date] = [];
+        }
+        dateGroups[date].push(record);
+      });
+
+      studentStats[studentId] = {
+        totalClicks: 0,
+        homepageViews: 0,
+        contentViews: 0,
+        subpageViews: 0,
+        resourceViews: 0,
+        forumViews: 0,
+        urlViews: 0,
+        sessionDuration: 0,
+        totalRecords: 0,
+        dailyActivity: []
+      };
+
+      // Sort dates and process each date group
+      const sortedDates = Object.keys(dateGroups).sort((a, b) => parseInt(a) - parseInt(b));
+      
+      sortedDates.forEach((dateKey, dayIndex) => {
+        console.log(`Processing date ${dateKey} as day ${dayIndex}`);
+        const dateRecords = dateGroups[dateKey];
+        console.log(`Found ${dateRecords.length} records for this date`);
+
+        // Aggregate all records for this date
+        let dayTotalClicks = 0;
+        let dayHomepage = 0;
+        let dayContent = 0;
+        let daySubpage = 0;
+        let dayResource = 0;
+        let dayForum = 0;
+        let dayUrl = 0;
+        let daySessionDuration = 0;
+
+        dateRecords.forEach(record => {
+          const recordTotalClicks = (record.homepage || 0) + 
+                                  (record.oucontent || 0) + 
+                                  (record.subpage || 0) + 
+                                  (record.url || 0) + 
+                                  (record.forumng || 0) + 
+                                  (record.resource || 0);
+
+          dayTotalClicks += recordTotalClicks;
+          dayHomepage += record.homepage || 0;
+          dayContent += record.oucontent || 0;
+          daySubpage += record.subpage || 0;
+          dayResource += record.resource || 0;
+          dayForum += record.forumng || 0;
+          dayUrl += record.url || 0;
+          daySessionDuration += record.session_duration || 0;
+        });
+
+        // Add to student totals
+        studentStats[studentId].totalClicks += dayTotalClicks;
+        studentStats[studentId].homepageViews += dayHomepage;
+        studentStats[studentId].contentViews += dayContent;
+        studentStats[studentId].subpageViews += daySubpage;
+        studentStats[studentId].resourceViews += dayResource;
+        studentStats[studentId].forumViews += dayForum;
+        studentStats[studentId].urlViews += dayUrl;
+        studentStats[studentId].sessionDuration += daySessionDuration;
+        studentStats[studentId].totalRecords += 1; // One record per day
+
+        // Add daily activity record with sequential day numbering
+        studentStats[studentId].dailyActivity.push({
+          date: dayIndex, // Sequential: 0, 1, 2, 3...
+          originalDate: parseInt(dateKey), // Original database date
+          homepage: dayHomepage,
+          content: dayContent,
+          subpage: daySubpage,
+          total: dayTotalClicks
+        });
+      });
+    });
+
+    console.log('Final studentStats for 11391:', studentStats[11391]?.dailyActivity);
+    return studentStats;
+}
   // Calculate overall averages
   calculateAverages() {
     const studentStats = this.getStudentStats();

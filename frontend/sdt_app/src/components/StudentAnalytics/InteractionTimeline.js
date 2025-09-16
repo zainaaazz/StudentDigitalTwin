@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Filter, Activity as TimelineIcon, MapPin, Clock, BarChart3 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Filter, Activity as TimelineIcon, MapPin, Clock, BarChart3, MessageCircle, Users } from 'lucide-react';
 import { mockInteractionData } from './dummyData';
 import { useInteractionSimulator } from '../../hooks/useInteractionSimulator';
 
@@ -117,36 +117,36 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#8b57d4'}}></div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500">No interaction data available</p>
+          <p className="text-gray-400">No interaction data available</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-900 p-6">
       {/* Navigation Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <button 
+            <button
               onClick={() => navigate('/student-dashboard')}
-              className="flex items-center justify-center w-10 h-10 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-800 border border-gray-700 hover:bg-gray-700 transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 text-gray-300" />
             </button>
             <TimelineIcon className="w-8 h-8" style={{color: '#8b57d4'}} />
-            <h1 className="text-3xl font-bold text-gray-900">Interaction Timeline</h1>
+            <h1 className="text-3xl font-bold text-white">Interaction Timeline</h1>
           </div>
           <div className="flex items-center space-x-3">
             <Link
@@ -162,7 +162,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
             <button
               onClick={fetchInteractions}
               disabled={loading}
-              className="inline-flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-gray-800 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -172,37 +172,65 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
       {/* Statistics Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <p className="text-3xl font-bold" style={{color: '#6C3D91'}}>{data.stats.totalInteractions}</p>
-          <p className="text-sm text-gray-600">Total Interactions</p>
+        <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700">
+          <div className="flex items-center">
+            <div className="p-3 rounded-lg mr-4" style={{ backgroundColor: '#8b57d4' }}>
+              <MessageCircle className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-white">{data.stats.totalInteractions}</p>
+              <p className="text-sm text-gray-400">Total Interactions</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <p className="text-3xl font-bold" style={{color: '#6C3D91'}}>{formatDuration(Math.round(data.stats.averageDuration))}</p>
-          <p className="text-sm text-gray-600">Average Duration</p>
+        <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700">
+          <div className="flex items-center">
+            <div className="p-3 rounded-lg mr-4" style={{ backgroundColor: '#8b57d4' }}>
+              <Clock className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-white">{formatDuration(Math.round(data.stats.averageDuration))}</p>
+              <p className="text-sm text-gray-400">Average Duration</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <p className="text-3xl font-bold" style={{color: '#6C3D91'}}>{data.stats.uniquePartners}</p>
-          <p className="text-sm text-gray-600">Unique Partners</p>
+        <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700">
+          <div className="flex items-center">
+            <div className="p-3 rounded-lg mr-4" style={{ backgroundColor: '#8b57d4' }}>
+              <Users className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-white">{data.stats.uniquePartners}</p>
+              <p className="text-sm text-gray-400">Unique Partners</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <p className="text-3xl font-bold" style={{color: '#6C3D91'}}>{Object.keys(data.stats.interactionsByType).length}</p>
-          <p className="text-sm text-gray-600">Interaction Types</p>
+        <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700">
+          <div className="flex items-center">
+            <div className="p-3 rounded-lg mr-4" style={{ backgroundColor: '#8b57d4' }}>
+              <BarChart3 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-white">{Object.keys(data.stats.interactionsByType).length}</p>
+              <p className="text-sm text-gray-400">Interaction Types</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 mb-6">
+      <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700 mb-6">
         <div className="flex items-center space-x-2 mb-4">
-          <Filter className="w-5 h-5" style={{color: '#6C3D91'}} />
-          <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+          <Filter className="w-5 h-5" style={{color: '#8b57d4'}} />
+          <h3 className="text-lg font-semibold text-white">Filters</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Interaction Type</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Interaction Type</label>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
               <option value="all">All Types</option>
               <option value="discussion">Discussion</option>
@@ -212,11 +240,11 @@ const InteractionTimeline = ({ currentUser = null }) => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Context</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Context</label>
             <select
               value={contextFilter}
               onChange={(e) => setContextFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
               <option value="all">All Contexts</option>
               <option value="lecture">Lecture</option>
@@ -226,17 +254,17 @@ const InteractionTimeline = ({ currentUser = null }) => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Search Partner/Session</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Search Partner/Session</label>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Enter partner ID or session..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
           <div className="flex items-end">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-400">
               Showing {filteredInteractions.length} of {data.stats.totalInteractions} interactions
             </p>
           </div>
@@ -244,44 +272,44 @@ const InteractionTimeline = ({ currentUser = null }) => {
       </div>
 
       {/* Interactions Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-gray-800 rounded-xl shadow-lg border border-gray-700">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Time</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Partner</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Duration</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Type</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Context</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Session</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Details</th>
+              <tr className="border-b border-gray-700" style={{ backgroundColor: '#8b57d4' }}>
+                <th className="px-6 py-4 text-left text-sm font-medium text-white">Time</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-white">Partner</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-white">Duration</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-white">Type</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-white">Context</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-white">Session</th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-white">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-700">
               {filteredInteractions.map((interaction) => (
-                <tr key={interaction.id} className="hover:bg-gray-50">
+                <tr key={interaction.id} className="hover:bg-gray-700">
                   <td className="px-6 py-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-white">
                         {new Date(interaction.startTime).toLocaleDateString()}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400">
                         {new Date(interaction.startTime).toLocaleTimeString()} - {new Date(interaction.endTime).toLocaleTimeString()}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400">
                         {formatRelativeTime(interaction.startTime)}
                       </p>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{backgroundColor: '#8b57d41A'}}>
                         <span className="text-xs font-medium" style={{color: '#8b57d4'}}>
                           {interaction.studentId2.slice(-2)}
                         </span>
                       </div>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-white">
                         {interaction.partnerName || interaction.studentId2}
                       </span>
                     </div>
@@ -289,7 +317,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-1">
                       <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-900">
+                      <span className="text-sm text-white">
                         {formatDuration(interaction.duration)}
                       </span>
                     </div>
@@ -305,7 +333,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <code className="text-xs font-mono text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                    <code className="text-xs font-mono text-gray-300 bg-gray-700 px-2 py-1 rounded">
                       {interaction.sessionId.slice(-8)}
                     </code>
                   </td>
@@ -313,11 +341,11 @@ const InteractionTimeline = ({ currentUser = null }) => {
                     <div>
                       <div className="flex items-center space-x-1 mb-1">
                         <MapPin className="w-3 h-3 text-gray-400" />
-                        <span className="text-xs text-gray-600">
+                        <span className="text-xs text-gray-300">
                           {interaction.avgDistance.toFixed(1)}m
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400">
                         Confidence: {Math.round(interaction.confidence * 100)}%
                       </p>
                     </div>
@@ -329,22 +357,22 @@ const InteractionTimeline = ({ currentUser = null }) => {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <div className="px-6 py-4 border-t border-gray-700 bg-gray-800">
           <div className="flex items-center justify-center space-x-2">
-            <button 
+            <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-purple-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
-            <span className="px-3 py-2 text-sm font-medium text-gray-700">
+            <span className="px-3 py-2 text-sm font-medium" style={{color: '#8b57d4'}}>
               Page {page}
             </span>
-            <button 
+            <button
               disabled={!data.pagination.hasMore}
               onClick={() => setPage(page + 1)}
-              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-purple-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>
@@ -354,7 +382,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
       {/* Summary Footer */}
       <div className="mt-6 text-center">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-400">
           Data from {new Date(data.stats.dateRange.start).toLocaleDateString()} to {new Date(data.stats.dateRange.end).toLocaleDateString()}
         </p>
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { logout } from '../../utils/auth';
 
 const NavItem = ({ to, label, icon = null, disabled = false }) => {
   const location = useLocation();
@@ -40,7 +41,7 @@ const Layout = ({ children, className = '' }) => {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-xl md:text-2xl font-semibold">NWU Student Digital Twin Portal</h1>
           <button
-            onClick={() => { localStorage.removeItem('token'); window.location.href = '/login'; }}
+            onClick={logout}
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
           >
             Logout

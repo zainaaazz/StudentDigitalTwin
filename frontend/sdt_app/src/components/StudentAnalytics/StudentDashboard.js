@@ -1,31 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { User, TrendingUp, TrendingDown, Minus, MessageCircle, Clock, Users, BarChart3, Activity as Timeline, ArrowLeft } from 'lucide-react';
 import { mockDashboardData } from './dummyData';
+import { useInteractionSimulator } from '../../hooks/useInteractionSimulator';
 import { CHART_COLORS } from './types';
 
 const StudentDashboard = ({ currentUser = null }) => {
   const navigate = useNavigate();
+  const { loading: simLoading, getDashboardData } = useInteractionSimulator(currentUser?.id);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading and use dummy data
-    const timer = setTimeout(() => {
-      setData({
-        ...mockDashboardData,
-        student: {
-          ...mockDashboardData.student,
-          name: currentUser?.name || mockDashboardData.student.name,
-          id: currentUser?.id || mockDashboardData.student.id
+    if (!simLoading) {
+      // Use simulation engine if currentUser is available, otherwise fallback to dummy data
+      const timer = setTimeout(() => {
+        if (currentUser?.id) {
+          const simulatedData = getDashboardData();
+          setData(simulatedData);
+        } else {
+          setData({
+            ...mockDashboardData,
+            student: {
+              ...mockDashboardData.student,
+              name: currentUser?.name || mockDashboardData.student.name,
+              id: currentUser?.id || mockDashboardData.student.id
+            }
+          });
         }
-      });
-      setLoading(false);
-    }, 800);
+        setLoading(false);
+      }, 500);
 
-    return () => clearTimeout(timer);
-  }, [currentUser]);
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser?.id, simLoading, getDashboardData]);
 
   const getRiskColor = (risk) => {
     switch (risk) {
@@ -45,6 +54,29 @@ const StudentDashboard = ({ currentUser = null }) => {
     }
   };
 
+  // Memoized chart data calculations (must be before early returns)
+  const interactionTypeData = useMemo(() => {
+    if (!data?.recentInteractions?.interactionTypes) return [];
+    return Object.entries(data.recentInteractions.interactionTypes).map(([type, count]) => ({
+      name: type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' '),
+      value: count
+    }));
+  }, [data?.recentInteractions?.interactionTypes]);
+
+  const engagementTrendData = useMemo(() => {
+    if (!data?.engagementHistory) return [];
+    return data.engagementHistory.map(item => ({
+      week: item.week,
+      engagement: Math.round(item.interactionFrequency * 10),
+      collaboration: item.collaborationScore,
+      riskScore: item.overallRiskScore,
+      sessions: item.sessionCount
+    }));
+  }, [data?.engagementHistory]);
+
+  const weeklySessionData = useMemo(() => {
+    return engagementTrendData.slice(-7);
+  }, [engagementTrendData]);
 
   if (loading) {
     return (
@@ -63,19 +95,6 @@ const StudentDashboard = ({ currentUser = null }) => {
       </div>
     );
   }
-
-  const interactionTypeData = Object.entries(data.recentInteractions.interactionTypes).map(([type, count]) => ({
-    name: type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' '),
-    value: count
-  }));
-
-  const engagementTrendData = data.engagementHistory.map(item => ({
-    week: item.week,
-    engagement: Math.round(item.interactionFrequency * 10),
-    collaboration: item.collaborationScore,
-    riskScore: item.overallRiskScore,
-    sessions: item.sessionCount
-  }));
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -273,6 +292,9 @@ const StudentDashboard = ({ currentUser = null }) => {
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
+                animationBegin={0}
+                animationDuration={800}
+                isAnimationActive={true}
               >
                 {interactionTypeData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
@@ -308,7 +330,7 @@ const StudentDashboard = ({ currentUser = null }) => {
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Weekly Session Activity</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={engagementTrendData.slice(-7)}>
+            <BarChart data={weeklySessionData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="week" />
               <YAxis />

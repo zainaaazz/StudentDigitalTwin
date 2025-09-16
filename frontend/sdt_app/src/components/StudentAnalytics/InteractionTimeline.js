@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Filter, Activity as TimelineIcon, MapPin, Clock, BarChart3 } from 'lucide-react';
 import { mockInteractionData } from './dummyData';
+import { useInteractionSimulator } from '../../hooks/useInteractionSimulator';
 
 const InteractionTimeline = ({ currentUser = null }) => {
   const navigate = useNavigate();
+  const { loading: simLoading, getInteractionHistory } = useInteractionSimulator(currentUser?.id);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -14,15 +16,50 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
   useEffect(() => {
     fetchInteractions();
-  }, [page, typeFilter, contextFilter]);
+  }, [page, typeFilter, contextFilter, simLoading]);
 
   const fetchInteractions = () => {
+    if (simLoading) return;
+
     setLoading(true);
-    // Simulate API call with dummy data
+    // Use simulation engine if currentUser is available
     setTimeout(() => {
-      setData(mockInteractionData);
+      if (currentUser?.id) {
+        const interactions = getInteractionHistory();
+
+        // Calculate stats from interactions to match expected data structure
+        const stats = {
+          totalInteractions: interactions.length,
+          dateRange: {
+            start: interactions.length > 0 ? new Date(Math.min(...interactions.map(i => i.startTime))) : new Date(),
+            end: interactions.length > 0 ? new Date(Math.max(...interactions.map(i => i.startTime))) : new Date()
+          },
+          averageDuration: interactions.length > 0 ? Math.round(interactions.reduce((sum, i) => sum + i.duration, 0) / interactions.length) : 0,
+          interactionsByType: interactions.reduce((acc, i) => {
+            acc[i.interactionType] = (acc[i.interactionType] || 0) + 1;
+            return acc;
+          }, {}),
+          interactionsByContext: interactions.reduce((acc, i) => {
+            acc[i.context] = (acc[i.context] || 0) + 1;
+            return acc;
+          }, {}),
+          uniquePartners: new Set(interactions.map(i => i.studentId2)).size
+        };
+
+        // Add pagination structure
+        const pagination = {
+          total: interactions.length,
+          limit: 20,
+          offset: 0,
+          hasMore: false // Since we're showing all interactions at once
+        };
+
+        setData({ interactions, stats, pagination });
+      } else {
+        setData(mockInteractionData);
+      }
       setLoading(false);
-    }, 500);
+    }, 300);
   };
 
   const getInteractionTypeColor = (type) => {
@@ -67,11 +104,12 @@ const InteractionTimeline = ({ currentUser = null }) => {
     return `${days} days ago`;
   };
 
-  const filteredInteractions = data?.interactions.filter(interaction => {
+  const interactions = Array.isArray(data) ? data : data?.interactions || [];
+  const filteredInteractions = interactions.filter(interaction => {
     const matchesType = typeFilter === 'all' || interaction.interactionType === typeFilter;
     const matchesContext = contextFilter === 'all' || interaction.context === contextFilter;
     const matchesSearch = searchTerm === '' || 
-      interaction.studentId2.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (interaction.partnerName || interaction.studentId2).toLowerCase().includes(searchTerm.toLowerCase()) ||
       interaction.sessionId.toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesType && matchesContext && matchesSearch;
@@ -244,7 +282,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
                         </span>
                       </div>
                       <span className="text-sm font-medium text-gray-900">
-                        {interaction.studentId2}
+                        {interaction.partnerName || interaction.studentId2}
                       </span>
                     </div>
                   </td>

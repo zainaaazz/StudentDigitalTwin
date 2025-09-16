@@ -1,7 +1,7 @@
 // Dummy data for Student Analytics Dashboard
 
 export const mockStudentProfile = {
-  id: 'STU001',
+  id: 'STU_001',
   name: 'Alex Johnson',
   academicLevel: 'Junior',
   major: 'Computer Science',
@@ -72,11 +72,11 @@ export const mockRecentInteractions = {
   totalInteractions: 127,
   averageDuration: 285, // seconds
   topInteractionPartners: [
-    { studentId: 'STU015', name: 'Emma Davis', count: 23 },
-    { studentId: 'STU032', name: 'Michael Chen', count: 18 },
-    { studentId: 'STU007', name: 'Sarah Williams', count: 16 },
-    { studentId: 'STU041', name: 'James Rodriguez', count: 14 },
-    { studentId: 'STU028', name: 'Lisa Kim', count: 12 }
+    { studentId: 'STU_015', name: 'Emma Davis', count: 23 },
+    { studentId: 'STU_032', name: 'Michael Chen', count: 18 },
+    { studentId: 'STU_007', name: 'Sarah Williams', count: 16 },
+    { studentId: 'STU_041', name: 'James Rodriguez', count: 14 },
+    { studentId: 'STU_028', name: 'Lisa Kim', count: 12 }
   ],
   interactionTypes: {
     discussion: 45,
@@ -108,8 +108,8 @@ export const mockInteractionEvents = [
   {
     id: 'INT001',
     sessionId: 'SES123456',
-    studentId1: 'STU001',
-    studentId2: 'STU015',
+    studentId1: 'STU_001',
+    studentId2: 'STU_015',
     startTime: new Date('2024-02-12T10:15:00'),
     endTime: new Date('2024-02-12T10:23:00'),
     duration: 480,
@@ -122,8 +122,8 @@ export const mockInteractionEvents = [
   {
     id: 'INT002',
     sessionId: 'SES123456',
-    studentId1: 'STU001',
-    studentId2: 'STU032',
+    studentId1: 'STU_001',
+    studentId2: 'STU_032',
     startTime: new Date('2024-02-12T11:30:00'),
     endTime: new Date('2024-02-12T11:37:00'),
     duration: 420,
@@ -136,8 +136,8 @@ export const mockInteractionEvents = [
   {
     id: 'INT003',
     sessionId: 'SES123457',
-    studentId1: 'STU001',
-    studentId2: 'STU007',
+    studentId1: 'STU_001',
+    studentId2: 'STU_007',
     startTime: new Date('2024-02-11T14:20:00'),
     endTime: new Date('2024-02-11T14:28:00'),
     duration: 480,
@@ -150,8 +150,8 @@ export const mockInteractionEvents = [
   {
     id: 'INT004',
     sessionId: 'SES123458',
-    studentId1: 'STU001',
-    studentId2: 'STU041',
+    studentId1: 'STU_001',
+    studentId2: 'STU_041',
     startTime: new Date('2024-02-11T12:45:00'),
     endTime: new Date('2024-02-11T12:52:00'),
     duration: 420,
@@ -164,8 +164,8 @@ export const mockInteractionEvents = [
   {
     id: 'INT005',
     sessionId: 'SES123459',
-    studentId1: 'STU001',
-    studentId2: 'STU028',
+    studentId1: 'STU_001',
+    studentId2: 'STU_028',
     startTime: new Date('2024-02-10T15:10:00'),
     endTime: new Date('2024-02-10T15:18:00'),
     duration: 480,

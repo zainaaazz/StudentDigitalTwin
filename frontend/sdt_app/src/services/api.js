@@ -135,6 +135,34 @@ export const apiService = {
       throw error;
     }
   }
+  ,
+  // Predictions day window
+  async getPredictionsWindow({ studentId, startDay, endDay, labels }) {
+    try {
+      const params = new URLSearchParams({
+        studentId: String(studentId),
+        startDay: String(startDay),
+        endDay: String(endDay),
+      });
+      if (labels && labels.length) {
+        params.set('labels', labels.join(','));
+      }
+      const url = `${API_BASE_URL}/digitaltwin/predictions/day-window?${params.toString()}`;
+      const response = await fetch(url, { headers: getAuthHeaders() });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (getPredictionsWindow):', error);
+      throw error;
+    }
+  }
 };
 
 // Keep mock data for development/testing

@@ -61,7 +61,7 @@ const Layout = ({ children, className = '' }) => {
           <nav className="space-y-2">
             <NavItem to="/dashboard" label="Engagement" />
             <NavItem to="/student-dashboard" label="Interactivity" />
-            <NavItem to={null} label="Predictions" disabled />
+            <NavItem to="/predictions" label="Predictions" />
           </nav>
         </aside>
 

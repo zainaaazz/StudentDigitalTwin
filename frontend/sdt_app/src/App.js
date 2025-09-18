@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import StudentAnalyticsDashboard from './components/Dashboard/StudentAnalyticsDashboard';
 import StudentDashboardWrapper from './components/StudentAnalytics/StudentDashboardWrapper';
 import InteractionTimelineWrapper from './components/StudentAnalytics/InteractionTimelineWrapper';
+import PredictionsPage from './components/Predictions/PredictionsPage';
 import './styles/global.css';
 
 function App() {
@@ -38,6 +39,16 @@ function App() {
           element={
             isAuthenticated() ? (
               <InteractionTimelineWrapper />
+            ) : (
+              <LoginPage />
+            )
+          }
+        />
+        <Route
+          path="/predictions"
+          element={
+            isAuthenticated() ? (
+              <PredictionsPage />
             ) : (
               <LoginPage />
             )

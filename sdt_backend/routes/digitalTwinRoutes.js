@@ -43,6 +43,11 @@ router.get('/dashboard/performance', safeHandler(controller.getStudentPerformanc
 router.get('/dashboard/activity-breakdown', safeHandler(controller.getActivityBreakdown, 'getActivityBreakdown'));
 
 // -----------------------------
+// PREDICTIONS (day window)
+// -----------------------------
+router.get('/predictions/day-window', safeHandler(controller.getPredictionsForWindow, 'getPredictionsForWindow'));
+
+// -----------------------------
 // STANDARD CRUD and helpers
 // Base path for this router should be mounted by app.js e.g. app.use('/api/digitaltwin', router)
 // -----------------------------

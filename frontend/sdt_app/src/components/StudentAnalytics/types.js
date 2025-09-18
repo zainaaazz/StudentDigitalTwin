@@ -27,4 +27,5 @@ export const SESSION_CONTEXTS = {
 };
 
 // Chart colors for consistency
-export const CHART_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+// Different shades of purple based on #8C4AA6
+export const CHART_COLORS = ['#8C4AA6', '#9B63B3', '#AA7BC0', '#BA93CD'];

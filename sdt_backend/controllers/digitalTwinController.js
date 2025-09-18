@@ -228,6 +228,158 @@ const controller = {
       });
     }
   }
+  ,
+  // Predictions (scaffold): check for model files and return stub predictions
+  // GET /digitaltwin/predictions/day-window?studentId=123&startDay=1&endDay=5
+  // Optional: labels=Distinction,Fail,Pass,Withdrawn
+  getPredictionsForWindow: async (req, res) => {
+    try {
+      const path = require('path');
+      const fs = require('fs');
+      const { spawn } = require('child_process');
+      const stripQuotes = (s) => (typeof s === 'string' ? s.trim().replace(/^"(.*)"$/,'$1').replace(/^\'(.*)\'$/,'$1') : s);
+
+      const studentId = parseInt(req.query.studentId, 10);
+      const startDay = Math.max(parseInt(req.query.startDay, 10) || 1, 1);
+      const endDayRaw = parseInt(req.query.endDay, 10) || startDay + 4;
+      const endDay = Math.max(startDay, endDayRaw);
+
+      if (Number.isNaN(studentId)) {
+        return res.status(400).json({ success: false, error: 'studentId must be a number' });
+      }
+
+      const labelsParam = (req.query.labels || '').split(',').map(s => s.trim()).filter(Boolean);
+      const labels = labelsParam.length ? labelsParam : ['Distinction', 'Fail', 'Pass', 'Withdrawn'];
+
+      let baseDir = process.env.PREDICTION_MODELS_DIR || path.resolve(__dirname, '..', 'PredictionModels');
+      baseDir = stripQuotes(baseDir);
+      let scalerPath = process.env.PREDICTION_SCALER || path.join(baseDir, 'scaler.pkl');
+      scalerPath = stripQuotes(scalerPath);
+      let featsPath = process.env.PREDICTION_FEATURES || path.join(baseDir, 'feature_cols.pkl');
+      featsPath = stripQuotes(featsPath);
+
+      // Fetch minimal student rows up to endDay-1 for sequence building
+      const projection = {
+        _id: 0,
+        id_student: 1,
+        date: 1,
+        homepage: 1,
+        oucontent: 1,
+        subpage: 1,
+        url: 1,
+        forumng: 1,
+        resource: 1,
+        repeatactivity: 1,
+        glossary: 1,
+        dataplus: 1,
+        oucollaborate: 1,
+        htmlactivity: 1,
+        questionnaire: 1,
+        dualpane: 1,
+        quiz: 1,
+        externalquiz: 1,
+        page: 1,
+        folder: 1,
+        ouwiki: 1,
+        sharedsubpage: 1,
+        ouelluminate: 1,
+        num_of_prev_attempts: 1,
+        studied_credits: 1,
+        final_result: 1
+      };
+
+      const rows = await DigitalTwin.find({ id_student: studentId, date: { $lt: endDay } })
+        .select(Object.keys(projection).join(' '))
+        .lean()
+        .sort({ date: 1 })
+        .exec();
+
+      // Compute ground truth (most frequent final_result)
+      let groundTruth = null;
+      if (rows && rows.length) {
+        const counts = {};
+        rows.forEach(r => {
+          const fr = r.final_result;
+          if (fr) counts[fr] = (counts[fr] || 0) + 1;
+        });
+        groundTruth = Object.keys(counts).sort((a,b) => counts[b]-counts[a])[0] || null;
+      }
+
+      // Ensure scaler/feature files exist
+      const haveArtifacts = fs.existsSync(scalerPath) && fs.existsSync(featsPath);
+
+      // If Python runtime or artifacts are missing, fall back to existence-only scaffold
+      async function fallbackStub() {
+        const items = [];
+        for (let day = startDay; day <= endDay; day++) {
+          const modelPath = path.join(baseDir, `model_day_${day}.h5`);
+          const exists = fs.existsSync(modelPath);
+          const idx = day % labels.length;
+          const confidence = exists ? Number((0.6 + ((day % 10) / 50)).toFixed(3)) : null;
+          items.push({
+            day,
+            model_available: exists,
+            pred_label: exists ? labels[idx] : null,
+            pred_index: exists ? idx : null,
+            confidence
+          });
+        }
+        return items;
+      }
+
+      if (!haveArtifacts) {
+        const items = await fallbackStub();
+        return res.json({ success: true, data: items, meta: { studentId, startDay, endDay, modelDir: baseDir, groundTruth, mode: 'stub_no_artifacts' } });
+      }
+
+      // Spawn python to run real predictions
+      const script = path.resolve(__dirname, '..', 'utils', 'predict_window.py');
+      const pythonBinRaw = process.env.PYTHON_BIN || (process.platform === 'win32' ? 'py' : 'python');
+      const pythonBin = stripQuotes(pythonBinRaw);
+      const py = spawn(pythonBin, ['-u', script], { stdio: ['pipe', 'pipe', 'pipe'] });
+
+      const payload = {
+        model_dir: baseDir,
+        scaler_path: scalerPath,
+        feats_path: featsPath,
+        student_id: studentId,
+        start_day: startDay,
+        end_day: endDay,
+        labels,
+        rows
+      };
+
+      let stdout = '';
+      let stderr = '';
+      py.stdout.on('data', (d) => { stdout += d.toString(); });
+      py.stderr.on('data', (d) => { stderr += d.toString(); });
+
+      py.on('error', async (err) => {
+        const items = await fallbackStub();
+        return res.json({ success: true, data: items, meta: { studentId, startDay, endDay, modelDir: baseDir, groundTruth, mode: 'stub_py_spawn_failed', stderr, pythonBin } });
+      });
+
+      py.on('close', async () => {
+        try {
+          const resp = JSON.parse(stdout || '{}');
+          if (resp && resp.success) {
+            return res.json({ success: true, data: resp.data || [], meta: { studentId, startDay, endDay, modelDir: baseDir, groundTruth, mode: 'python' } });
+          }
+          const items = await fallbackStub();
+          return res.json({ success: true, data: items, meta: { studentId, startDay, endDay, modelDir: baseDir, groundTruth, mode: 'stub_py_error', stderr, pyResp: resp } });
+        } catch (e) {
+          const items = await fallbackStub();
+          return res.json({ success: true, data: items, meta: { studentId, startDay, endDay, modelDir: baseDir, groundTruth, mode: 'stub_py_parse_error', stderr } });
+        }
+      });
+
+      py.stdin.write(JSON.stringify(payload));
+      py.stdin.end();
+    } catch (error) {
+      console.error('Error in getPredictionsForWindow:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
 };
 
 module.exports = controller;

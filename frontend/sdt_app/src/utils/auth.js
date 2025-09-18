@@ -56,6 +56,11 @@ const generateAnonymousName = (studentId) => {
   return `Student ${letters[letterIndex]}${number.toString().padStart(2, '0')}`;
 };
 
+// Get anonymous name for other students (POPIA compliance)
+export const getAnonymousName = (studentId) => {
+  return generateAnonymousName(studentId);
+};
+
 export const getCurrentUser = () => {
   const token = localStorage.getItem('token');
 
@@ -67,7 +72,7 @@ export const getCurrentUser = () => {
     const payload = JSON.parse(atob(token.split('.')[1]));
     return {
       id: payload.id_student,
-      name: generateAnonymousName(payload.id_student),
+      name: `Student ${payload.id_student}`, // Show real student ID for the current user
       email: `student${payload.id_student}@university.edu`,
       role: payload.role
     };

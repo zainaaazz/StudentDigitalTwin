@@ -20,12 +20,16 @@ const StudentDashboard = ({ currentUser = null }) => {
           const simulatedData = getDashboardData();
           setData(simulatedData);
         } else {
+          // For the signed-in student, show their real information instead of anonymous
+          const displayName = currentUser?.id ? `Student ${currentUser.id}` : mockDashboardData.student.name;
+          const studentId = currentUser?.id || mockDashboardData.student.id;
+
           setData({
             ...mockDashboardData,
             student: {
               ...mockDashboardData.student,
-              name: currentUser?.name || mockDashboardData.student.name,
-              id: currentUser?.id || mockDashboardData.student.id
+              name: displayName,
+              id: studentId
             }
           });
         }

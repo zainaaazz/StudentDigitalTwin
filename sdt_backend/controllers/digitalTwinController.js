@@ -28,6 +28,10 @@ const controller = {
 
   // Get student data (index-first, fallback to allowDiskUse aggregation)
   getStudentData: async (req, res) => {
+    console.log('=== API CALLED ===');
+    console.log('Query params:', req.query);
+    console.log('==================');
+    
     try {
       const { studentId, limit: limitRaw, page: pageRaw } = req.query;
       const limit = Math.min(parseInt(limitRaw, 10) || 100, 1000); // cap to avoid huge responses
@@ -86,6 +90,10 @@ const controller = {
           .hint({ id_student: 1, date: 1 }) // force index usage if available
           .exec();
 
+          console.log(`Found ${records.length} records for student ${sid}`);
+          console.log('Date range:', records.map(r => r.date));
+          console.log('Sample records:', records.slice(0, 5).map(r => ({ date: r.date, homepage: r.homepage, content: r.oucontent })));
+
         // If this returns without error, we're done
         return res.json({
           success: true,
@@ -106,6 +114,10 @@ const controller = {
         ];
 
         const recordsAgg = await runAggregationWithDiskUse(pipeline, 'digitaltwin');
+        
+        console.log(`Aggregation found ${recordsAgg.length} records for student ${sid}`);
+        console.log('Aggregation date range:', recordsAgg.map(r => r.date));
+
         return res.json({
           success: true,
           data: recordsAgg,

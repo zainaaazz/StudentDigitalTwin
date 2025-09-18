@@ -19,17 +19,23 @@ import { useStudentData } from '../../hooks/useStudentData';
 import { StudentAnalytics } from '../../utils/analytics';
 
 import StudentLearningAssessment from './StudentLearningAssessment';
+import { apiService } from '../../services/api';
+
+import WeekSelector from './WeekSelector';
 
 const StudentAnalyticsDashboard = () => {
   const [selectedStudent, setSelectedStudent] = useState('all');
-  const { data, loading, error, refetch, userRole, currentStudentId } = useStudentData();
+  const [selectedWeek, setSelectedWeek] = useState('all'); // New state for week
+  // First get the basic data and user info
+  const { data, loading, error, refetch, fetchSpecificStudent, userRole, currentStudentId } = useStudentData();
 
-  // Create analytics instance
-  const analyticsEngine = useMemo(() => {
-    return new StudentAnalytics(data);
-  }, [data]);
+  // console.log('Dashboard received data:', {
+  // totalRecords: data?.length,
+  // student11391Records: data?.filter(r => r.id_student === 11391)?.length,
+  // sampleDates: data?.filter(r => r.id_student === 11391)?.slice(0, 10)?.map(r => r.date)
+  //});
 
-  // For students, automatically set their ID as selected and disable changing
+  // Then calculate effectiveSelectedStudent after we have currentStudentId
   const effectiveSelectedStudent = useMemo(() => {
     if (userRole === 'student' && currentStudentId) {
       return currentStudentId.toString();
@@ -37,11 +43,17 @@ const StudentAnalyticsDashboard = () => {
     return selectedStudent;
   }, [userRole, currentStudentId, selectedStudent]);
 
+  // Create analytics instance
+  const analyticsEngine = useMemo(() => {
+    return new StudentAnalytics(data);
+  }, [data]);
+
   // Calculate analytics based on current data and selected student
   const analytics = useMemo(() => {
-    return analyticsEngine.calculateAnalytics(effectiveSelectedStudent);
-  }, [analyticsEngine, effectiveSelectedStudent]);
+    return analyticsEngine.calculateAnalytics(effectiveSelectedStudent, selectedWeek);
+  }, [analyticsEngine, effectiveSelectedStudent, selectedWeek]);
 
+  
   // Get unique students for the selector (only for admin/teacher roles)
   const students = useMemo(() => {
     if (userRole === 'student') {
@@ -50,11 +62,25 @@ const StudentAnalyticsDashboard = () => {
     return analyticsEngine.getUniqueStudents();
   }, [analyticsEngine, userRole, currentStudentId]);
 
+  // Get available weeks for the selected student
+  const availableWeeks = useMemo(() => {
+    if (effectiveSelectedStudent === 'all') return [];
+    return analytics.availableWeeks || [];
+  }, [analytics.availableWeeks, effectiveSelectedStudent]);
+
   // Handle student selector change (only for non-student roles)
-  const handleStudentChange = (newStudentId) => {
+  const handleStudentChange = async (newStudentId) => {
     if (userRole !== 'student') {
       setSelectedStudent(newStudentId);
+      setSelectedWeek('all'); // Reset week when changing student
+      //const newData = await apiService.getStudentData(newStudentId);
+      await fetchSpecificStudent(newStudentId);
     }
+  };
+
+  // Handle week selector change
+  const handleWeekChange = (newWeek) => {
+    setSelectedWeek(newWeek);
   };
 
   // Handle loading state
@@ -100,6 +126,15 @@ const StudentAnalyticsDashboard = () => {
                 />
               )}
               
+              {/* ADD THIS - Week selector - show when specific student is selected */}
+              {effectiveSelectedStudent !== 'all' && availableWeeks.length > 0 && (
+                <WeekSelector
+                  weeks={availableWeeks}
+                  selectedWeek={selectedWeek}
+                  onWeekChange={handleWeekChange}
+                />
+              )}
+
               {/* Show current student info for student role */}
               {userRole === 'student' && currentStudentId && (
                 <div className="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-lg">
@@ -149,8 +184,8 @@ const StudentAnalyticsDashboard = () => {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Line chart showing daily activity trend */}
-          <ActivityChart 
-            data={analytics.dailyActivity} 
+          <ActivityChart  
+            data={analytics.dailyActivity}
             title={userRole === 'student' ? 'Your Daily Activity' : 'Daily Activity Trend'}
           />
 
@@ -163,7 +198,7 @@ const StudentAnalyticsDashboard = () => {
 
         {/* Detailed Activity Bar Chart */}
         <ActivityBarChart 
-          data={analytics.dailyActivity}
+          data={analytics.dailyActivity}  
           title={userRole === 'student' ? 'Your Detailed Activity Pattern' : 'Detailed Activity Pattern'}
         />
 
@@ -182,7 +217,7 @@ const StudentAnalyticsDashboard = () => {
           <InteractionSummary />
         </div>
 
-        </div>
+      </div>
     </Layout>
   );
 };

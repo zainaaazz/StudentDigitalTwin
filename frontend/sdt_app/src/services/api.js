@@ -136,6 +136,57 @@ export const apiService = {
     }
   }
   ,
+  async listPredictionModels() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/digitaltwin/predictions/models`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Unable to load models');
+      }
+      return Array.isArray(result.data) ? result.data : [];
+    } catch (error) {
+      console.error('API Error (listPredictionModels):', error);
+      throw error;
+    }
+  }
+  ,
+  async getPredictionModelDownloadUrl(name) {
+    if (!name) {
+      throw new Error('Model name is required');
+    }
+    try {
+      const params = new URLSearchParams({ name });
+      const response = await fetch(`${API_BASE_URL}/digitaltwin/predictions/models/download-url?${params.toString()}`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Unable to generate download URL');
+      }
+      return result.data || {};
+    } catch (error) {
+      console.error('API Error (getPredictionModelDownloadUrl):', error);
+      throw error;
+    }
+  },
   // Predictions day window
   async getPredictionsWindow({ studentId, startDay, endDay, labels }) {
     try {

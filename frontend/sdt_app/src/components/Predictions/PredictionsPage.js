@@ -1,10 +1,36 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import Layout from '../layout/Layout';
 import Header from '../layout/Header';
 import { useStudentData } from '../../hooks/useStudentData';
 import { apiService } from '../../services/api';
 
 const DEFAULT_LABELS = ['Distinction', 'Fail', 'Pass', 'Withdrawn'];
+
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes < 0) {
+    return '-';
+  }
+  if (bytes === 0) {
+    return '0 B';
+  }
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const idx = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)));
+  const value = bytes / 1024 ** idx;
+  const decimals = value >= 10 || idx === 0 ? 0 : 1;
+  return `${value.toFixed(decimals)} ${units[idx]}`;
+}
+
+function formatTimestamp(value) {
+  if (!value) {
+    return 'unknown';
+  }
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) {
+    return 'unknown';
+  }
+  return dt.toLocaleString();
+}
+
 
 function generateMockPredictions(days, labels) {
   return days.map((day) => {
@@ -65,7 +91,19 @@ const PredictionsPage = () => {
   const [predictions, setPredictions] = useState([]);
   const [groundTruth, setGroundTruth] = useState(null);
   const [backendMode, setBackendMode] = useState(null); // 'python' or stub_xxx
-  const [modelDir, setModelDir] = useState('sdt_backend/PredictionModels');
+  const [modelDir, setModelDir] = useState('Azure Blob Storage (models)');
+  const [availableModels, setAvailableModels] = useState([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState(null);
+  const [selectedModelName, setSelectedModelName] = useState('');
+  const [downloadUrl, setDownloadUrl] = useState(null);
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const [downloadError, setDownloadError] = useState(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => () => {
+    isMountedRef.current = false;
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -114,6 +152,86 @@ const PredictionsPage = () => {
     return () => { cancelled = true; };
   }, [selectedStudent, startDay, endDay, labels, students]);
 
+  const fetchModels = useCallback(async () => {
+    setModelsLoading(true);
+    setModelsError(null);
+    setDownloadUrl(null);
+    setDownloadError(null);
+
+    try {
+      const models = await apiService.listPredictionModels();
+      if (!isMountedRef.current) {
+        return;
+      }
+      const normalized = Array.isArray(models) ? models : [];
+      setAvailableModels(normalized);
+      setSelectedModelName((prev) => {
+        if (prev && normalized.some((item) => item.name === prev)) {
+          return prev;
+        }
+        return normalized[0]?.name || '';
+      });
+    } catch (error) {
+      if (!isMountedRef.current) {
+        return;
+      }
+      setAvailableModels([]);
+      setSelectedModelName('');
+      setModelsError(error?.message || 'Unable to load models');
+    } finally {
+      if (!isMountedRef.current) {
+        return;
+      }
+      setModelsLoading(false);
+    }
+  }, [isMountedRef]);
+
+  useEffect(() => {
+    fetchModels();
+  }, [fetchModels]);
+
+  useEffect(() => {
+    setDownloadUrl(null);
+    setDownloadError(null);
+  }, [selectedModelName]);
+
+  const selectedModelMeta = useMemo(() => (
+    availableModels.find((item) => item.name === selectedModelName) || null
+  ), [availableModels, selectedModelName]);
+
+  const handleRefreshModels = useCallback(() => {
+    fetchModels();
+  }, [fetchModels]);
+
+  const handleGenerateDownloadUrl = useCallback(async () => {
+    if (!selectedModelName) {
+      return;
+    }
+    setDownloadLoading(true);
+    setDownloadError(null);
+    setDownloadUrl(null);
+    try {
+      const data = await apiService.getPredictionModelDownloadUrl(selectedModelName);
+      if (!isMountedRef.current) {
+        return;
+      }
+      const url = data?.url;
+      if (!url) {
+        throw new Error('Download URL missing in response');
+      }
+      setDownloadUrl(url);
+    } catch (error) {
+      if (!isMountedRef.current) {
+        return;
+      }
+      setDownloadError(error?.message || 'Unable to generate download URL');
+    } finally {
+      if (!isMountedRef.current) {
+        return;
+      }
+      setDownloadLoading(false);
+    }
+  }, [selectedModelName]);
   return (
     <Layout>
       <div className="max-w-7xl mx-auto">
@@ -151,6 +269,70 @@ const PredictionsPage = () => {
                 onChange={(e) => setLabelText(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <h4 className="text-sm font-semibold text-gray-600 mb-3">Azure Stored Models</h4>
+            {modelsError && (
+              <div className="mb-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {modelsError}
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm text-gray-600 mb-1">Model file</label>
+                <select
+                  className="app-input w-full px-3 py-2 rounded-lg border"
+                  value={selectedModelName}
+                  onChange={(e) => setSelectedModelName(e.target.value)}
+                  disabled={modelsLoading || !availableModels.length}
+                >
+                  {availableModels.map((item) => (
+                    <option key={item.name} value={item.name}>{item.name}</option>
+                  ))}
+                </select>
+                {selectedModelMeta && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Size: {formatBytes(selectedModelMeta.size ?? 0)} | Updated {formatTimestamp(selectedModelMeta.lastModified)}
+                  </p>
+                )}
+                {!modelsLoading && !availableModels.length && !modelsError && (
+                  <p className="text-xs text-gray-500 mt-1">No models available in Azure storage.</p>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <button
+                  className="px-3 py-2 rounded-lg text-white shadow-sm"
+                  style={{ backgroundColor: '#8b57d4' }}
+                  onClick={handleRefreshModels}
+                  disabled={modelsLoading}
+                >
+                  {modelsLoading ? 'Loading...' : 'Refresh list'}
+                </button>
+                <button
+                  className="px-3 py-2 rounded-lg text-white shadow-sm"
+                  style={{ backgroundColor: '#0ea5e9' }}
+                  onClick={handleGenerateDownloadUrl}
+                  disabled={downloadLoading || !selectedModelName}
+                >
+                  {downloadLoading ? 'Generating...' : 'Get download URL'}
+                </button>
+              </div>
+            </div>
+            {downloadError && (
+              <div className="mt-3 text-sm text-yellow-300 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2">
+                {downloadError}
+              </div>
+            )}
+            {downloadUrl && (
+              <div className="mt-3 text-xs text-gray-200 bg-black/30 border border-white/10 rounded-lg px-3 py-2 space-y-1 break-words">
+                <div className="flex items-center justify-between gap-2">
+                  <span>Download link ready</span>
+                  <a className="text-indigo-300 underline" href={downloadUrl} target="_blank" rel="noreferrer">Open</a>
+                </div>
+                <code className="block text-[11px] leading-4 break-words">{downloadUrl}</code>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between">

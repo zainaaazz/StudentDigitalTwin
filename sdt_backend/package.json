@@ -19,7 +19,8 @@
     "mongodb": "^6.18.0",
     "mongoose": "^8.18.1",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "@azure/storage-blob": "^12.24.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

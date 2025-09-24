@@ -73,15 +73,6 @@ export class StudentAnalytics {
     // console.log('Count:', student11391Records.length);
     // console.log('Dates found:', student11391Records.map(r => r.date));
 
-    //console.log('Sample records for student 11391:');
-    student11391Records.forEach((record, index) => {
-      console.log(`Record ${index}:`, {
-        id: record._id,
-        date: record.date,
-        homepage: record.homepage,
-        content: record.oucontent
-      });
-    });
 
     // First pass: collect all records for each student
     const studentRecords = {};
@@ -203,14 +194,19 @@ export class StudentAnalytics {
       acc.homepageViews += stats.homepageViews;
       acc.contentViews += stats.contentViews;
       acc.sessionDuration += stats.sessionDuration;
+      acc.totalDays += stats.dailyActivity.length;
       return acc;
-    }, { totalClicks: 0, homepageViews: 0, contentViews: 0, sessionDuration: 0 });
+    }, { totalClicks: 0, homepageViews: 0, contentViews: 0, sessionDuration: 0, totalDays: 0 });
+
+    // Calculate weekly averages for meaningful comparison
+    const avgTotalDays = totals.totalDays / students.length; // Average days per student
+    const avgWeeks = avgTotalDays / 7; // Convert to average weeks per student
 
     return {
-      totalClicks: Math.round(totals.totalClicks / students.length),
-      homepageViews: Math.round(totals.homepageViews / students.length),
-      contentViews: Math.round(totals.contentViews / students.length),
-      dailyActivity: Math.round(totals.totalClicks / students.length),
+      totalClicks: avgWeeks ? Math.round(totals.totalClicks / students.length / avgWeeks) : 0,
+      homepageViews: avgWeeks ? Math.round(totals.homepageViews / students.length / avgWeeks) : 0,
+      contentViews: avgWeeks ? Math.round(totals.contentViews / students.length / avgWeeks) : 0,
+      dailyActivity: totals.totalDays ? Math.round(totals.totalClicks / totals.totalDays) : 0,
       sessionDuration: Math.round(totals.sessionDuration / students.length)
     };
   }
@@ -278,22 +274,31 @@ export class StudentAnalytics {
 
       const filteredDailyActivity = this.filterByWeek(student.dailyActivity, selectedWeek);
 
+      const weeklyTotals = filteredDailyActivity.reduce((acc, day) => {
+        acc.totalClicks += day.total || 0;
+        acc.homepageClicks += day.homepage || 0;
+        acc.contentClicks += day.content || 0;
+        return acc;
+      }, { totalClicks: 0, homepageClicks: 0, contentClicks: 0 });
+
+      const totalClicks = selectedWeek === 'all' ? student.totalClicks : weeklyTotals.totalClicks;
+      const homepageClicks = selectedWeek === 'all' ? student.homepageViews : weeklyTotals.homepageClicks;
+      const contentClicks = selectedWeek === 'all' ? student.contentViews : weeklyTotals.contentClicks;
+      const avgClicksPerDay = filteredDailyActivity.length ? Math.round(totalClicks / filteredDailyActivity.length) : 0;
+
       analytics = {
-        totalClicks: student.totalClicks,
-        homepageClicks: student.homepageViews,
-        contentClicks: student.contentViews,
+        totalClicks,
+        homepageClicks,
+        contentClicks,
         uniqueStudents: 1,
         dailyActivity: filteredDailyActivity,
         availableWeeks: this.getAvailableWeeks(selectedStudent),
-        avgClicksPerDay: student.totalRecords ? Math.round(student.totalClicks / student.totalRecords) : 0,
+        avgClicksPerDay,
         evaluation: {
-          totalClicks: this.getEvaluationStatus(student.totalClicks, averages.totalClicks),
-          homepageViews: this.getEvaluationStatus(student.homepageViews, averages.homepageViews),
-          contentViews: this.getEvaluationStatus(student.contentViews, averages.contentViews),
-          dailyActivity: this.getEvaluationStatus(
-            student.totalRecords ? Math.round(student.totalClicks / student.totalRecords) : 0,
-            averages.dailyActivity
-          )
+          totalClicks: this.getEvaluationStatus(totalClicks, averages.totalClicks),
+          homepageViews: this.getEvaluationStatus(homepageClicks, averages.homepageViews),
+          contentViews: this.getEvaluationStatus(contentClicks, averages.contentViews),
+          dailyActivity: this.getEvaluationStatus(avgClicksPerDay, averages.dailyActivity)
         }
       };
     }
@@ -364,91 +369,171 @@ getAvailableWeeks(studentId) {
   // Generate risk assessment for a student
   calculateRiskLevel(studentId) {
     const analytics = this.calculateAnalytics(studentId);
-    if (!analytics.evaluation) return 'normal';
+    if (!analytics.evaluation || !analytics.dailyActivity?.length) return 'normal';
 
-    const metrics = analytics.evaluation;
+    // Get basic student data
+    const studentStats = this.getStudentStats();
+    const student = studentStats[studentId];
+    if (!student) return 'normal';
+
+    // Calculate multiple risk factors
     let riskScore = 0;
-    const numMetrics = Object.keys(metrics).length;
+    let factors = 0;
 
-    Object.values(metrics).forEach(metricEval => {
-      const absDev = Math.abs(metricEval.deviation);
-      let points = 0;
+    // Factor 1: Activity consistency (using coefficient of variation)
+    const dailyTotals = student.dailyActivity.map(day => day.total || 0);
+    if (dailyTotals.length > 3) {
+      const mean = dailyTotals.reduce((sum, val) => sum + val, 0) / dailyTotals.length;
+      const variance = dailyTotals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / dailyTotals.length;
+      const cv = mean > 0 ? Math.sqrt(variance) / mean : 0;
 
-      if (metricEval.status === 'below') {
-        // Higher risk for low activity (potential failure)
-        if (absDev > 100) points = 4;
-        else if (absDev > 50) points = 3;
-        else if (absDev > 25) points = 2;
-      } else if (metricEval.status === 'above') {
-        // Moderate risk for high activity (potential burnout)
-        if (absDev > 100) points = 3;
-        else if (absDev > 50) points = 2;
-        else if (absDev > 25) points = 1;
-      } else {
-        // Average: no points, no concern
-        points = 0;
+      // High variability suggests inconsistent learning patterns
+      if (cv > 1.5) riskScore += 2; // Very inconsistent
+      else if (cv > 1.0) riskScore += 1; // Moderately inconsistent
+      factors++;
+    }
+
+    // Factor 2: Activity trend (are they declining?)
+    if (dailyTotals.length >= 5) {
+      const firstHalf = dailyTotals.slice(0, Math.floor(dailyTotals.length / 2));
+      const secondHalf = dailyTotals.slice(Math.floor(dailyTotals.length / 2));
+      const firstAvg = firstHalf.reduce((sum, val) => sum + val, 0) / firstHalf.length;
+      const secondAvg = secondHalf.reduce((sum, val) => sum + val, 0) / secondHalf.length;
+
+      if (firstAvg > 0) {
+        const trendChange = (secondAvg - firstAvg) / firstAvg;
+        if (trendChange < -0.3) riskScore += 2; // Declining significantly
+        else if (trendChange < -0.1) riskScore += 1; // Declining moderately
       }
+      factors++;
+    }
 
-      riskScore += points;
-    });
+    // Factor 3: Absolute activity level (compared to realistic thresholds)
+    const avgDaily = analytics.avgClicksPerDay || 0;
+    if (avgDaily < 5) riskScore += 3; // Very low activity
+    else if (avgDaily < 15) riskScore += 1; // Low activity
+    else if (avgDaily > 100) riskScore += 2; // Potentially excessive activity
+    factors++;
 
-    const avgRisk = riskScore / numMetrics;
+    // Factor 4: Learning diversity (are they engaging with different content types?)
+    const contentTypes = [student.homepageViews, student.contentViews, student.subpageViews, student.resourceViews].filter(val => val > 0);
+    if (contentTypes.length < 2) riskScore += 1; // Limited engagement diversity
+    factors++;
 
-    if (avgRisk >= 3) return 'high';
-    if (avgRisk >= 2) return 'medium';
-    if (avgRisk >= 1) return 'low';
+    // Calculate final risk level
+    const avgRisk = factors > 0 ? riskScore / factors : 0;
+
+    if (avgRisk >= 2.5) return 'high';
+    if (avgRisk >= 1.5) return 'medium';
+    if (avgRisk >= 0.75) return 'low';
     return 'normal';
   }
 
   // Get recommendations for a student
   getRecommendations(studentId) {
     const analytics = this.calculateAnalytics(studentId);
-    if (!analytics.evaluation) return [];
+    const studentStats = this.getStudentStats();
+    const student = studentStats[studentId];
+
+    if (!student || !analytics.dailyActivity?.length) return [];
 
     const recommendations = [];
-    const metricNames = {
-      totalClicks: 'total clicks',
-      homepageViews: 'homepage views',
-      contentViews: 'content views',
-      dailyActivity: 'daily activity'
-    };
+    const dailyTotals = student.dailyActivity.map(day => day.total || 0);
+    const avgDaily = analytics.avgClicksPerDay || 0;
 
-    Object.keys(analytics.evaluation).forEach(key => {
-      const metricEval = analytics.evaluation[key];
-      const displayName = metricNames[key] || key;
-      const absDev = Math.abs(metricEval.deviation);
+    // Analyze activity patterns and generate specific recommendations
 
-      if (metricEval.status === 'above') {
-        if (absDev > 75) {
-          recommendations.push({
-            type: 'burnout',
-            priority: 'medium',
-            message: `Significantly higher than average ${displayName} (${metricEval.deviation}% above). You may be overworking; take breaks to avoid burnout.`
-          });
-        } else if (absDev > 25) {
-          recommendations.push({
-            type: 'balance',
-            priority: 'low',
-            message: `Above average ${displayName} (${metricEval.deviation}% above). Great effort, but ensure you're maintaining a healthy balance.`
-          });
-        }
-      } else if (metricEval.status === 'below') {
-        if (absDev > 75) {
+    // 1. Activity Level Assessment
+    if (avgDaily < 5) {
+      recommendations.push({
+        type: 'engagement',
+        priority: 'high',
+        message: `Very low daily activity (${avgDaily} interactions/day). Consider setting daily learning goals to improve engagement and retention.`
+      });
+    } else if (avgDaily < 15) {
+      recommendations.push({
+        type: 'engagement',
+        priority: 'medium',
+        message: `Moderate activity level (${avgDaily} interactions/day). Try to explore more learning materials to deepen understanding.`
+      });
+    } else if (avgDaily > 100) {
+      recommendations.push({
+        type: 'burnout',
+        priority: 'medium',
+        message: `High activity level (${avgDaily} interactions/day). Consider pacing yourself to maintain sustainable learning habits.`
+      });
+    }
+
+    // 2. Consistency Analysis
+    if (dailyTotals.length > 3) {
+      const mean = dailyTotals.reduce((sum, val) => sum + val, 0) / dailyTotals.length;
+      const variance = dailyTotals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / dailyTotals.length;
+      const cv = mean > 0 ? Math.sqrt(variance) / mean : 0;
+
+      if (cv > 1.5) {
+        recommendations.push({
+          type: 'balance',
+          priority: 'high',
+          message: `Highly irregular activity pattern. Try to establish a consistent daily learning routine for better retention.`
+        });
+      } else if (cv > 1.0) {
+        recommendations.push({
+          type: 'balance',
+          priority: 'medium',
+          message: `Somewhat irregular learning schedule. Consider setting aside specific times each day for study activities.`
+        });
+      }
+    }
+
+    // 3. Learning Trend Analysis
+    if (dailyTotals.length >= 5) {
+      const firstHalf = dailyTotals.slice(0, Math.floor(dailyTotals.length / 2));
+      const secondHalf = dailyTotals.slice(Math.floor(dailyTotals.length / 2));
+      const firstAvg = firstHalf.reduce((sum, val) => sum + val, 0) / firstHalf.length;
+      const secondAvg = secondHalf.reduce((sum, val) => sum + val, 0) / secondHalf.length;
+
+      if (firstAvg > 0) {
+        const trendChange = (secondAvg - firstAvg) / firstAvg;
+        if (trendChange < -0.3) {
           recommendations.push({
             type: 'engagement',
             priority: 'high',
-            message: `Significantly lower than average ${displayName} (${absDev}% below). Increase your activity to keep up with classmates and reduce risk of falling behind.`
+            message: `Declining activity trend detected (${Math.round(Math.abs(trendChange) * 100)}% decrease). Re-engage with course materials to maintain momentum.`
           });
-        } else if (absDev > 25) {
+        } else if (trendChange > 0.3) {
           recommendations.push({
             type: 'improvement',
-            priority: 'medium',
-            message: `Below average ${displayName} (${absDev}% below). Consider increasing your engagement in this area to improve performance.`
+            priority: 'low',
+            message: `Increasing activity trend (${Math.round(trendChange * 100)}% increase). Great progress! Maintain this positive momentum.`
           });
         }
       }
-      // No recommendations for 'average' status to avoid unnecessary concern
-    });
+    }
+
+    // 4. Content Diversity Analysis
+    const contentTypes = [
+      { name: 'homepage', value: student.homepageViews, label: 'course homepage' },
+      { name: 'content', value: student.contentViews, label: 'learning content' },
+      { name: 'resources', value: student.resourceViews, label: 'additional resources' },
+      { name: 'forums', value: student.forumViews, label: 'discussion forums' }
+    ].filter(type => type.value > 0);
+
+    if (contentTypes.length < 2) {
+      recommendations.push({
+        type: 'improvement',
+        priority: 'medium',
+        message: `Limited content exploration. Try engaging with different types of learning materials for a more comprehensive understanding.`
+      });
+    }
+
+    // If student is doing well overall, give positive reinforcement
+    if (recommendations.length === 0 || recommendations.every(r => r.priority === 'low')) {
+      recommendations.push({
+        type: 'improvement',
+        priority: 'low',
+        message: `Well-balanced learning approach with consistent engagement. Keep up the excellent work!`
+      });
+    }
 
     return recommendations;
   }

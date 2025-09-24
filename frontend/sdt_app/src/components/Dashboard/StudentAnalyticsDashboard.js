@@ -13,7 +13,6 @@ import ActivityChart from './ActivityChart';
 import ActivityBreakDown from './ActivityBreakDown';
 import ActivityBarChart from './ActivityBarChart';
 import StudentSelector from './StudentSelector';
-import InteractionSummary from './InteractionSummary';
 
 import { useStudentData } from '../../hooks/useStudentData';
 import { StudentAnalytics } from '../../utils/analytics';
@@ -147,9 +146,10 @@ const StudentAnalyticsDashboard = () => {
 
 
         {/* Enhanced Metrics Grid with Evaluation Indicators */}
-        <MetricsGrid 
-          analytics={analytics} 
+        <MetricsGrid
+          analytics={analytics}
           selectedStudent={effectiveSelectedStudent}
+          selectedWeek={selectedWeek}
           userRole={userRole}
         />
 
@@ -184,10 +184,6 @@ const StudentAnalyticsDashboard = () => {
           </div>
         )}
 
-        {/* Student Interaction Summary */}
-        <div className="mb-6">
-          <InteractionSummary />
-        </div>
 
       </div>
     </Layout>

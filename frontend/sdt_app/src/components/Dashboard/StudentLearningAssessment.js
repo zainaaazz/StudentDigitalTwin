@@ -15,18 +15,18 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
   // If nothing to show and low/normal risk -> show positive card
   if (!recommendations.length && (riskLevel === 'normal' || riskLevel === 'low')) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-5 border-l-4 border-indigo-500">
+      <div className="bg-white rounded-lg shadow-sm p-5 border-l-4" style={{ borderLeftColor: '#8b57d4' }}>
         <div className="flex items-center gap-4">
           <div className="flex-shrink-0">
-            <div className="w-11 h-11 rounded-full bg-indigo-50 flex items-center justify-center">
-              <svg className="w-6 h-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+            <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ backgroundColor: '#8b57d41A' }}>
+              <svg className="w-6 h-6" style={{ color: '#8b57d4' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900">Great Learning Balance</h3>
-            <p className="text-sm text-gray-700 mt-1">Your learning activity looks healthy and consistent. Keep it up!</p>
+            <h3 className="text-lg font-semibold text-slate-100">Great Learning Balance</h3>
+            <p className="text-sm text-slate-300 mt-1">Your learning activity looks healthy and consistent. Keep it up!</p>
           </div>
         </div>
       </div>
@@ -35,10 +35,10 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
 
   // Color / accent per risk level (stronger, non-blending)
   const riskConfigMap = {
-    high:   { label: 'High Attention', color: 'text-orange-700', stripe: 'border-l-4 border-orange-500', badgeBg: 'bg-orange-100', badgeText: 'text-orange-800' },
-    medium: { label: 'Moderate Attention', color: 'text-amber-700', stripe: 'border-l-4 border-amber-500', badgeBg: 'bg-amber-100', badgeText: 'text-amber-800' },
-    low:    { label: 'Minor Adjustments', color: 'text-teal-700', stripe: 'border-l-4 border-teal-500', badgeBg: 'bg-teal-100', badgeText: 'text-teal-800' },
-    normal: { label: 'Monitoring Recommended', color: 'text-indigo-700', stripe: 'border-l-4 border-indigo-500', badgeBg: 'bg-indigo-100', badgeText: 'text-indigo-800' }
+    high:   { label: 'High Attention', color: 'text-red-400', stripe: 'border-l-4 border-red-500', badgeBg: 'bg-red-100', badgeText: 'text-red-700' },
+    medium: { label: 'Moderate Attention', color: 'text-yellow-400', stripe: 'border-l-4 border-yellow-500', badgeBg: 'bg-yellow-100', badgeText: 'text-yellow-700' },
+    low:    { label: 'Minor Adjustments', color: 'text-green-400', stripe: 'border-l-4 border-green-500', badgeBg: 'bg-green-100', badgeText: 'text-green-700' },
+    normal: { label: 'Monitoring Recommended', color: '', stripe: 'border-l-4', badgeBg: '', badgeText: '' }
   };
   const riskConfig = riskConfigMap[riskLevel] || riskConfigMap.normal;
 
@@ -53,20 +53,41 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
   // Distinct colors for types (non-blending)
   const typeConfig = (type) => {
     switch (type) {
-      case 'burnout': return { icon: '🔥', title: 'Burnout Prevention', color: 'text-red-700', tagBg: 'bg-red-50' };
-      case 'balance': return { icon: '⚖️', title: 'Learning Balance', color: 'text-yellow-700', tagBg: 'bg-yellow-50' };
-      case 'engagement': return { icon: '📈', title: 'Increase Engagement', color: 'text-teal-700', tagBg: 'bg-teal-50' };
-      case 'improvement': return { icon: '🎯', title: 'Performance Enhancement', color: 'text-purple-700', tagBg: 'bg-purple-50' };
-      default: return { icon: '💡', title: 'General Recommendations', color: 'text-gray-700', tagBg: 'bg-gray-50' };
+      case 'burnout': return { icon: '🔥', title: 'Burnout Prevention', color: 'text-red-400', tagBg: 'bg-red-900 bg-opacity-20' };
+      case 'balance': return { icon: '⚖️', title: 'Learning Balance', color: 'text-yellow-400', tagBg: 'bg-yellow-900 bg-opacity-20' };
+      case 'engagement': return { icon: '📈', title: 'Increase Engagement', color: 'text-green-400', tagBg: 'bg-green-900 bg-opacity-20' };
+      case 'improvement': return { icon: '🎯', title: 'Performance Enhancement', color: '', tagBg: '' };
+      default: return { icon: '💡', title: 'General Recommendations', color: 'text-slate-300', tagBg: 'bg-slate-700 bg-opacity-50' };
     }
   };
 
   const summaryMessage = () => {
     const burnoutCount = (grouped.burnout || []).length;
     const engagementCount = (grouped.engagement || []).length;
-    if (burnoutCount > 0) return 'Activity is above normal — consider slowing pace and scheduling breaks.';
-    if (engagementCount > 0) return 'Activity is below average — try increasing small daily steps.';
-    return 'Small, targeted adjustments can help stabilize progress.';
+    const balanceCount = (grouped.balance || []).length;
+    const improvementCount = (grouped.improvement || []).length;
+
+    // Generate data-driven summary based on actual analytics
+    const analytics = analyticsEngine?.calculateAnalytics(studentId);
+    const avgDaily = analytics?.avgClicksPerDay || 0;
+    const totalActivity = analytics?.totalClicks || 0;
+    const activeDays = analytics?.dailyActivity?.length || 0;
+
+    if (burnoutCount > 0) {
+      return `High activity detected (${avgDaily} interactions/day) — consider sustainable pacing.`;
+    }
+    if (engagementCount > 0) {
+      return `Low engagement pattern (${avgDaily} interactions/day) — consider increasing daily participation.`;
+    }
+    if (balanceCount > 0) {
+      return `Irregular activity pattern across ${activeDays} active days — establish consistent routines.`;
+    }
+    if (improvementCount > 0) {
+      return `Moderate activity level with ${totalActivity} total interactions — room for enhancement.`;
+    }
+
+    // Positive assessment for good patterns
+    return `Healthy learning pattern with ${avgDaily} daily interactions across ${activeDays} active days.`;
   };
 
   const priorityDot = (p) => {
@@ -76,27 +97,27 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-md p-5 ${riskConfig.stripe} ring-1 ring-black/5`}>
+    <div className={`bg-white rounded-lg shadow-md p-5 ${riskConfig.stripe} ring-1 ring-black/5`} style={{ borderLeftColor: riskLevel === 'normal' ? '#8b57d4' : undefined }}>
       {/* header */}
       <div className="flex items-start gap-4 mb-4">
         <div className="flex-shrink-0">
-          <div className={`w-12 h-12 rounded-md flex items-center justify-center ${riskConfig.badgeBg}`}>
-            <svg className={`w-6 h-6 ${riskConfig.badgeText}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+          <div className={`w-12 h-12 rounded-md flex items-center justify-center ${riskLevel === 'normal' ? '' : riskConfig.badgeBg}`} style={riskLevel === 'normal' ? { backgroundColor: '#8b57d41A' } : {}}>
+            <svg className={`w-6 h-6 ${riskLevel === 'normal' ? '' : riskConfig.badgeText}`} style={riskLevel === 'normal' ? { color: '#8b57d4' } : {}} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className={`text-lg font-semibold ${riskConfig.color}`}>{userRole === 'student' ? 'Your Learning Assessment' : 'Student Learning Assessment'}</h3>
-          <p className="text-sm text-gray-700 mt-1">{riskConfig.label} — <span className="text-gray-600">{summaryMessage()}</span></p>
+          <h3 className={`text-lg font-semibold ${riskLevel === 'normal' ? 'text-slate-100' : riskConfig.color}`}>{userRole === 'student' ? 'Your Learning Assessment' : 'Student Learning Assessment'}</h3>
+          <p className="text-sm text-slate-300 mt-1">{riskConfig.label} — <span className="text-slate-400">{summaryMessage()}</span></p>
         </div>
 
         <div className="flex-shrink-0 text-right">
-          <div className="text-xs text-gray-500">Risk</div>
-          <div className="mt-1 inline-flex items-center gap-2 px-2 py-1 rounded-full bg-gray-50 ring-1 ring-black/3">
-            <span className={`w-2.5 h-2.5 rounded-full ${riskLevel === 'high' ? 'bg-red-500' : riskLevel === 'medium' ? 'bg-amber-400' : riskLevel === 'low' ? 'bg-teal-500' : 'bg-indigo-500'}`} />
-            <span className="text-sm font-medium text-gray-700 capitalize">{riskLevel}</span>
+          <div className="text-xs text-slate-400">Risk</div>
+          <div className="mt-1 inline-flex items-center gap-2 px-2 py-1 rounded-full bg-slate-700 bg-opacity-50 ring-1 ring-slate-600">
+            <span className={`w-2.5 h-2.5 rounded-full ${riskLevel === 'high' ? 'bg-red-500' : riskLevel === 'medium' ? 'bg-yellow-500' : riskLevel === 'low' ? 'bg-green-500' : ''}`} style={riskLevel === 'normal' ? { backgroundColor: '#8b57d4' } : {}} />
+            <span className="text-sm font-medium text-slate-200 capitalize">{riskLevel}</span>
           </div>
         </div>
       </div>
@@ -109,13 +130,13 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
           const order = { high: 0, medium: 1, low: 2 };
           recs.sort((a, b) => (order[a.priority] ?? 3) - (order[b.priority] ?? 3));
           return (
-            <div key={type} className={`p-3 rounded-md ${cfg.tagBg} ring-1 ring-black/3`}>
+            <div key={type} className={`p-3 rounded-md ${type === 'improvement' ? 'bg-slate-700 bg-opacity-50' : cfg.tagBg} ring-1 ring-slate-600`} style={type === 'improvement' ? { backgroundColor: '#8b57d420' } : {}}>
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-9 h-9 flex items-center justify-center rounded-md bg-white shadow-sm">
+                <div className="w-9 h-9 flex items-center justify-center rounded-md bg-slate-800 shadow-sm">
                   <span className="text-lg">{cfg.icon}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className={`text-sm font-medium ${cfg.color}`}>{cfg.title}</div>
+                  <div className={`text-sm font-medium ${type === 'improvement' ? 'text-slate-200' : cfg.color}`} style={type === 'improvement' ? { color: '#8b57d4' } : {}}>{cfg.title}</div>
                 </div>
               </div>
 
@@ -125,7 +146,7 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
                     <div className="mt-1">
                       <span className={`inline-block w-2.5 h-2.5 rounded-full ${priorityDot(rec.priority)}`} />
                     </div>
-                    <div className="text-sm text-gray-800">{rec.message}</div>
+                    <div className="text-sm text-slate-200">{rec.message}</div>
                   </div>
                 ))}
               </div>
@@ -135,19 +156,19 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
       </div>
 
       {/* quick actions */}
-      <div className="mt-4 pt-3 border-t border-gray-100">
-        <h4 className="text-sm font-medium text-gray-800 mb-2">Quick Actions</h4>
+      <div className="mt-4 pt-3 border-t border-slate-600">
+        <h4 className="text-sm font-medium text-slate-200 mb-2">Quick Actions</h4>
         <div className="flex flex-wrap gap-2">
           {recommendations.some(r => r.type === 'burnout') && (
-            <button type="button" className="px-3 py-1 rounded-full text-xs font-medium border border-red-100 text-red-700">Schedule break</button>
+            <button type="button" className="px-3 py-1 rounded-full text-xs font-medium border border-red-400 text-red-400 hover:bg-red-900 hover:bg-opacity-20 transition-colors">Schedule break</button>
           )}
           {recommendations.some(r => r.type === 'engagement') && (
-            <button type="button" className="px-3 py-1 rounded-full text-xs font-medium border border-teal-100 text-teal-700">Try a quick quiz</button>
+            <button type="button" className="px-3 py-1 rounded-full text-xs font-medium border border-green-400 text-green-400 hover:bg-green-900 hover:bg-opacity-20 transition-colors">Try a quick quiz</button>
           )}
           {recommendations.some(r => r.type === 'balance') && (
-            <button type="button" className="px-3 py-1 rounded-full text-xs font-medium border border-yellow-100 text-yellow-700">Rebalance plan</button>
+            <button type="button" className="px-3 py-1 rounded-full text-xs font-medium border border-yellow-400 text-yellow-400 hover:bg-yellow-900 hover:bg-opacity-20 transition-colors">Rebalance plan</button>
           )}
-          <button type="button" className="px-3 py-1 rounded-full text-xs font-medium border border-gray-100 text-gray-700">Review progress</button>
+          <button type="button" className="px-3 py-1 rounded-full text-xs font-medium border text-slate-300 hover:bg-slate-700 transition-colors" style={{ borderColor: '#8b57d4', color: '#8b57d4' }}>Review progress</button>
         </div>
       </div>
     </div>

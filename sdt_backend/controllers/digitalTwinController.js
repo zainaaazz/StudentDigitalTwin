@@ -342,7 +342,7 @@ const controller = {
       const debugLog = process.env.PREDICTION_DEBUG_LOG === '1';
       const debugDayParsed = Number.parseInt(process.env.PREDICTION_DEBUG_DAY || '', 10);
       const debugDay = Number.isFinite(debugDayParsed) ? debugDayParsed : startDay;
-      console.info(\`[PRED] Debug logging ${debugLog ? 'enabled' : 'disabled'} (day ${debugDay})\`);
+      console.info(`[PRED] Debug logging ${debugLog ? 'enabled' : 'disabled'} (day ${debugDay})`);
 
       if (missingModels.length) {
         console.error('[PRED] Missing models after Azure download:', missingModels);

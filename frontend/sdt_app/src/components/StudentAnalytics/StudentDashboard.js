@@ -129,43 +129,7 @@ const StudentDashboard = ({ currentUser = null }) => {
       </div>
 
       {/* Header Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-            <div className="flex items-center gap-4">
-              {/* Profile Image Section */}
-              <div className="flex-shrink-0">
-                <div className="relative">
-                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-100 shadow-lg">
-                    {data.student.profileImage ? (
-                      <img
-                        src={data.student.profileImage}
-                        alt={data.student.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center" style={{backgroundColor: '#8b57d4'}}>
-                        <User className="w-10 h-10 text-white" />
-                      </div>
-                    )}
-                  </div>
-                  {/* Presence indicator */}
-                  <div className="absolute bottom-0 right-0 w-5 h-5 bg-green-500 rounded-full border-3 border-white"
-                       title="Active in class">
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {data.student.name}
-                </h2>
-                <p className="text-gray-600">Interaction Analytics</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 gap-6 mb-6">
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Week Stats</h3>
           <div className="space-y-4">

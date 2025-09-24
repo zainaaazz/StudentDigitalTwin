@@ -1,6 +1,7 @@
 import React from 'react';
+import { InfoIcon } from '../UI/Tooltip';
 
-const MetricsGrid = ({ analytics, selectedStudent }) => {
+const MetricsGrid = ({ analytics, selectedStudent, selectedWeek = 'all' }) => {
   // If no data, show loading state
   if (!analytics) {
     return (
@@ -82,10 +83,13 @@ const MetricsGrid = ({ analytics, selectedStudent }) => {
   };
 
   // Metric card component
-  const MetricCard = ({ title, value, icon, color, evaluation, subtitle }) => (
+  const MetricCard = ({ title, value, icon, color, evaluation, subtitle, tooltip }) => (
     <div className="bg-white rounded-lg shadow-md p-6 border-l-4" style={{ borderLeftColor: color }}>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+        <div className="flex items-center gap-1">
+          <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+          {tooltip && <InfoIcon tooltip={tooltip} />}
+        </div>
         <div className={`p-2 rounded-lg ${color.replace('#', '').length === 6 ? 'bg-gray-100' : 'bg-blue-100'}`}>
           {icon}
         </div>
@@ -145,7 +149,8 @@ const MetricsGrid = ({ analytics, selectedStudent }) => {
         icon={<TotalClicksIcon />}
         color="#8884d8"
         evaluation={analytics.evaluation?.totalClicks}
-        subtitle={isIndividualStudent ? `Avg: ${analytics.averages?.totalClicks || 0}` : null}
+        subtitle={isIndividualStudent ? `Weekly Avg: ${analytics.averages?.totalClicks || 0}` : null}
+        tooltip={selectedWeek === 'all' ? "Total number of all platform interactions including homepage visits, content views, and resource access" : `Total interactions for Week ${selectedWeek}`}
       />
 
       {/* Homepage Views */}
@@ -155,7 +160,8 @@ const MetricsGrid = ({ analytics, selectedStudent }) => {
         icon={<HomepageIcon />}
         color="#82ca9d"
         evaluation={analytics.evaluation?.homepageViews}
-        subtitle={isIndividualStudent ? `Avg: ${analytics.averages?.homepageViews || 0}` : null}
+        subtitle={isIndividualStudent ? `Weekly Avg: ${analytics.averages?.homepageViews || 0}` : null}
+        tooltip={selectedWeek === 'all' ? "Number of times the course homepage was accessed" : `Homepage visits for Week ${selectedWeek}`}
       />
 
       {/* Content Views */}
@@ -165,18 +171,20 @@ const MetricsGrid = ({ analytics, selectedStudent }) => {
         icon={<ContentIcon />}
         color="#8884d8"
         evaluation={analytics.evaluation?.contentViews}
-        subtitle={isIndividualStudent ? `Avg: ${analytics.averages?.contentViews || 0}` : null}
+        subtitle={isIndividualStudent ? `Weekly Avg: ${analytics.averages?.contentViews || 0}` : null}
+        tooltip={selectedWeek === 'all' ? "Number of times course content and learning materials were accessed" : `Content views for Week ${selectedWeek}`}
       />
 
       {/* Active Students or Daily Activity */}
       {isIndividualStudent ? (
         <MetricCard
-          title="Daily Activity"
+          title={selectedWeek === 'all' ? 'Avg Clicks Per Day' : `Week ${selectedWeek} Avg/Day`}
           value={analytics.avgClicksPerDay}
           icon={<ActivityIcon />}
           color="#8884d8"
           evaluation={analytics.evaluation?.dailyActivity}
-          subtitle={`Avg: ${analytics.averages?.dailyActivity || 0}`}
+          subtitle={`Weekly Avg: ${analytics.averages?.dailyActivity || 0} per day`}
+          tooltip={selectedWeek === 'all' ? "Average number of interactions per day across all recorded activity" : `Average daily interactions for Week ${selectedWeek}`}
         />
       ) : (
         <MetricCard
@@ -185,6 +193,7 @@ const MetricsGrid = ({ analytics, selectedStudent }) => {
           icon={<StudentsIcon />}
           color="#ffc658"
           subtitle={`Avg clicks/day: ${analytics.avgClicksPerDay}`}
+          tooltip="Total number of students with recorded activity in the learning platform"
         />
       )}
     </div>

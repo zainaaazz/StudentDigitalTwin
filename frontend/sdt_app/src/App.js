@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import StudentAnalyticsDashboard from './components/Dashboard/StudentAnalyticsDashboard';
 import StudentDashboardWrapper from './components/StudentAnalytics/StudentDashboardWrapper';
 import InteractionTimelineWrapper from './components/StudentAnalytics/InteractionTimelineWrapper';
-import PredictionsPage from './components/Predictions/PredictionsPage';
+import AcademicsPage from './components/Academics/AcademicsPage';
 import StudentProfile from './components/Profile/StudentProfile';
 import './styles/global.css';
 
@@ -56,10 +56,10 @@ function App() {
           }
         />
         <Route
-          path="/predictions"
+          path="/academics"
           element={
             isAuthenticated() ? (
-              <PredictionsPage />
+              <AcademicsPage />
             ) : (
               <LoginPage />
             )

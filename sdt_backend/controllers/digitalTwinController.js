@@ -1,7 +1,7 @@
 // controllers/digitalTwinController.js
 const mongoose = require('mongoose');
 const DigitalTwin = require('../models/DigitalTwin');
-const { listModelBlobs, getModelDownloadUrl } = require('../utils/azureModels');
+const { listModelBlobs, getModelDownloadUrl, downloadBlobToFile } = require('../utils/azureModels');
 
 /**
  * Run aggregation on native collection with allowDiskUse:true (Atlas/Mongo driver)
@@ -272,9 +272,12 @@ const controller = {
   },
 
   getPredictionsForWindow: async (req, res) => {
+    let cleanupTempDir = () => Promise.resolve();
+    let baseDir = null;
     try {
       const path = require('path');
       const fs = require('fs');
+      const os = require('os');
       const { spawn } = require('child_process');
       const stripQuotes = (s) => (typeof s === 'string' ? s.trim().replace(/^"(.*)"$/,'$1').replace(/^\'(.*)\'$/,'$1') : s);
 
@@ -284,20 +287,75 @@ const controller = {
       const endDay = Math.max(startDay, endDayRaw);
 
       if (Number.isNaN(studentId)) {
+        console.error('[PRED] Invalid studentId supplied to getPredictionsForWindow:', req.query.studentId);
         return res.status(400).json({ success: false, error: 'studentId must be a number' });
       }
 
       const labelsParam = (req.query.labels || '').split(',').map(s => s.trim()).filter(Boolean);
       const labels = labelsParam.length ? labelsParam : ['Distinction', 'Fail', 'Pass', 'Withdrawn'];
 
-      let baseDir = process.env.PREDICTION_MODELS_DIR || path.resolve(__dirname, '..', 'PredictionModels');
-      baseDir = stripQuotes(baseDir);
-      let scalerPath = process.env.PREDICTION_SCALER || path.join(baseDir, 'scaler.pkl');
-      scalerPath = stripQuotes(scalerPath);
-      let featsPath = process.env.PREDICTION_FEATURES || path.join(baseDir, 'feature_cols.pkl');
-      featsPath = stripQuotes(featsPath);
+      const azureEnvReady = Boolean(process.env.AZURE_STORAGE_ACCOUNT_NAME && process.env.AZURE_STORAGE_CONTAINER && process.env.AZURE_STORAGE_SAS_TOKEN);
 
-      // Fetch minimal student rows up to endDay-1 for sequence building
+      if (!azureEnvReady) {
+        console.error('[PRED] Azure Storage environment variables are missing.');
+        return res.status(503).json({
+          success: false,
+          error: 'Prediction service is not configured to connect to Azure Storage.'
+        });
+      }
+
+      const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'sdt_models_'));
+      baseDir = tempDir;
+      cleanupTempDir = () => fs.promises.rm(baseDir, { recursive: true, force: true }).catch((err) => {
+        console.error(`[PRED] Failed to clean up temp directory ${baseDir}:`, err);
+      });
+
+      const scalerPath = path.join(baseDir, 'scaler.pkl');
+      const featsPath = path.join(baseDir, 'feature_cols.pkl');
+
+      const azureTargets = [
+        { name: 'scaler.pkl', destination: scalerPath },
+        { name: 'feature_cols.pkl', destination: featsPath }
+      ];
+      for (let day = startDay; day <= endDay; day++) {
+        azureTargets.push({ name: `model_day_${day}.h5`, destination: path.join(baseDir, `model_day_${day}.h5`) });
+      }
+
+      const azureDownloads = [];
+      for (const target of azureTargets) {
+        try {
+          const info = await downloadBlobToFile(target.name, target.destination);
+          azureDownloads.push(info);
+        } catch (downloadErr) {
+          console.error(`[PRED] Azure download failed for ${target.name}:`, downloadErr);
+          cleanupTempDir();
+          return res.status(500).json({ success: false, error: `Azure download failed for ${target.name}: ${downloadErr.message}` });
+        }
+      }
+
+      console.info('[PRED] Azure downloads:', azureDownloads.map(item => item.name).join(', ') || 'none');
+
+      const missingModels = azureTargets
+        .filter(target => !fs.existsSync(target.destination))
+        .map(target => target.name);
+
+      const debugLog = process.env.PREDICTION_DEBUG_LOG === '1';
+      const debugDayParsed = Number.parseInt(process.env.PREDICTION_DEBUG_DAY || '', 10);
+      const debugDay = Number.isFinite(debugDayParsed) ? debugDayParsed : startDay;
+      console.info(\`[PRED] Debug logging ${debugLog ? 'enabled' : 'disabled'} (day ${debugDay})\`);
+
+      if (missingModels.length) {
+        console.error('[PRED] Missing models after Azure download:', missingModels);
+        cleanupTempDir();
+        return res.status(500).json({ success: false, error: `Missing models after Azure download: ${missingModels.join(', ')}` });
+      }
+
+      if (!fs.existsSync(scalerPath) || !fs.existsSync(featsPath)) {
+        console.error('[PRED] Essential artifacts were not downloaded from Azure.');
+        cleanupTempDir();
+        return res.status(500).json({ success: false, error: 'Scaler or feature columns missing after Azure download.' });
+      }
+
       const projection = {
         _id: 0,
         id_student: 1,
@@ -333,7 +391,12 @@ const controller = {
         .sort({ date: 1 })
         .exec();
 
-      // Compute ground truth (most frequent final_result)
+      const numericDates = rows.map(r => Number(r?.date)).filter(Number.isFinite);
+      const minDate = numericDates.length ? Math.min(...numericDates) : null;
+      const maxDate = numericDates.length ? Math.max(...numericDates) : null;
+      const rowsCount = rows.length;
+      console.info(`[PRED] Student ${studentId} window ${startDay}-${endDay}: row_count=${rowsCount}, min_date=${minDate ?? 'n/a'}, max_date=${maxDate ?? 'n/a'}`);
+
       let groundTruth = null;
       if (rows && rows.length) {
         const counts = {};
@@ -344,34 +407,6 @@ const controller = {
         groundTruth = Object.keys(counts).sort((a,b) => counts[b]-counts[a])[0] || null;
       }
 
-      // Ensure scaler/feature files exist
-      const haveArtifacts = fs.existsSync(scalerPath) && fs.existsSync(featsPath);
-
-      // If Python runtime or artifacts are missing, fall back to existence-only scaffold
-      async function fallbackStub() {
-        const items = [];
-        for (let day = startDay; day <= endDay; day++) {
-          const modelPath = path.join(baseDir, `model_day_${day}.h5`);
-          const exists = fs.existsSync(modelPath);
-          const idx = day % labels.length;
-          const confidence = exists ? Number((0.6 + ((day % 10) / 50)).toFixed(3)) : null;
-          items.push({
-            day,
-            model_available: exists,
-            pred_label: exists ? labels[idx] : null,
-            pred_index: exists ? idx : null,
-            confidence
-          });
-        }
-        return items;
-      }
-
-      if (!haveArtifacts) {
-        const items = await fallbackStub();
-        return res.json({ success: true, data: items, meta: { studentId, startDay, endDay, modelDir: baseDir, groundTruth, mode: 'stub_no_artifacts' } });
-      }
-
-      // Spawn python to run real predictions
       const script = path.resolve(__dirname, '..', 'utils', 'predict_window.py');
       const pythonBinRaw = process.env.PYTHON_BIN || (process.platform === 'win32' ? 'py' : 'python');
       const pythonBin = stripQuotes(pythonBinRaw);
@@ -385,40 +420,112 @@ const controller = {
         start_day: startDay,
         end_day: endDay,
         labels,
-        rows
+        rows,
+        debug_log: debugLog,
+        debug_day: debugDay
       };
 
       let stdout = '';
       let stderr = '';
+      let responded = false;
+
+      const respondWithError = (context, err) => {
+        const message = err && err.message ? err.message : err;
+        console.error(`[PRED] ${context}:`, message);
+        if (err && err.stack) {
+          console.error(err.stack);
+        }
+        if (!responded) {
+          responded = true;
+          cleanupTempDir();
+          res.status(500).json({
+            success: false,
+            error: `${context}: ${message}`,
+            meta: {
+              studentId,
+              startDay,
+              endDay,
+              modelDir: baseDir,
+              groundTruth,
+              source: 'azure-only',
+              azureDownloads,
+              missingModels,
+              debugLog,
+              debugDay,
+              rowsCount,
+              rowMinDate: minDate,
+              rowMaxDate: maxDate,
+              stderr,
+              stdout
+            }
+          });
+        }
+      };
+
       py.stdout.on('data', (d) => { stdout += d.toString(); });
       py.stderr.on('data', (d) => { stderr += d.toString(); });
 
-      py.on('error', async (err) => {
-        const items = await fallbackStub();
-        return res.json({ success: true, data: items, meta: { studentId, startDay, endDay, modelDir: baseDir, groundTruth, mode: 'stub_py_spawn_failed', stderr, pythonBin } });
+      py.on('error', (err) => {
+        respondWithError('Python process spawn failed', err);
       });
 
-      py.on('close', async () => {
+      py.on('close', (code) => {
+        if (responded) {
+          return;
+        }
         try {
           const resp = JSON.parse(stdout || '{}');
-          if (resp && resp.success) {
-            return res.json({ success: true, data: resp.data || [], meta: { studentId, startDay, endDay, modelDir: baseDir, groundTruth, mode: 'python' } });
+          if (code === 0 && resp && resp.success) {
+            responded = true;
+            cleanupTempDir();
+            return res.json({
+              success: true,
+              data: resp.data || [],
+              meta: {
+                studentId,
+                startDay,
+                endDay,
+                modelDir: baseDir,
+                groundTruth,
+                mode: 'python',
+                source: 'azure-only',
+                azureDownloads,
+                missingModels,
+                debugLog,
+                debugDay,
+                rowsCount,
+                rowMinDate: minDate,
+                rowMaxDate: maxDate,
+                stderr,
+                stdout
+              }
+            });
           }
-          const items = await fallbackStub();
-          return res.json({ success: true, data: items, meta: { studentId, startDay, endDay, modelDir: baseDir, groundTruth, mode: 'stub_py_error', stderr, pyResp: resp } });
-        } catch (e) {
-          const items = await fallbackStub();
-          return res.json({ success: true, data: items, meta: { studentId, startDay, endDay, modelDir: baseDir, groundTruth, mode: 'stub_py_parse_error', stderr } });
+          const errorMessage = resp && resp.error ? resp.error : `Python exited with code ${code}`;
+          respondWithError('Python prediction failed', new Error(errorMessage));
+        } catch (parseErr) {
+          respondWithError('Failed to parse python output', parseErr);
         }
       });
 
-      py.stdin.write(JSON.stringify(payload));
-      py.stdin.end();
+      try {
+        py.stdin.write(JSON.stringify(payload));
+        py.stdin.end();
+      } catch (stdinErr) {
+        respondWithError('Failed to write payload to python stdin', stdinErr);
+      }
     } catch (error) {
       console.error('Error in getPredictionsForWindow:', error);
+      try {
+        await cleanupTempDir();
+      } catch (cleanupError) {
+        console.error('[PRED] Cleanup after failure failed:', cleanupError);
+      }
       res.status(500).json({ success: false, error: error.message });
     }
   }
 };
 
 module.exports = controller;
+
+

@@ -83,7 +83,7 @@ const Layout = ({ children, className = '' }) => {
                 <NavItem to="/profile" label="Profile" />
                 <NavItem to="/dashboard" label="Engagement" />
                 <NavItem to="/student-dashboard" label="Interactivity" />
-                <NavItem to="/predictions" label="Predictions" />
+                <NavItem to="/academics" label="Academics" />
                 <div className="pt-2 mt-2 border-t border-white/20">
                   <NavItem
                     onClick={() => {
@@ -112,7 +112,7 @@ const Layout = ({ children, className = '' }) => {
               <NavItem to="/profile" label="Profile" />
               <NavItem to="/dashboard" label="Engagement" />
               <NavItem to="/student-dashboard" label="Interactivity" />
-              <NavItem to="/predictions" label="Predictions" />
+              <NavItem to="/academics" label="Academics" />
               <div className="pt-2 mt-2 border-t border-white/20">
                 <NavItem
                   onClick={logout}

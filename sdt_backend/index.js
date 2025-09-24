@@ -1,8 +1,13 @@
 // index.js (cleaned)
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-require('dotenv').config();
+const envPath = path.resolve(__dirname, '.env');
+const dotenvResult = require('dotenv').config({ path: envPath });
+if (dotenvResult.error) {
+  console.warn(`[env] Could not load ${envPath}: ${dotenvResult.error.message}`);
+}
 
 const connectDB = require('./config/db');
 
@@ -106,3 +111,4 @@ async function start() {
 }
 
 start();
+

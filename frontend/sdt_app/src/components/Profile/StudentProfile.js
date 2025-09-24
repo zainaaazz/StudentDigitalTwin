@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, BookOpen, Award, Calendar, TrendingUp, GraduationCap, Brain } from 'lucide-react';
 import Layout from '../layout/Layout';
+import InteractionSummary from '../Dashboard/InteractionSummary';
 import { useStudentData } from '../../hooks/useStudentData';
 import LoadingSpinner from '../UI/LoadingSpinner';
 
@@ -292,6 +293,11 @@ const StudentProfile = () => {
                 <p className="text-sm text-gray-600 mt-1">Credits Earned</p>
               </div>
             </div>
+          </div>
+
+          {/* Student Interaction Overview */}
+          <div className="mt-8 lg:col-span-2">
+            <InteractionSummary />
           </div>
         </div>
       </div>

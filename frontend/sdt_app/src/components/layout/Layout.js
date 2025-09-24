@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { logout } from '../../utils/auth';
+import { LogOut } from 'lucide-react';
 
-const NavItem = ({ to, label, icon = null, disabled = false }) => {
+const NavItem = ({ to, label, icon = null, disabled = false, onClick = null }) => {
   const location = useLocation();
   const isActive = to && location.pathname.startsWith(to);
 
@@ -16,6 +17,19 @@ const NavItem = ({ to, label, icon = null, disabled = false }) => {
         {icon}
         <span className="ml-2">{label}</span>
       </div>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        className={`${baseClasses} ${inactiveClasses}`}
+      >
+        <span className="bg-transparent group-hover:bg-white/60 absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r transition-all duration-200"></span>
+        {icon}
+        <span className="ml-2">{label}</span>
+      </button>
     );
   }
 
@@ -70,21 +84,18 @@ const Layout = ({ children, className = '' }) => {
                 <NavItem to="/dashboard" label="Engagement" />
                 <NavItem to="/student-dashboard" label="Interactivity" />
                 <NavItem to="/predictions" label="Predictions" />
+                <div className="pt-2 mt-2 border-t border-white/20">
+                  <NavItem
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logout();
+                    }}
+                    label="Logout"
+                    icon={<LogOut className="w-4 h-4" />}
+                  />
+                </div>
               </nav>
             </div>
-
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                logout();
-              }}
-              className="w-full bg-red-500 text-white px-4 py-2.5 rounded-lg hover:bg-red-600 transition font-medium flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Logout
-            </button>
           </div>
         </div>
       )}
@@ -102,18 +113,15 @@ const Layout = ({ children, className = '' }) => {
               <NavItem to="/dashboard" label="Engagement" />
               <NavItem to="/student-dashboard" label="Interactivity" />
               <NavItem to="/predictions" label="Predictions" />
+              <div className="pt-2 mt-2 border-t border-white/20">
+                <NavItem
+                  onClick={logout}
+                  label="Logout"
+                  icon={<LogOut className="w-4 h-4" />}
+                />
+              </div>
             </nav>
           </div>
-
-          <button
-            onClick={logout}
-            className="w-full bg-red-500 text-white px-4 py-2.5 rounded-lg hover:bg-red-600 transition font-medium flex items-center justify-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Logout
-          </button>
         </aside>
 
         {/* Content */}

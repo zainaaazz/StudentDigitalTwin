@@ -116,7 +116,7 @@ const PredictionsPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Header
           title="Daywise Predictions"
           subtitle="Windowed view of model outputs per day"
@@ -129,8 +129,8 @@ const PredictionsPage = () => {
         />
 
         {/* Controls */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 sdt-dark">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 sdt-dark">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4">
             <div>
               <label className="block text-sm text-gray-600 mb-1">Student</label>
               <select
@@ -143,8 +143,8 @@ const PredictionsPage = () => {
                 ))}
               </select>
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm text-gray-600 mb-1">Label names (comma-separated)</label>
+            <div className="sm:col-span-1 md:col-span-2">
+              <label className="block text-xs sm:text-sm text-gray-600 mb-1">Label names (comma-separated)</label>
               <input
                 className="app-input w-full px-3 py-2 rounded-lg border"
                 value={labelText}
@@ -153,32 +153,32 @@ const PredictionsPage = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-500">Max day in dataset: <span className="font-medium text-gray-300">{Math.max(1, maxDayInData)}</span></div>
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+            <div className="text-xs sm:text-sm text-gray-500">Max day in dataset: <span className="font-medium text-gray-300">{Math.max(1, maxDayInData)}</span></div>
+            <div className="flex items-center space-x-2 w-full sm:w-auto">
               <button
-                className="px-3 py-2 rounded-lg text-white shadow-sm"
+                className="flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-white shadow-sm text-xs sm:text-sm"
                 style={{ backgroundColor: '#8b57d4' }}
                 onClick={() => setStartDay((d) => Math.max(1, d - 5))}
               >
-                Prev 5 days
+                ⬅️ Prev 5
               </button>
               <button
-                className="px-3 py-2 rounded-lg text-white shadow-sm"
+                className="flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-white shadow-sm text-xs sm:text-sm"
                 style={{ backgroundColor: '#8b57d4' }}
                 onClick={() => setStartDay((d) => Math.min(Math.max(1, maxDayInData - 4), d + 5))}
               >
-                Next 5 days ➡️
+                Next 5 ➡️
               </button>
             </div>
           </div>
         </div>
 
         {/* Table */}
-        <div className="mt-6 bg-white rounded-xl shadow-sm p-6 border border-gray-200 sdt-dark">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-gray-100">Student {selectedStudent} — Days {startDay}–{endDay}</h3>
-            <div className="flex items-center gap-2">
+        <div className="mt-4 sm:mt-6 bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-200 sdt-dark">
+          <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+            <h3 className="text-base sm:text-xl font-semibold text-gray-100">Student {selectedStudent} — Days {startDay}–{endDay}</h3>
+            <div className="flex flex-wrap items-center gap-2">
               {backendMode && (
                 <span className={`px-3 py-1 rounded-full text-xs font-medium border ${backendMode === 'python' ? 'bg-green-200/10 text-green-300 border-green-400/20' : 'bg-yellow-200/10 text-yellow-300 border-yellow-400/20'}`}>
                   {backendMode === 'python' ? 'Source: Real models' : 'Fallback Data'}
@@ -191,8 +191,8 @@ const PredictionsPage = () => {
               )}
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <table className="min-w-full text-xs sm:text-sm">
               <thead>
                 <tr className="text-left text-gray-400">
                   <th className="pb-2 pr-4">Day</th>

@@ -83,15 +83,15 @@ const MetricsGrid = ({ analytics, selectedStudent }) => {
 
   // Metric card component
   const MetricCard = ({ title, value, icon, color, evaluation, subtitle }) => (
-    <div className="bg-white rounded-lg shadow-md p-6 border-l-4" style={{ borderLeftColor: color }}>
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4" style={{ borderLeftColor: color }}>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-medium text-gray-600">{title}</h3>
+        <h3 className="text-xs sm:text-sm font-medium text-gray-600">{title}</h3>
         <div className={`p-2 rounded-lg ${color.replace('#', '').length === 6 ? 'bg-gray-100' : 'bg-blue-100'}`}>
           {icon}
         </div>
       </div>
       <div className="flex flex-col">
-        <div className="text-2xl font-bold text-gray-900 mb-1">
+        <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
           {formatNumber(value)}
         </div>
         {subtitle && (
@@ -137,7 +137,7 @@ const MetricsGrid = ({ analytics, selectedStudent }) => {
   const isIndividualStudent = selectedStudent && selectedStudent !== 'all';
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
       {/* Total Clicks */}
       <MetricCard
         title="Total Clicks"

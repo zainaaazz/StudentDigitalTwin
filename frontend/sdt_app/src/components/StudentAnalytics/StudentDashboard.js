@@ -5,6 +5,7 @@ import { User, TrendingUp, TrendingDown, Minus, MessageCircle, Clock, Users, Bar
 import { mockDashboardData } from './dummyData';
 import { useInteractionSimulator } from '../../hooks/useInteractionSimulator';
 import { CHART_COLORS } from './types';
+import { InfoIcon } from '../UI/Tooltip';
 
 const StudentDashboard = ({ currentUser = null }) => {
   const navigate = useNavigate();
@@ -131,28 +132,35 @@ const StudentDashboard = ({ currentUser = null }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{backgroundColor: '#8b57d4'}}>
-                <User className="w-8 h-8 text-white" />
+            <div className="flex items-center gap-4">
+              {/* Profile Image Section */}
+              <div className="flex-shrink-0">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-100 shadow-lg">
+                    {data.student.profileImage ? (
+                      <img
+                        src={data.student.profileImage}
+                        alt={data.student.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center" style={{backgroundColor: '#8b57d4'}}>
+                        <User className="w-10 h-10 text-white" />
+                      </div>
+                    )}
+                  </div>
+                  {/* Presence indicator */}
+                  <div className="absolute bottom-0 right-0 w-5 h-5 bg-green-500 rounded-full border-3 border-white"
+                       title="Active in class">
+                  </div>
+                </div>
               </div>
+
               <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                <h2 className="text-2xl font-bold text-gray-900">
                   {data.student.name}
                 </h2>
-                <p className="text-gray-600 mb-2">
-                  {data.student.major} • {data.student.academicLevel}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRiskColor(data.student.riskLevel)}`}>
-                    Risk Level: {data.student.riskLevel.toUpperCase()}
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-sm font-medium text-gray-600 bg-gray-100 border border-gray-200">
-                    GPA: {data.student.currentGPA.toFixed(2)}
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-sm font-medium text-gray-600 bg-gray-100 border border-gray-200">
-                    {data.student.personalityType}
-                  </span>
-                </div>
+                <p className="text-gray-600">Interaction Analytics</p>
               </div>
             </div>
           </div>
@@ -163,7 +171,10 @@ const StudentDashboard = ({ currentUser = null }) => {
           <div className="space-y-4">
             <div>
               <div className="flex justify-between items-center mb-1">
-                <span className="text-sm text-gray-600">Weekly Engagement</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm text-gray-600">Weekly Engagement</span>
+                  <InfoIcon tooltip="Percentage of active learning sessions this week compared to expected activity levels" />
+                </div>
                 <span className="text-sm font-medium">{data.currentStats.weeklyEngagement}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -178,7 +189,10 @@ const StudentDashboard = ({ currentUser = null }) => {
             </div>
             <div>
               <div className="flex justify-between items-center mb-1">
-                <span className="text-sm text-gray-600">Network Centrality</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm text-gray-600">Network Centrality</span>
+                  <InfoIcon tooltip="Measures how central you are in the class collaboration network. Higher values indicate more connections with peers" />
+                </div>
                 <span className="text-sm font-medium">{Math.round(data.currentStats.networkCentrality * 100)}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -192,7 +206,10 @@ const StudentDashboard = ({ currentUser = null }) => {
               </div>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Participation Trend</span>
+              <div className="flex items-center gap-1">
+                <span className="text-sm text-gray-600">Participation Trend</span>
+                <InfoIcon tooltip="Shows whether your participation is increasing, decreasing, or staying stable over recent weeks" />
+              </div>
               <div className="flex items-center space-x-1">
                 {getTrendIcon(data.currentStats.participationTrend)}
                 <span className="text-sm font-medium capitalize">
@@ -211,9 +228,12 @@ const StudentDashboard = ({ currentUser = null }) => {
             <div className="p-2 bg-blue-100 rounded-lg mr-4">
               <MessageCircle className="w-6 h-6 text-blue-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-2xl font-bold text-gray-900">{data.recentInteractions.totalInteractions}</p>
-              <p className="text-sm text-gray-600">Total Interactions</p>
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-gray-600">Total Interactions</p>
+                <InfoIcon tooltip="Total number of learning platform interactions including content views, forum posts, quiz attempts, and resource access" />
+              </div>
             </div>
           </div>
         </div>
@@ -223,9 +243,12 @@ const StudentDashboard = ({ currentUser = null }) => {
             <div className="p-2 bg-green-100 rounded-lg mr-4">
               <Clock className="w-6 h-6 text-green-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-2xl font-bold text-gray-900">{Math.round(data.recentInteractions.averageDuration / 60)}m</p>
-              <p className="text-sm text-gray-600">Avg Duration</p>
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-gray-600">Avg Duration</p>
+                <InfoIcon tooltip="Average time spent per learning session. Longer durations often indicate deeper engagement with course materials" />
+              </div>
             </div>
           </div>
         </div>
@@ -235,9 +258,12 @@ const StudentDashboard = ({ currentUser = null }) => {
             <div className="p-2 bg-purple-100 rounded-lg mr-4">
               <Users className="w-6 h-6" style={{ color: '#8b57d4' }} />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-2xl font-bold text-gray-900">{data.recentInteractions.topInteractionPartners.length}</p>
-              <p className="text-sm text-gray-600">Active Partners</p>
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-gray-600">Active Partners</p>
+                <InfoIcon tooltip="Number of classmates you've actively collaborated with through discussions, group work, or peer interactions" />
+              </div>
             </div>
           </div>
         </div>
@@ -247,9 +273,12 @@ const StudentDashboard = ({ currentUser = null }) => {
             <div className="p-2 bg-orange-100 rounded-lg mr-4">
               <BarChart3 className="w-6 h-6 text-orange-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-2xl font-bold text-gray-900">{data.currentStats.sessionsThisWeek}</p>
-              <p className="text-sm text-gray-600">Sessions This Week</p>
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-gray-600">Sessions This Week</p>
+                <InfoIcon tooltip="Number of distinct learning sessions recorded this week. A session is a continuous period of platform activity" />
+              </div>
             </div>
           </div>
         </div>
@@ -258,7 +287,10 @@ const StudentDashboard = ({ currentUser = null }) => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Engagement Trends Over Time</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Engagement Trends Over Time</h3>
+            <InfoIcon tooltip="Track your learning engagement, collaboration scores, risk levels, and session counts across recent weeks" />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={engagementTrendData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -284,7 +316,10 @@ const StudentDashboard = ({ currentUser = null }) => {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Interaction Types</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Interaction Types</h3>
+            <InfoIcon tooltip="Distribution of different learning activities: content views, forum discussions, resource access, and quiz attempts" />
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -313,7 +348,10 @@ const StudentDashboard = ({ currentUser = null }) => {
       {/* Recent Interactions and Partners */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Interaction Partners</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Top Interaction Partners</h3>
+            <InfoIcon tooltip="Classmates you interact with most frequently through collaborative activities, discussions, and group work" />
+          </div>
           <div className="space-y-3">
             {data.recentInteractions.topInteractionPartners.map((partner, index) => (
               <div key={partner.studentId} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
@@ -332,7 +370,10 @@ const StudentDashboard = ({ currentUser = null }) => {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Weekly Session Activity</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Weekly Session Activity</h3>
+            <InfoIcon tooltip="Number of learning sessions per week. Each bar represents total sessions for that week" />
+          </div>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={weeklySessionData}>
               <CartesianGrid strokeDasharray="3 3" />

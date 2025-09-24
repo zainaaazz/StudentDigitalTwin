@@ -5,6 +5,7 @@ import StudentAnalyticsDashboard from './components/Dashboard/StudentAnalyticsDa
 import StudentDashboardWrapper from './components/StudentAnalytics/StudentDashboardWrapper';
 import InteractionTimelineWrapper from './components/StudentAnalytics/InteractionTimelineWrapper';
 import PredictionsPage from './components/Predictions/PredictionsPage';
+import StudentProfile from './components/Profile/StudentProfile';
 import './styles/global.css';
 
 function App() {
@@ -14,6 +15,16 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/profile"
+          element={
+            isAuthenticated() ? (
+              <StudentProfile />
+            ) : (
+              <LoginPage />
+            )
+          }
+        />
         <Route
           path="/dashboard"
           element={

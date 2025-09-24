@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@azure/storage-blob": "^12.28.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
@@ -19,8 +20,7 @@
     "mongodb": "^6.18.0",
     "mongoose": "^8.18.1",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1",
-    "@azure/storage-blob": "^12.24.0"
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

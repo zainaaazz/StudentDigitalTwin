@@ -48,8 +48,7 @@ function generateMockPredictions(days, labels) {
   });
 }
 
-// Temporary flag to force dummy data until models are stable
-const FORCE_DUMMY = true;
+const FORCE_DUMMY = false;
 
 const PredictionsPage = () => {
   const { data } = useStudentData();

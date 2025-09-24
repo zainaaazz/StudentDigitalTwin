@@ -15,30 +15,30 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
   // If nothing to show and low/normal risk -> show positive card
   if (!recommendations.length && (riskLevel === 'normal' || riskLevel === 'low')) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-5 border-l-4 border-indigo-500">
+      <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200 sdt-dark">
         <div className="flex items-center gap-4">
           <div className="flex-shrink-0">
-            <div className="w-11 h-11 rounded-full bg-indigo-50 flex items-center justify-center">
-              <svg className="w-6 h-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+            <div className="w-11 h-11 rounded-full flex items-center justify-center" style={{ backgroundColor: '#8b57d41A' }}>
+              <svg className="w-6 h-6" style={{ color: '#8b57d4' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900">Great Learning Balance</h3>
-            <p className="text-sm text-gray-700 mt-1">Your learning activity looks healthy and consistent. Keep it up!</p>
+            <h3 className="text-lg font-semibold text-gray-100">Great Learning Balance</h3>
+            <p className="text-sm text-gray-300 mt-1">Your learning activity looks healthy and consistent. Keep it up!</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // Color / accent per risk level (stronger, non-blending)
+  // Color / accent per risk level (dark theme)
   const riskConfigMap = {
-    high:   { label: 'High Attention', color: 'text-orange-700', stripe: 'border-l-4 border-orange-500', badgeBg: 'bg-orange-100', badgeText: 'text-orange-800' },
-    medium: { label: 'Moderate Attention', color: 'text-amber-700', stripe: 'border-l-4 border-amber-500', badgeBg: 'bg-amber-100', badgeText: 'text-amber-800' },
-    low:    { label: 'Minor Adjustments', color: 'text-teal-700', stripe: 'border-l-4 border-teal-500', badgeBg: 'bg-teal-100', badgeText: 'text-teal-800' },
-    normal: { label: 'Monitoring Recommended', color: 'text-indigo-700', stripe: 'border-l-4 border-indigo-500', badgeBg: 'bg-indigo-100', badgeText: 'text-indigo-800' }
+    high:   { label: 'High Attention', color: 'text-orange-300', stripe: 'border-l-4 border-orange-500', badgeBg: 'bg-orange-500/10', badgeText: 'text-orange-300' },
+    medium: { label: 'Moderate Attention', color: 'text-amber-300', stripe: 'border-l-4 border-amber-500', badgeBg: 'bg-amber-500/10', badgeText: 'text-amber-300' },
+    low:    { label: 'Minor Adjustments', color: 'text-teal-300', stripe: 'border-l-4 border-teal-500', badgeBg: 'bg-teal-500/10', badgeText: 'text-teal-300' },
+    normal: { label: 'Monitoring Recommended', color: 'text-purple-300', stripe: 'border-l-4', badgeBg: 'bg-purple-500/10', badgeText: 'text-purple-300', stripeColor: '#8b57d4' }
   };
   const riskConfig = riskConfigMap[riskLevel] || riskConfigMap.normal;
 
@@ -50,14 +50,14 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
     return acc;
   }, {});
 
-  // Distinct colors for types (non-blending)
+  // Distinct colors for types (dark theme)
   const typeConfig = (type) => {
     switch (type) {
-      case 'burnout': return { icon: '🔥', title: 'Burnout Prevention', color: 'text-red-700', tagBg: 'bg-red-50' };
-      case 'balance': return { icon: '⚖️', title: 'Learning Balance', color: 'text-yellow-700', tagBg: 'bg-yellow-50' };
-      case 'engagement': return { icon: '📈', title: 'Increase Engagement', color: 'text-teal-700', tagBg: 'bg-teal-50' };
-      case 'improvement': return { icon: '🎯', title: 'Performance Enhancement', color: 'text-purple-700', tagBg: 'bg-purple-50' };
-      default: return { icon: '💡', title: 'General Recommendations', color: 'text-gray-700', tagBg: 'bg-gray-50' };
+      case 'burnout': return { icon: '🔥', title: 'Burnout Prevention', color: 'text-red-300', tagBg: 'bg-red-500/10' };
+      case 'balance': return { icon: '⚖️', title: 'Learning Balance', color: 'text-yellow-300', tagBg: 'bg-yellow-500/10' };
+      case 'engagement': return { icon: '📈', title: 'Increase Engagement', color: 'text-teal-300', tagBg: 'bg-teal-500/10' };
+      case 'improvement': return { icon: '🎯', title: 'Performance Enhancement', color: 'text-purple-300', tagBg: 'bg-purple-500/10' };
+      default: return { icon: '💡', title: 'General Recommendations', color: 'text-gray-300', tagBg: 'bg-gray-500/10' };
     }
   };
 

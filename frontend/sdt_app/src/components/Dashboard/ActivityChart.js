@@ -16,6 +16,9 @@ const ActivityChart = ({ data, title = "Daily Activity Trend" }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
       <h3 className="text-xl font-bold text-gray-800 mb-4">{title}</h3>
+      <p className="text-sm text-gray-500 mb-4">
+        Trend of daily activity over time showing total, homepage, and content clicks.
+      </p>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />

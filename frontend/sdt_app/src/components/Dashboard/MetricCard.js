@@ -1,6 +1,7 @@
 import React from 'react';
+import { InfoIcon } from '../UI/Tooltip'; // Adjust the path
 
-const MetricCard = ({ title, value, icon: Icon, colorClass = 'purple' }) => {
+const MetricCard = ({ title, value, icon: Icon, colorClass = 'purple', description, tooltip }) => {
   const colorClasses = {
     blue: 'bg-blue-100 text-blue-600',
     green: 'bg-green-100 text-green-600',
@@ -12,8 +13,14 @@ const MetricCard = ({ title, value, icon: Icon, colorClass = 'purple' }) => {
     <div className="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-500 text-sm font-medium">{title}</p>
-          <p className="text-3xl font-bold text-gray-800">
+          <div className="flex items-center gap-1">
+            <p className="text-gray-500 text-sm font-medium">{title}</p>
+            {tooltip && <InfoIcon tooltip={tooltip} size="sm" />}
+          </div>
+          {description && (
+            <p className="text-gray-400 text-xs mt-1">{description}</p>
+          )}
+          <p className="text-3xl font-bold text-gray-800 mt-2">
             {typeof value === 'number' ? value.toLocaleString() : value}
           </p>
         </div>

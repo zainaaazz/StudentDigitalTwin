@@ -16,6 +16,9 @@ const ActivityBreakDown = ({ data }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
       <h3 className="text-xl font-bold text-gray-800 mb-4">Activity BreakDown</h3>
+      <p className="text-sm text-gray-500 mb-4">
+        Proportion of different activity types such as homepage, content, and subpage visits.
+      </p>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie

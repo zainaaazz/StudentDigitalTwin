@@ -13,7 +13,6 @@ import ActivityChart from './ActivityChart';
 import ActivityBreakDown from './ActivityBreakDown';
 import ActivityBarChart from './ActivityBarChart';
 import StudentSelector from './StudentSelector';
-import InteractionSummary from './InteractionSummary';
 
 import { useStudentData } from '../../hooks/useStudentData';
 import { StudentAnalytics } from '../../utils/analytics';
@@ -183,11 +182,6 @@ const StudentAnalyticsDashboard = () => {
             />
           </div>
         )}
-
-        {/* Student Interaction Summary */}
-        <div className="mb-6">
-          <InteractionSummary />
-        </div>
 
       </div>
     </Layout>

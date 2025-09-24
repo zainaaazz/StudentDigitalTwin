@@ -101,8 +101,8 @@ const LoginPage = () => {
         // Save JWT token to localStorage
         localStorage.setItem('token', data.token);
 
-        // Redirect to dashboard
-        window.location.href = '/dashboard';
+        // Redirect to Profile tab
+        window.location.href = '/profile';
       } else {
         setError(data.message || 'Login failed');
       }

@@ -1,6 +1,7 @@
 // controllers/digitalTwinController.js
 const mongoose = require('mongoose');
 const DigitalTwin = require('../models/DigitalTwin');
+const { listModelBlobs, getModelDownloadUrl } = require('../utils/azureModels');
 
 /**
  * Run aggregation on native collection with allowDiskUse:true (Atlas/Mongo driver)
@@ -31,7 +32,7 @@ const controller = {
     console.log('=== API CALLED ===');
     console.log('Query params:', req.query);
     console.log('==================');
-    
+
     try {
       const { studentId, limit: limitRaw, page: pageRaw } = req.query;
       const limit = Math.min(parseInt(limitRaw, 10) || 100, 1000); // cap to avoid huge responses
@@ -114,7 +115,7 @@ const controller = {
         ];
 
         const recordsAgg = await runAggregationWithDiskUse(pipeline, 'digitaltwin');
-        
+
         console.log(`Aggregation found ${recordsAgg.length} records for student ${sid}`);
         console.log('Aggregation date range:', recordsAgg.map(r => r.date));
 
@@ -244,6 +245,32 @@ const controller = {
   // Predictions (scaffold): check for model files and return stub predictions
   // GET /digitaltwin/predictions/day-window?studentId=123&startDay=1&endDay=5
   // Optional: labels=Distinction,Fail,Pass,Withdrawn
+  listPredictionModels: async (req, res) => {
+    try {
+      const models = await listModelBlobs();
+      res.json({ success: true, data: models });
+    } catch (error) {
+      console.error('Error listing prediction models:', error);
+      const status = error?.statusCode === 404 ? 404 : 500;
+      res.status(status).json({ success: false, error: error.message || 'Unable to list models' });
+    }
+  },
+
+  getPredictionModelDownloadUrl: async (req, res) => {
+    try {
+      const { name } = req.query;
+      if (!name) {
+        return res.status(400).json({ success: false, error: 'name query parameter is required' });
+      }
+      const url = await getModelDownloadUrl(name);
+      res.json({ success: true, data: { name, url } });
+    } catch (error) {
+      console.error('Error generating model download URL:', error);
+      const status = error?.statusCode === 404 ? 404 : 500;
+      res.status(status).json({ success: false, error: error.message || 'Unable to generate download URL' });
+    }
+  },
+
   getPredictionsForWindow: async (req, res) => {
     try {
       const path = require('path');

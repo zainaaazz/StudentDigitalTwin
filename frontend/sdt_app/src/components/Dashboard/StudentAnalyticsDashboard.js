@@ -179,6 +179,7 @@ const StudentAnalyticsDashboard = () => {
               studentId={effectiveSelectedStudent}
               analyticsEngine={analyticsEngine}
               userRole={userRole}
+              selectedWeek={selectedWeek}
             />
           </div>
         )}

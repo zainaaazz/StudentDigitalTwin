@@ -8,10 +8,10 @@ import PropTypes from 'prop-types';
  * - Distinct colors per recommendation type (red, yellow, teal, purple, gray)
  */
 
-const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => {
+const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, selectedWeek }) => {
   const riskLevel = analyticsEngine?.calculateRiskLevel(studentId) ?? 'normal';
-  const recommendations = analyticsEngine?.getRecommendations(studentId) ?? [];
-
+  const recommendations = analyticsEngine?.getRecommendations(studentId, selectedWeek) ?? [];
+  
   // If nothing to show and low/normal risk -> show positive card
   if (!recommendations.length && (riskLevel === 'normal' || riskLevel === 'low')) {
     return (
@@ -114,6 +114,7 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
                 <div className="w-9 h-9 flex items-center justify-center rounded-md bg-white shadow-sm">
                   <span className="text-lg">{cfg.icon}</span>
                 </div>
+                
                 <div className="flex-1 min-w-0">
                   <div className={`text-sm font-medium ${cfg.color}`}>{cfg.title}</div>
                 </div>
@@ -125,7 +126,7 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole }) => 
                     <div className="mt-1">
                       <span className={`inline-block w-2.5 h-2.5 rounded-full ${priorityDot(rec.priority)}`} />
                     </div>
-                    <div className="text-sm text-gray-800">{rec.message}</div>
+                    <div className="text-sm" style={{ color: '#333333' }}>{rec.message}</div>
                   </div>
                 ))}
               </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 const Tooltip = ({ content, children, position = 'top' }) => {
   const [isVisible, setIsVisible] = useState(false);

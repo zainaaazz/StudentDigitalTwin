@@ -16,6 +16,9 @@ const ActivityBarChart = ({ data, title = "Daily Activity Details" }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
       <h3 className="text-xl font-bold text-gray-800 mb-4">{title}</h3>
+      <p className="text-sm text-gray-500 mb-4">
+        Breakdown of your daily activity by amount of homepage, content and subpage visits.
+      </p>
       <ResponsiveContainer width="100%" height={400}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />

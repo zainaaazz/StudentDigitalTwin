@@ -1,4 +1,5 @@
 import React from 'react';
+import { InfoIcon } from '../UI/Tooltip'; // Adjust the path depending on where Tooltip.js is
 
 const MetricsGrid = ({ analytics, selectedStudent }) => {
   // If no data, show loading state
@@ -82,10 +83,12 @@ const MetricsGrid = ({ analytics, selectedStudent }) => {
   };
 
   // Metric card component
-  const MetricCard = ({ title, value, icon, color, evaluation, subtitle }) => (
+  const MetricCard = ({ title, value, icon, color, evaluation, subtitle, tooltip }) => (
     <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4" style={{ borderLeftColor: color }}>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xs sm:text-sm font-medium text-gray-600">{title}</h3>
+        <h3 className="text-xs sm:text-sm font-medium text-gray-600">{title}
+          {tooltip && <InfoIcon tooltip={tooltip} size="sm" />}
+        </h3>
         <div className={`p-2 rounded-lg ${color.replace('#', '').length === 6 ? 'bg-gray-100' : 'bg-blue-100'}`}>
           {icon}
         </div>
@@ -140,43 +143,47 @@ const MetricsGrid = ({ analytics, selectedStudent }) => {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
       {/* Total Clicks */}
       <MetricCard
-        title="Total Clicks"
+        title="Total Clicks "
         value={analytics.totalClicks}
         icon={<TotalClicksIcon />}
         color="#8884d8"
         evaluation={analytics.evaluation?.totalClicks}
         subtitle={isIndividualStudent ? `Avg: ${analytics.averages?.totalClicks || 0}` : null}
+        tooltip="Total clicks for the selected period."
       />
 
       {/* Homepage Views */}
       <MetricCard
-        title="Homepage Views"
+        title="Homepage Views "
         value={analytics.homepageClicks}
         icon={<HomepageIcon />}
         color="#82ca9d"
         evaluation={analytics.evaluation?.homepageViews}
         subtitle={isIndividualStudent ? `Avg: ${analytics.averages?.homepageViews || 0}` : null}
+        tooltip="Total homepage views for the selected period."
       />
 
       {/* Content Views */}
       <MetricCard
-        title="Content Views"
+        title="Content Views  "
         value={analytics.contentClicks}
         icon={<ContentIcon />}
         color="#8884d8"
         evaluation={analytics.evaluation?.contentViews}
         subtitle={isIndividualStudent ? `Avg: ${analytics.averages?.contentViews || 0}` : null}
+        tooltip="Total content views for the selected period."
       />
 
       {/* Active Students or Daily Activity */}
       {isIndividualStudent ? (
         <MetricCard
-          title="Daily Activity"
+          title="Daily Activity "
           value={analytics.avgClicksPerDay}
           icon={<ActivityIcon />}
           color="#8884d8"
           evaluation={analytics.evaluation?.dailyActivity}
           subtitle={`Avg: ${analytics.averages?.dailyActivity || 0}`}
+          tooltip="Average number of clicks per day"
         />
       ) : (
         <MetricCard

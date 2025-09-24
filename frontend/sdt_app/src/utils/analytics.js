@@ -63,6 +63,46 @@ export class StudentAnalytics {
     return studentStats;
   }*/
 
+   // Get stats for ALL students per week + calculate class average
+getWeeklyStatsWithAverages() {
+  const weeklyStats = {};
+
+  this.data.forEach(record => {
+    const week = record.week;          // you must have a week number in your record
+    const studentId = record.id_student;
+
+    if (!weeklyStats[week]) {
+      weeklyStats[week] = { students: {}, classTotal: 0, classDays: 0 };
+    }
+
+    if (!weeklyStats[week].students[studentId]) {
+      weeklyStats[week].students[studentId] = { totalClicks: 0, days: new Set() };
+    }
+
+    // Track student stats
+    weeklyStats[week].students[studentId].totalClicks += record.clicks;
+    weeklyStats[week].students[studentId].days.add(record.date);
+  });
+
+  // Post-process: calculate student averages + class averages
+  Object.keys(weeklyStats).forEach(week => {
+    let totalAvgSum = 0;
+    let studentCount = 0;
+
+    Object.keys(weeklyStats[week].students).forEach(studentId => {
+      const stats = weeklyStats[week].students[studentId];
+      stats.avgClicks = stats.totalClicks / stats.days.size;
+
+      totalAvgSum += stats.avgClicks;
+      studentCount++;
+    });
+
+    weeklyStats[week].classAverage = studentCount > 0 ? (totalAvgSum / studentCount) : 0;
+  });
+
+  return weeklyStats;
+}
+ 
   // Calculate individual student statistics
   getStudentStats() {
     const studentStats = {};
@@ -179,14 +219,171 @@ export class StudentAnalytics {
       });
     });
 
-    console.log('Final studentStats for 11391:', studentStats[11391]?.dailyActivity);
+    //console.log('Final studentStats for 11391:', studentStats[11391]?.dailyActivity);
     return studentStats;
 }
+// calculateWeeklyAverages(selectedWeek = 'all') {
+//   const studentStats = this.getStudentStats();
+//   const students = Object.keys(studentStats);
+
+//   let allWeeklyTotals = [];
+//   let allHomepageWeeklyTotals = [];
+//   let allContentWeeklyTotals = [];
+//   let allSessionWeeklyTotals = [];
+
+//   students.forEach(studentId => {
+//     const daily = studentStats[studentId].dailyActivity;
+//     // Find the days for the selected week
+//     let week;
+//     if (selectedWeek === 'all') {
+//       // All weeks: group by 7s
+//       for (let i = 0; i < daily.length; i += 7) {
+//         week = daily.slice(i, i + 7);
+//         allWeeklyTotals.push(week.reduce((sum, day) => sum + (day.total || 0), 0));
+//         allHomepageWeeklyTotals.push(week.reduce((sum, day) => sum + (day.homepage || 0), 0));
+//         allContentWeeklyTotals.push(week.reduce((sum, day) => sum + (day.content || 0), 0));
+//         allSessionWeeklyTotals.push(week.reduce((sum, day) => sum + (day.sessionDuration || 0), 0));
+//       }
+//     } else {
+//       // Only the selected week
+//       const weekNumber = parseInt(selectedWeek);
+//       const startDay = weekNumber * 7;
+//       const endDay = startDay + 6;
+//       week = daily.filter(day => {
+//         const originalDate = day.originalDate ?? day.date;
+//         return originalDate >= startDay && originalDate <= endDay;
+//       });
+//       if (week.length > 0) {
+//         allWeeklyTotals.push(week.reduce((sum, day) => sum + (day.total || 0), 0));
+//         allHomepageWeeklyTotals.push(week.reduce((sum, day) => sum + (day.homepage || 0), 0));
+//         allContentWeeklyTotals.push(week.reduce((sum, day) => sum + (day.content || 0), 0));
+//         allSessionWeeklyTotals.push(week.reduce((sum, day) => sum + (day.sessionDuration || 0), 0));
+//       }
+//     }
+//   });
+
+//   const avgTotalClicksPerWeek = allWeeklyTotals.length
+//     ? Math.round(allWeeklyTotals.reduce((a, b) => a + b, 0) / allWeeklyTotals.length)
+//     : 0;
+//   const avgHomepageViewsPerWeek = allHomepageWeeklyTotals.length
+//     ? Math.round(allHomepageWeeklyTotals.reduce((a, b) => a + b, 0) / allHomepageWeeklyTotals.length)
+//     : 0;
+//   const avgContentViewsPerWeek = allContentWeeklyTotals.length
+//     ? Math.round(allContentWeeklyTotals.reduce((a, b) => a + b, 0) / allContentWeeklyTotals.length)
+//     : 0;
+//   const avgSessionDurationPerWeek = allSessionWeeklyTotals.length
+//     ? Math.round(allSessionWeeklyTotals.reduce((a, b) => a + b, 0) / allSessionWeeklyTotals.length)
+//     : 0;
+
+//   return {
+//     totalClicks: avgTotalClicksPerWeek,
+//     homepageViews: avgHomepageViewsPerWeek,
+//     contentViews: avgContentViewsPerWeek,
+//     sessionDuration: avgSessionDurationPerWeek
+//   };
+// }
+
+
+// Robust per-week averages across all students (include zero-activity students)
+// Robust per-week averages across all students (include zero-activity students)
+calculateWeeklyAverages(selectedWeek = 'all') {
+  const studentStats = this.getStudentStats();         // { "<id>": {...}, ... }
+  const uniqueIds = this.getUniqueStudents() || [];   // canonical list from raw data
+
+  // fallback to keys of studentStats if getUniqueStudents is empty
+  const studentIds = (uniqueIds.length ? uniqueIds : Object.keys(studentStats)).map(id => id);
+
+  let totalClicks = 0;
+  let homepageViews = 0;
+  let contentViews = 0;
+  let sessionDuration = 0;
+  let countedStudents = 0;
+  let skippedStudents = [];
+
+  studentIds.forEach(rawId => {
+    // normalize id lookups: studentStats keys might be strings or numbers
+    const idKeyCandidates = [rawId, String(rawId), Number(rawId)];
+    let stats = null;
+    for (const k of idKeyCandidates) {
+      if (studentStats[k]) { stats = studentStats[k]; break; }
+    }
+    stats = stats || { dailyActivity: [] };
+    const daily = stats.dailyActivity || [];
+
+    // Filter the days for the requested week
+    let filtered = [];
+    if (typeof this.filterByWeek === 'function') {
+      filtered = this.filterByWeek(daily, selectedWeek);
+    } else {
+      if (selectedWeek === 'all') filtered = daily;
+      else {
+        const weekNumber = parseInt(selectedWeek, 10);
+        const startDay = weekNumber * 7;
+        const endDay = startDay + 6;
+        filtered = daily.filter(day => {
+          const originalDate = day.originalDate ?? day.date;
+          return originalDate >= startDay && originalDate <= endDay;
+        });
+      }
+    }
+
+    if (filtered.length === 0) {
+      skippedStudents.push(rawId); // track students with no data
+      return;
+    }
+
+    // Sum this student's totals for the filtered week
+    const sTotal = filtered.reduce((s, d) => s + (d.total || 0), 0);
+    const sHome = filtered.reduce((s, d) => s + (d.homepage || 0), 0);
+    const sContent = filtered.reduce((s, d) => s + (d.content || 0), 0);
+    const sSession = filtered.reduce((s, d) => s + (d.sessionDuration || 0), 0);
+
+    console.log(`Student ${rawId}: totalClicks for week ${selectedWeek} = ${sTotal}, days in week: ${filtered.length}`);
+
+    totalClicks += sTotal;
+    homepageViews += sHome;
+    contentViews += sContent;
+    sessionDuration += sSession;
+
+    countedStudents += 1; // count students who contributed
+  });
+
+  console.log(`Number of students used in calculation for week "${selectedWeek}": ${countedStudents}`);
+  console.log(`Students skipped (no data):`, skippedStudents);
+
+  const denom = countedStudents || 1; // avoid div-by-zero
+  return {
+    totalClicks: countedStudents ? Math.round(totalClicks / denom) : 0,
+    homepageViews: countedStudents ? Math.round(homepageViews / denom) : 0,
+    contentViews: countedStudents ? Math.round(contentViews / denom) : 0,
+    sessionDuration: countedStudents ? Math.round(sessionDuration / denom) : 0
+  };
+}
+
+// Helper to filter days by selected week
+filterByWeek(daily, selectedWeek) {
+  if (selectedWeek === 'all') return daily;
+
+  const weekNumber = parseInt(selectedWeek);
+  const startDay = weekNumber * 7;
+  const endDay = startDay + 6;
+
+  return daily.filter(day => {
+    const originalDate = day.originalDate ?? day.date;
+    return originalDate >= startDay && originalDate <= endDay;
+  });
+}
+
+
   // Calculate overall averages
   calculateAverages() {
     const studentStats = this.getStudentStats();
     const students = Object.keys(studentStats);
     
+    const totalWeeks = students.reduce((sum, studentId) => {
+      return sum + (studentStats[studentId].dailyActivity.length || 0);
+    }, 0);
+
     if (students.length === 0) {
       return {
         totalClicks: 0,
@@ -207,11 +404,16 @@ export class StudentAnalytics {
     }, { totalClicks: 0, homepageViews: 0, contentViews: 0, sessionDuration: 0 });
 
     return {
-      totalClicks: Math.round(totals.totalClicks / students.length),
-      homepageViews: Math.round(totals.homepageViews / students.length),
-      contentViews: Math.round(totals.contentViews / students.length),
-      dailyActivity: Math.round(totals.totalClicks / students.length),
-      sessionDuration: Math.round(totals.sessionDuration / students.length)
+      // totalClicks: Math.round(totals.totalClicks / students.length),
+      // homepageViews: Math.round(totals.homepageViews / students.length),
+      // contentViews: Math.round(totals.contentViews / students.length),
+      // dailyActivity: Math.round(totals.totalClicks / students.length),
+      // sessionDuration: Math.round(totals.sessionDuration / students.length)
+      totalClicks: totalWeeks ? Math.round(totals.totalClicks / totalWeeks) : 0,
+      homepageViews: totalWeeks ? Math.round(totals.homepageViews / totalWeeks) : 0,
+      contentViews: totalWeeks ? Math.round(totals.contentViews / totalWeeks) : 0,
+      dailyActivity: totalWeeks ? Math.round(totals.totalClicks / totalWeeks) : 0,
+      sessionDuration: totalWeeks ? Math.round(totals.sessionDuration / totalWeeks) : 0
     };
   }
 
@@ -235,7 +437,7 @@ export class StudentAnalytics {
     if (!this.data.length) return {};
 
     const studentStats = this.getStudentStats();
-    const averages = this.calculateAverages();
+    const averages = this.calculateWeeklyAverages(selectedWeek);
     const uniqueStudents = this.getUniqueStudents();
 
     let analytics = {};
@@ -278,24 +480,122 @@ export class StudentAnalytics {
 
       const filteredDailyActivity = this.filterByWeek(student.dailyActivity, selectedWeek);
 
+      // Calculate totals for that week
+      const weeklyTotals = filteredDailyActivity.reduce((acc, day) => {
+        acc.totalClicks += day.total || 0;
+        acc.homepageClicks += day.homepage || 0;
+        acc.contentClicks += day.content || 0;
+        acc.subpageViews += day.subpage || 0;
+        return acc;
+      }, { totalClicks: 0, homepageClicks: 0, contentClicks: 0, subpageViews: 0 });
+
+      const studentWeekTotals = filteredDailyActivity.reduce((acc, day) => {
+        acc.totalClicks += day.total || 0;
+        acc.homepageClicks += day.homepage || 0;
+        acc.contentClicks += day.content || 0;
+        acc.subpageViews += day.subpage || 0;
+        acc.resourceViews += day.resource || 0;
+        acc.forumViews += day.forum || 0;
+        acc.urlViews += day.url || 0;
+        return acc;
+      }, {
+        totalClicks: 0,
+        homepageClicks: 0,
+        contentClicks: 0,
+        subpageViews: 0,
+        resourceViews: 0,
+        forumViews: 0,
+        urlViews: 0
+      });
+
+      
       analytics = {
-        totalClicks: student.totalClicks,
-        homepageClicks: student.homepageViews,
-        contentClicks: student.contentViews,
-        uniqueStudents: 1,
-        dailyActivity: filteredDailyActivity,
-        availableWeeks: this.getAvailableWeeks(selectedStudent),
-        avgClicksPerDay: student.totalRecords ? Math.round(student.totalClicks / student.totalRecords) : 0,
-        evaluation: {
-          totalClicks: this.getEvaluationStatus(student.totalClicks, averages.totalClicks),
-          homepageViews: this.getEvaluationStatus(student.homepageViews, averages.homepageViews),
-          contentViews: this.getEvaluationStatus(student.contentViews, averages.contentViews),
-          dailyActivity: this.getEvaluationStatus(
-            student.totalRecords ? Math.round(student.totalClicks / student.totalRecords) : 0,
-            averages.dailyActivity
-          )
-        }
+        totalClicks: selectedWeek !== 'all' ? weeklyTotals.totalClicks : student.totalClicks,
+    homepageClicks: selectedWeek !== 'all' ? weeklyTotals.homepageClicks : student.homepageViews,
+    contentClicks: selectedWeek !== 'all' ? weeklyTotals.contentClicks : student.contentViews,
+    uniqueStudents: 1,
+    dailyActivity: filteredDailyActivity,
+    availableWeeks: this.getAvailableWeeks(selectedStudent),
+    avgClicksPerDay: filteredDailyActivity.length
+      ? Math.round(weeklyTotals.totalClicks / filteredDailyActivity.length)
+      : 0,
+    evaluation: {
+      totalClicks: this.getEvaluationStatus(
+        selectedWeek !== 'all' ? weeklyTotals.totalClicks : student.totalClicks,
+        averages.totalClicks
+      ),
+      homepageViews: this.getEvaluationStatus(
+        selectedWeek !== 'all' ? weeklyTotals.homepageClicks : student.homepageViews,
+        averages.homepageViews
+      ),
+      contentViews: this.getEvaluationStatus(
+        selectedWeek !== 'all' ? weeklyTotals.contentClicks : student.contentViews,
+        averages.contentViews
+      ),
+      dailyActivity: this.getEvaluationStatus(
+        filteredDailyActivity.length
+          ? Math.round(weeklyTotals.totalClicks / filteredDailyActivity.length)
+          : 0,
+        averages.dailyActivity
+      )
+    }
       };
+    //   analytics = {
+    //   totalClicks: weeklyTotals.totalClicks,
+    //   homepageClicks: weeklyTotals.homepageClicks,
+    //   contentClicks: weeklyTotals.contentClicks,
+    //   subpageViews: weeklyTotals.subpageViews,
+    //   uniqueStudents: 1,
+    //   dailyActivity: filteredDailyActivity,
+    //   availableWeeks: this.getAvailableWeeks(selectedStudent),
+    //   avgClicksPerDay: filteredDailyActivity.length ? Math.round(weeklyTotals.totalClicks / filteredDailyActivity.length) : 0,
+    //   evaluation: {
+    //     totalClicks: this.getEvaluationStatus(weeklyTotals.totalClicks, averages.totalClicks),
+    //     homepageViews: this.getEvaluationStatus(weeklyTotals.homepageClicks, averages.homepageViews),
+    //     contentViews: this.getEvaluationStatus(weeklyTotals.contentClicks, averages.contentViews),
+    //     dailyActivity: this.getEvaluationStatus(
+    //       filteredDailyActivity.length ? Math.round(weeklyTotals.totalClicks / filteredDailyActivity.length) : 0,
+    //       averages.dailyActivity
+    //     )
+    //   }
+    // };
+
+    // Calculate weekly totals
+// const filteredDailyActivity = this.filterByWeek(student.dailyActivity, selectedWeek);
+// const weeklyTotals = filteredDailyActivity.reduce((acc, day) => {
+//   acc.totalClicks += day.total || 0;
+//   acc.homepageClicks += day.homepage || 0;
+//   acc.contentClicks += day.content || 0;
+//   acc.subpageViews += day.subpage || 0;
+//   return acc;
+// }, { totalClicks: 0, homepageClicks: 0, contentClicks: 0, subpageViews: 0 });
+
+// // Compute per-day averages for the week
+// const avgClicksPerDayThisWeek = filteredDailyActivity.length
+//     ? Math.round(weeklyTotals.totalClicks / filteredDailyActivity.length)
+//     : 0;
+
+    // analytics = {
+    //   totalClicks: weeklyTotals.totalClicks,
+    //   homepageClicks: weeklyTotals.homepageClicks,
+    //   contentClicks: weeklyTotals.contentClicks,
+    //   uniqueStudents: 1,
+    //   dailyActivity: filteredDailyActivity,
+    //   avgClicksPerDay: avgClicksPerDayThisWeek,
+    //   evaluation: {
+    //     totalClicks: this.getEvaluationStatus(avgClicksPerDayThisWeek, averages.totalClicks),
+    //     homepageViews: this.getEvaluationStatus(
+    //       Math.round(weeklyTotals.homepageClicks / filteredDailyActivity.length),
+    //       averages.homepageViews
+    //     ),
+    //     contentViews: this.getEvaluationStatus(
+    //       Math.round(weeklyTotals.contentClicks / filteredDailyActivity.length),
+    //       averages.contentViews
+    //     ),
+    //     dailyActivity: this.getEvaluationStatus(avgClicksPerDayThisWeek, averages.dailyActivity)
+    //   }
+    // };
+
     }
 
     // Create activity breakdown
@@ -401,8 +701,8 @@ getAvailableWeeks(studentId) {
   }
 
   // Get recommendations for a student
-  getRecommendations(studentId) {
-    const analytics = this.calculateAnalytics(studentId);
+  getRecommendations(studentId, selectedWeek) {
+    const analytics = this.calculateAnalytics(studentId, selectedWeek);
     if (!analytics.evaluation) return [];
 
     const recommendations = [];

@@ -86,7 +86,7 @@ const StudentProfile = () => {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-white">Student Profile</h1>
           <p className="text-gray-400 mt-2 text-lg">Your academic information and details</p>

@@ -110,13 +110,13 @@ const StudentAnalyticsDashboard = () => {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header with conditional student selector */}
         <Header
           title={getHeaderTitle()}
           subtitle={getHeaderSubtitle()}
           rightContent={
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
               {/* Only show student selector for non-student roles */}
               {userRole !== 'student' && (
                 <StudentSelector
@@ -135,18 +135,9 @@ const StudentAnalyticsDashboard = () => {
                 />
               )}
 
-              {/* Show current student info for student role */}
-              {userRole === 'student' && currentStudentId && (
-                <div className="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-blue-700">
-                    Student {currentStudentId}
-                  </span>
-                </div>
-              )}
               
               {/* Live data indicator */}
-              <div className="flex items-center text-green-600">
+              <div className="flex items-center text-green-600 text-xs sm:text-sm">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
                 <span className="text-sm font-medium">Live Data</span>
               </div>
@@ -154,25 +145,6 @@ const StudentAnalyticsDashboard = () => {
           }
         />
 
-        {/* Role-based information banner for students */}
-        {userRole === 'student' && (
-          <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-blue-800">Your Personal Analytics</h3>
-                <p className="mt-1 text-sm text-blue-700">
-                  This dashboard shows your learning activity data compared to class averages. 
-                  Use these insights to understand your study patterns and improve your learning experience.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Enhanced Metrics Grid with Evaluation Indicators */}
         <MetricsGrid 
@@ -182,7 +154,7 @@ const StudentAnalyticsDashboard = () => {
         />
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
           {/* Line chart showing daily activity trend */}
           <ActivityChart  
             data={analytics.dailyActivity}

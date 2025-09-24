@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { logout } from '../../utils/auth';
+import { LogOut } from 'lucide-react';
 
-const NavItem = ({ to, label, icon = null, disabled = false }) => {
+const NavItem = ({ to, label, icon = null, disabled = false, onClick = null }) => {
   const location = useLocation();
   const isActive = to && location.pathname.startsWith(to);
 
@@ -16,6 +17,19 @@ const NavItem = ({ to, label, icon = null, disabled = false }) => {
         {icon}
         <span className="ml-2">{label}</span>
       </div>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        className={`${baseClasses} ${inactiveClasses}`}
+      >
+        <span className="bg-transparent group-hover:bg-white/60 absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r transition-all duration-200"></span>
+        {icon}
+        <span className="ml-2">{label}</span>
+      </button>
     );
   }
 
@@ -34,39 +48,84 @@ const NavItem = ({ to, label, icon = null, disabled = false }) => {
 };
 
 const Layout = ({ children, className = '' }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className={`min-h-screen bg-zinc-900 ${className}`}>
-      {/* Top Header */}
-      <header className="w-full text-slate-100 shadow" style={{ backgroundColor: '#8b57d4' }}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl md:text-2xl font-semibold">NWU Student Digital Twin Portal</h1>
-          <button
-            onClick={logout}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+      {/* Mobile menu button - positioned absolutely */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="md:hidden fixed top-4 left-4 z-40 text-white p-2 rounded-lg hover:bg-white/10 transition"
+        style={{ backgroundColor: '#8b57d4' }}
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {mobileMenuOpen ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          )}
+        </svg>
+      </button>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setMobileMenuOpen(false)}>
+          <div
+            className="absolute top-0 left-0 h-full w-64 text-white p-6 shadow-xl flex flex-col justify-between"
+            style={{ backgroundColor: '#8b57d4' }}
+            onClick={(e) => e.stopPropagation()}
           >
-            Logout
-          </button>
+            <div>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold leading-tight">Student Digital Twin Navigation</h2>
+              </div>
+              <nav className="space-y-2" onClick={() => setMobileMenuOpen(false)}>
+                <NavItem to="/profile" label="Profile" />
+                <NavItem to="/dashboard" label="Engagement" />
+                <NavItem to="/student-dashboard" label="Interactivity" />
+                <NavItem to="/predictions" label="Predictions" />
+                <div className="pt-2 mt-2 border-t border-white/20">
+                  <NavItem
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logout();
+                    }}
+                    label="Logout"
+                    icon={<LogOut className="w-4 h-4" />}
+                  />
+                </div>
+              </nav>
+            </div>
+          </div>
         </div>
-      </header>
-      {/* Separator strip to visually separate the purple header from the left sidebar */}
-      <div className="w-full" style={{ backgroundColor: 'var(--nwu-bg, #27272a)', height: '16px' }} />
+      )}
 
       <div className="flex min-h-screen">
-        {/* Sidebar */}
-        <aside className="w-64 text-white p-6 hidden md:flex md:flex-col" style={{ backgroundColor: '#8b57d4' }}>
-          <div className="mb-6 px-1 mt-4">
-            <h2 className="text-2xl font-bold leading-tight">Student Digital Twin Navigation</h2>
-          </div>
+        {/* Sidebar - Desktop */}
+        <aside className="w-52 lg:w-64 text-white p-4 lg:p-6 hidden md:flex md:flex-col justify-between" style={{ backgroundColor: '#8b57d4' }}>
+          <div>
+            <div className="mb-4 lg:mb-6 px-1 mt-2 lg:mt-4">
+              <h2 className="text-lg lg:text-2xl font-bold leading-tight">Student Digital Twin Navigation</h2>
+            </div>
 
-          <nav className="space-y-2">
-            <NavItem to="/dashboard" label="Engagement" />
-            <NavItem to="/student-dashboard" label="Interactivity" />
-            <NavItem to="/predictions" label="Predictions" />
-          </nav>
+            <nav className="space-y-2">
+              <NavItem to="/profile" label="Profile" />
+              <NavItem to="/dashboard" label="Engagement" />
+              <NavItem to="/student-dashboard" label="Interactivity" />
+              <NavItem to="/predictions" label="Predictions" />
+              <div className="pt-2 mt-2 border-t border-white/20">
+                <NavItem
+                  onClick={logout}
+                  label="Logout"
+                  icon={<LogOut className="w-4 h-4" />}
+                />
+              </div>
+            </nav>
+          </div>
         </aside>
 
         {/* Content */}
-        <main className="flex-1 p-6 sdt-dark bg-zinc-800 text-slate-100">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 sdt-dark bg-zinc-800 text-slate-100">
           {children}
         </main>
       </div>

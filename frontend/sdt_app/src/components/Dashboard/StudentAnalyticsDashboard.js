@@ -21,6 +21,7 @@ import StudentLearningAssessment from './StudentLearningAssessment';
 import { apiService } from '../../services/api';
 
 import WeekSelector from './WeekSelector';
+import StudentBehaviorIndicator from './StudentBehaviorIndicator';
 
 const StudentAnalyticsDashboard = () => {
   const [selectedStudent, setSelectedStudent] = useState('all');
@@ -52,7 +53,7 @@ const StudentAnalyticsDashboard = () => {
     return analyticsEngine.calculateAnalytics(effectiveSelectedStudent, selectedWeek);
   }, [analyticsEngine, effectiveSelectedStudent, selectedWeek]);
 
-  
+
   // Get unique students for the selector (only for admin/teacher roles)
   const students = useMemo(() => {
     if (userRole === 'student') {
@@ -124,7 +125,7 @@ const StudentAnalyticsDashboard = () => {
                   onStudentChange={handleStudentChange}
                 />
               )}
-              
+
               {/* ADD THIS - Week selector - show when specific student is selected */}
               {effectiveSelectedStudent !== 'all' && availableWeeks.length > 0 && (
                 <WeekSelector
@@ -134,7 +135,7 @@ const StudentAnalyticsDashboard = () => {
                 />
               )}
 
-              
+
               {/* Live data indicator */}
               <div className="flex items-center text-green-600 text-xs sm:text-sm">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
@@ -143,7 +144,14 @@ const StudentAnalyticsDashboard = () => {
             </div>
           }
         />
-
+        {/* //images of burnout etc */}
+        {effectiveSelectedStudent !== 'all' && (
+          <StudentBehaviorIndicator
+            analytics={analytics}
+            selectedStudent={effectiveSelectedStudent}
+            userRole={userRole}
+          />
+        )}
 
         {/* Enhanced Metrics Grid with Evaluation Indicators */}
         <MetricsGrid
@@ -156,21 +164,21 @@ const StudentAnalyticsDashboard = () => {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
           {/* Line chart showing daily activity trend */}
-          <ActivityChart  
+          <ActivityChart
             data={analytics.dailyActivity}
             title={userRole === 'student' ? 'Your Daily Activity' : 'Daily Activity Trend'}
           />
 
           {/* Pie chart showing activity breakdown */}
-          <ActivityBreakDown 
+          <ActivityBreakDown
             data={analytics.activityBreakdown}
-            title={userRole === 'student' ? 'Your Activity Breakdown' : 'Activity Breakdown'} 
+            title={userRole === 'student' ? 'Your Activity Breakdown' : 'Activity Breakdown'}
           />
         </div>
 
         {/* Detailed Activity Bar Chart */}
-        <ActivityBarChart 
-          data={analytics.dailyActivity}  
+        <ActivityBarChart
+          data={analytics.dailyActivity}
           title={userRole === 'student' ? 'Your Detailed Activity Pattern' : 'Detailed Activity Pattern'}
         />
 

@@ -1,5 +1,9 @@
 // controllers/digitalTwinController.js
 const mongoose = require('mongoose');
+const path = require('path');
+const fs = require('fs');
+const os = require('os');
+const { spawn } = require('child_process');
 const DigitalTwin = require('../models/DigitalTwin');
 const { listModelBlobs, getModelDownloadUrl, downloadBlobToFile } = require('../utils/azureModels');
 
@@ -21,6 +25,123 @@ async function runAggregationWithDiskUse(pipeline, collectionName = 'digitaltwin
 function projectionToSelect(proj) {
   // keep only keys that are set to 1
   return Object.keys(proj).filter(k => proj[k] === 1).join(' ');
+}
+
+const BACKEND_ROOT = path.resolve(__dirname, '..');
+const DEFAULT_MODEL_DIR = path.join(BACKEND_ROOT, 'AcademicPredictionModels');
+
+function resolveBackendPath(inputPath, fallbackAbsolute) {
+  if (inputPath === undefined || inputPath === null || inputPath === '') {
+    return fallbackAbsolute;
+  }
+  const candidate = path.isAbsolute(inputPath)
+    ? inputPath
+    : path.join(BACKEND_ROOT, inputPath);
+  const normalized = path.normalize(candidate);
+  if (!normalized.startsWith(BACKEND_ROOT)) {
+    throw new Error(`Resolved path escapes backend directory: ${inputPath}`);
+  }
+  return normalized;
+}
+
+function parseCsvLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+async function loadStudentRowsFromCsv(filePath, studentId) {
+  const content = await fs.promises.readFile(filePath, 'utf8');
+  const lines = content.split(/\r?\n/).filter(line => line.trim().length > 0);
+  if (!lines.length) {
+    throw new Error('CSV file is empty or missing header row.');
+  }
+
+  const headerValues = parseCsvLine(lines.shift());
+  const headers = headerValues.map(h => h.trim());
+  const idIndex = headers.indexOf('id_student');
+  const dateIndex = headers.indexOf('date');
+  if (idIndex === -1 || dateIndex === -1) {
+    throw new Error("CSV must contain 'id_student' and 'date' columns.");
+  }
+  const finalResultIndex = headers.indexOf('final_result');
+
+  const rows = [];
+  const finalResultCounts = {};
+  let minDate = null;
+  let maxDate = null;
+
+  for (const rawLine of lines) {
+    let fields = parseCsvLine(rawLine);
+    if (!fields.length) {
+      continue;
+    }
+    if (fields.length < headers.length) {
+      fields = fields.concat(new Array(headers.length - fields.length).fill(''));
+    } else if (fields.length > headers.length) {
+      fields = fields.slice(0, headers.length);
+    }
+
+    const rawId = fields[idIndex];
+    const numericId = Number.parseInt(rawId, 10);
+    if (!Number.isFinite(numericId) || numericId !== studentId) {
+      continue;
+    }
+
+    const row = {};
+    for (let i = 0; i < headers.length; i += 1) {
+      row[headers[i]] = fields[i] ?? '';
+    }
+    rows.push(row);
+
+    const numericDate = Number.parseFloat(String(fields[dateIndex] || '').trim());
+    if (Number.isFinite(numericDate)) {
+      if (minDate === null || numericDate < minDate) {
+        minDate = numericDate;
+      }
+      if (maxDate === null || numericDate > maxDate) {
+        maxDate = numericDate;
+      }
+    }
+
+    if (finalResultIndex !== -1) {
+      const fr = (fields[finalResultIndex] || '').trim();
+      if (fr) {
+        finalResultCounts[fr] = (finalResultCounts[fr] || 0) + 1;
+      }
+    }
+  }
+
+  return {
+    rows,
+    minDate,
+    maxDate,
+    finalResultCounts
+  };
+}
+
+function stripQuotes(value) {
+  return typeof value === 'string'
+    ? value.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1')
+    : value;
 }
 
 const controller = {
@@ -275,12 +396,6 @@ const controller = {
     let cleanupTempDir = () => Promise.resolve();
     let baseDir = null;
     try {
-      const path = require('path');
-      const fs = require('fs');
-      const os = require('os');
-      const { spawn } = require('child_process');
-      const stripQuotes = (s) => (typeof s === 'string' ? s.trim().replace(/^"(.*)"$/,'$1').replace(/^\'(.*)\'$/,'$1') : s);
-
       const studentId = parseInt(req.query.studentId, 10);
       const startDay = Math.max(parseInt(req.query.startDay, 10) || 1, 1);
       const endDayRaw = parseInt(req.query.endDay, 10) || startDay + 4;
@@ -294,117 +409,214 @@ const controller = {
       const labelsParam = (req.query.labels || '').split(',').map(s => s.trim()).filter(Boolean);
       const labels = labelsParam.length ? labelsParam : ['Distinction', 'Fail', 'Pass', 'Withdrawn'];
 
-      const azureEnvReady = Boolean(process.env.AZURE_STORAGE_ACCOUNT_NAME && process.env.AZURE_STORAGE_CONTAINER && process.env.AZURE_STORAGE_SAS_TOKEN);
+      const modeParam = (req.query.mode || '').toLowerCase();
+      const useLocalModels = modeParam === 'local'
+        || req.query.useLocal === '1'
+        || Boolean(req.query.modelDir || req.query.dataPath || req.query.scalerPath || req.query.featsPath);
 
-      if (!azureEnvReady) {
-        console.error('[PRED] Azure Storage environment variables are missing.');
-        return res.status(503).json({
-          success: false,
-          error: 'Prediction service is not configured to connect to Azure Storage.'
-        });
-      }
+      let scalerPath;
+      let featsPath;
+      let dataPathUsed = null;
+      let rows = [];
+      let minDate = null;
+      let maxDate = null;
+      let rowsCount = 0;
+      let azureDownloads = [];
+      let missingModels = [];
+      const dataSource = useLocalModels ? 'local-files' : 'azure-storage';
 
-      const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'sdt_models_'));
-      baseDir = tempDir;
-      cleanupTempDir = () => fs.promises.rm(baseDir, { recursive: true, force: true }).catch((err) => {
-        console.error(`[PRED] Failed to clean up temp directory ${baseDir}:`, err);
-      });
-
-      const scalerPath = path.join(baseDir, 'scaler.pkl');
-      const featsPath = path.join(baseDir, 'feature_cols.pkl');
-
-      const azureTargets = [
-        { name: 'scaler.pkl', destination: scalerPath },
-        { name: 'feature_cols.pkl', destination: featsPath }
-      ];
-      for (let day = startDay; day <= endDay; day++) {
-        azureTargets.push({ name: `model_day_${day}.h5`, destination: path.join(baseDir, `model_day_${day}.h5`) });
-      }
-
-      const azureDownloads = [];
-      for (const target of azureTargets) {
+      if (useLocalModels) {
         try {
-          const info = await downloadBlobToFile(target.name, target.destination);
-          azureDownloads.push(info);
-        } catch (downloadErr) {
-          console.error(`[PRED] Azure download failed for ${target.name}:`, downloadErr);
-          cleanupTempDir();
-          return res.status(500).json({ success: false, error: `Azure download failed for ${target.name}: ${downloadErr.message}` });
+          const resolvedModelDir = resolveBackendPath(req.query.modelDir, DEFAULT_MODEL_DIR);
+          const resolvedDataPath = resolveBackendPath(req.query.dataPath, path.join(resolvedModelDir, 'data.csv'));
+          const resolvedScalerPath = resolveBackendPath(req.query.scalerPath, path.join(resolvedModelDir, 'scaler.pkl'));
+          const resolvedFeatsPath = resolveBackendPath(req.query.featsPath, path.join(resolvedModelDir, 'feature_cols.pkl'));
+
+          const modelDirStats = await fs.promises.stat(resolvedModelDir).catch(() => null);
+          if (!modelDirStats || !modelDirStats.isDirectory()) {
+            return res.status(404).json({
+              success: false,
+              error: `Model directory not found: ${resolvedModelDir}`
+            });
+          }
+
+          const requiredArtifacts = [
+            { label: 'Data CSV', path: resolvedDataPath },
+            { label: 'Scaler file', path: resolvedScalerPath },
+            { label: 'Feature columns file', path: resolvedFeatsPath }
+          ];
+
+          for (const artifact of requiredArtifacts) {
+            const exists = await fs.promises.access(artifact.path).then(() => true).catch(() => false);
+            if (!exists) {
+              return res.status(404).json({
+                success: false,
+                error: `${artifact.label} missing at ${artifact.path}`
+              });
+            }
+          }
+
+          baseDir = resolvedModelDir;
+          scalerPath = resolvedScalerPath;
+          featsPath = resolvedFeatsPath;
+          dataPathUsed = resolvedDataPath;
+          cleanupTempDir = () => Promise.resolve();
+
+          const csvData = await loadStudentRowsFromCsv(dataPathUsed, studentId);
+          rows = csvData.rows;
+          minDate = csvData.minDate;
+          maxDate = csvData.maxDate;
+          rowsCount = rows.length;
+
+          if (!rowsCount) {
+            return res.status(404).json({
+              success: false,
+              error: `No records found for student ${studentId} in ${path.basename(dataPathUsed)}`
+            });
+          }
+        } catch (localErr) {
+          console.error('[PRED] Local mode preparation failed:', localErr);
+          return res.status(500).json({
+            success: false,
+            error: localErr.message || 'Failed to prepare local prediction artefacts'
+          });
         }
+      } else {
+        const azureEnvReady = Boolean(
+          process.env.AZURE_STORAGE_ACCOUNT_NAME &&
+          process.env.AZURE_STORAGE_CONTAINER &&
+          process.env.AZURE_STORAGE_SAS_TOKEN
+        );
+
+        if (!azureEnvReady) {
+          console.error('[PRED] Azure Storage environment variables are missing.');
+          return res.status(503).json({
+            success: false,
+            error: 'Prediction service is not configured to connect to Azure Storage.'
+          });
+        }
+
+        const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'sdt_models_'));
+        baseDir = tempDir;
+        cleanupTempDir = () => fs.promises.rm(baseDir, { recursive: true, force: true }).catch((err) => {
+          console.error(`[PRED] Failed to clean up temp directory ${baseDir}:`, err);
+        });
+
+        scalerPath = path.join(baseDir, 'scaler.pkl');
+        featsPath = path.join(baseDir, 'feature_cols.pkl');
+
+        const azureTargets = [
+          { name: 'scaler.pkl', destination: scalerPath },
+          { name: 'feature_cols.pkl', destination: featsPath }
+        ];
+        for (let day = startDay; day <= endDay; day += 1) {
+          azureTargets.push({
+            name: `model_day_${day}.h5`,
+            destination: path.join(baseDir, `model_day_${day}.h5`)
+          });
+        }
+
+        azureDownloads = [];
+        for (const target of azureTargets) {
+          try {
+            const info = await downloadBlobToFile(target.name, target.destination);
+            azureDownloads.push(info);
+          } catch (downloadErr) {
+            console.error(`[PRED] Azure download failed for ${target.name}:`, downloadErr);
+            await cleanupTempDir();
+            return res.status(500).json({
+              success: false,
+              error: `Azure download failed for ${target.name}: ${downloadErr.message}`
+            });
+          }
+        }
+
+        console.info('[PRED] Azure downloads:', azureDownloads.map(item => item.name).join(', ') || 'none');
+
+        missingModels = azureTargets
+          .filter(target => !fs.existsSync(target.destination))
+          .map(target => target.name);
+
+        if (missingModels.length) {
+          console.error('[PRED] Missing models after Azure download:', missingModels);
+          await cleanupTempDir();
+          return res.status(500).json({
+            success: false,
+            error: `Missing models after Azure download: ${missingModels.join(', ')}`
+          });
+        }
+
+        if (!fs.existsSync(scalerPath) || !fs.existsSync(featsPath)) {
+          console.error('[PRED] Essential artifacts were not downloaded from Azure.');
+          await cleanupTempDir();
+          return res.status(500).json({
+            success: false,
+            error: 'Scaler or feature columns missing after Azure download.'
+          });
+        }
+
+        const projection = {
+          _id: 0,
+          id_student: 1,
+          date: 1,
+          homepage: 1,
+          oucontent: 1,
+          subpage: 1,
+          url: 1,
+          forumng: 1,
+          resource: 1,
+          repeatactivity: 1,
+          glossary: 1,
+          dataplus: 1,
+          oucollaborate: 1,
+          htmlactivity: 1,
+          questionnaire: 1,
+          dualpane: 1,
+          quiz: 1,
+          externalquiz: 1,
+          page: 1,
+          folder: 1,
+          ouwiki: 1,
+          sharedsubpage: 1,
+          ouelluminate: 1,
+          num_of_prev_attempts: 1,
+          studied_credits: 1,
+          final_result: 1
+        };
+
+        rows = await DigitalTwin.find({ id_student: studentId, date: { $lt: endDay } })
+          .select(Object.keys(projection).join(' '))
+          .lean()
+          .sort({ date: 1 })
+          .exec();
+
+        rowsCount = rows.length;
       }
-
-      console.info('[PRED] Azure downloads:', azureDownloads.map(item => item.name).join(', ') || 'none');
-
-      const missingModels = azureTargets
-        .filter(target => !fs.existsSync(target.destination))
-        .map(target => target.name);
 
       const debugLog = process.env.PREDICTION_DEBUG_LOG === '1';
       const debugDayParsed = Number.parseInt(process.env.PREDICTION_DEBUG_DAY || '', 10);
       const debugDay = Number.isFinite(debugDayParsed) ? debugDayParsed : startDay;
       console.info(`[PRED] Debug logging ${debugLog ? 'enabled' : 'disabled'} (day ${debugDay})`);
 
-      if (missingModels.length) {
-        console.error('[PRED] Missing models after Azure download:', missingModels);
-        cleanupTempDir();
-        return res.status(500).json({ success: false, error: `Missing models after Azure download: ${missingModels.join(', ')}` });
-      }
-
-      if (!fs.existsSync(scalerPath) || !fs.existsSync(featsPath)) {
-        console.error('[PRED] Essential artifacts were not downloaded from Azure.');
-        cleanupTempDir();
-        return res.status(500).json({ success: false, error: 'Scaler or feature columns missing after Azure download.' });
-      }
-
-      const projection = {
-        _id: 0,
-        id_student: 1,
-        date: 1,
-        homepage: 1,
-        oucontent: 1,
-        subpage: 1,
-        url: 1,
-        forumng: 1,
-        resource: 1,
-        repeatactivity: 1,
-        glossary: 1,
-        dataplus: 1,
-        oucollaborate: 1,
-        htmlactivity: 1,
-        questionnaire: 1,
-        dualpane: 1,
-        quiz: 1,
-        externalquiz: 1,
-        page: 1,
-        folder: 1,
-        ouwiki: 1,
-        sharedsubpage: 1,
-        ouelluminate: 1,
-        num_of_prev_attempts: 1,
-        studied_credits: 1,
-        final_result: 1
-      };
-
-      const rows = await DigitalTwin.find({ id_student: studentId, date: { $lt: endDay } })
-        .select(Object.keys(projection).join(' '))
-        .lean()
-        .sort({ date: 1 })
-        .exec();
-
       const numericDates = rows.map(r => Number(r?.date)).filter(Number.isFinite);
-      const minDate = numericDates.length ? Math.min(...numericDates) : null;
-      const maxDate = numericDates.length ? Math.max(...numericDates) : null;
-      const rowsCount = rows.length;
-      console.info(`[PRED] Student ${studentId} window ${startDay}-${endDay}: row_count=${rowsCount}, min_date=${minDate ?? 'n/a'}, max_date=${maxDate ?? 'n/a'}`);
+      if (numericDates.length) {
+        minDate = minDate ?? Math.min(...numericDates);
+        maxDate = maxDate ?? Math.max(...numericDates);
+      }
+
+      rowsCount = rows.length;
+      console.info(`[PRED] [${dataSource}] Student ${studentId} window ${startDay}-${endDay}: row_count=${rowsCount}, min_date=${minDate ?? 'n/a'}, max_date=${maxDate ?? 'n/a'}`);
 
       let groundTruth = null;
       if (rows && rows.length) {
         const counts = {};
         rows.forEach(r => {
           const fr = r.final_result;
-          if (fr) counts[fr] = (counts[fr] || 0) + 1;
+          if (fr) {
+            counts[fr] = (counts[fr] || 0) + 1;
+          }
         });
-        groundTruth = Object.keys(counts).sort((a,b) => counts[b]-counts[a])[0] || null;
+        groundTruth = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0] || null;
       }
 
       const script = path.resolve(__dirname, '..', 'utils', 'predict_window.py');
@@ -447,11 +659,10 @@ const controller = {
               endDay,
               modelDir: baseDir,
               groundTruth,
-              source: 'azure-only',
+              source: dataSource,
+              dataPath: dataPathUsed,
               azureDownloads,
               missingModels,
-              debugLog,
-              debugDay,
               rowsCount,
               rowMinDate: minDate,
               rowMaxDate: maxDate,
@@ -469,7 +680,7 @@ const controller = {
         respondWithError('Python process spawn failed', err);
       });
 
-      py.on('close', (code) => {
+      py.on('close', async (code) => {
         if (responded) {
           return;
         }
@@ -477,7 +688,7 @@ const controller = {
           const resp = JSON.parse(stdout || '{}');
           if (code === 0 && resp && resp.success) {
             responded = true;
-            cleanupTempDir();
+            await cleanupTempDir();
             return res.json({
               success: true,
               data: resp.data || [],
@@ -488,11 +699,10 @@ const controller = {
                 modelDir: baseDir,
                 groundTruth,
                 mode: 'python',
-                source: 'azure-only',
+                source: dataSource,
+                dataPath: dataPathUsed,
                 azureDownloads,
                 missingModels,
-                debugLog,
-                debugDay,
                 rowsCount,
                 rowMinDate: minDate,
                 rowMaxDate: maxDate,
@@ -527,5 +737,6 @@ const controller = {
 };
 
 module.exports = controller;
+
 
 

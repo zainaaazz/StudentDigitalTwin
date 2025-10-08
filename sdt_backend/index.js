@@ -24,6 +24,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Static assets (avatars, media)
+const avatarsDir = path.resolve(__dirname, 'avatars');
+app.use('/avatars', express.static(avatarsDir));
+
 // ---------- Helpers ----------
 function sanitizeMountPath(maybeUrlOrPath, fallback = '/') {
   if (!maybeUrlOrPath) return fallback;

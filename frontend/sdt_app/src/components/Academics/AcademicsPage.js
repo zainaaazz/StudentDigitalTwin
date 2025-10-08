@@ -1,453 +1,573 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
 import Layout from '../layout/Layout';
-import Header from '../layout/Header';
 import { apiService } from '../../services/api';
-import { useStudentData } from '../../hooks/useStudentData';
 
-const DEFAULT_LABELS = ['Distinction', 'Fail', 'Pass', 'Withdrawn'];
-const WINDOW_SIZE = 5;
+const WEEK_LENGTH = 5;
+const EMPTY_VALUE = 'N/A';
+
+function parseStudentId(value) {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+  const numeric = Number.parseInt(value, 10);
+  return Number.isNaN(numeric) ? null : numeric;
+}
+
+function getRowStudentId(row) {
+  if (!row || typeof row !== 'object') {
+    return null;
+  }
+  return parseStudentId(
+    row.student_id ?? row.id_student ?? row.studentId ?? row.idStudent
+  );
+}
+
+function getOutcomeColors(label) {
+  switch (label) {
+    case 'Pass':
+      return {
+        border: '#22c55e',
+        background: 'rgba(34, 197, 94, 0.1)',
+        text: '#bbf7d0'
+      };
+    case 'Distinction':
+      return {
+        border: '#38bdf8',
+        background: 'rgba(56, 189, 248, 0.1)',
+        text: '#bae6fd'
+      };
+    case 'Withdrawn':
+      return {
+        border: '#f97316',
+        background: 'rgba(249, 115, 22, 0.1)',
+        text: '#fed7aa'
+      };
+    case 'Fail':
+      return {
+        border: '#ef4444',
+        background: 'rgba(239, 68, 68, 0.1)',
+        text: '#fecaca'
+      };
+    default:
+      return {
+        border: 'rgba(148, 163, 184, 0.4)',
+        background: 'rgba(148, 163, 184, 0.1)',
+        text: '#e2e8f0'
+      };
+  }
+}
+
+function formatConfidence(value) {
+  if (value === null || value === undefined) {
+    return EMPTY_VALUE;
+  }
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return EMPTY_VALUE;
+  }
+  return `${(numeric * 100).toFixed(1)}%`;
+}
+
+function getWeekNumber(day) {
+  const numeric = Number(day);
+  if (!Number.isFinite(numeric) || numeric <= 0) {
+    return 1;
+  }
+  return Math.floor((numeric - 1) / WEEK_LENGTH) + 1;
+}
+
+function getWeekRange(weekNumber) {
+  const start = (weekNumber - 1) * WEEK_LENGTH + 1;
+  const end = start + WEEK_LENGTH - 1;
+  return { start, end };
+}
+
+function summariseWeek(rows) {
+  if (!rows.length) {
+    return null;
+  }
+
+  const counts = new Map();
+  rows.forEach((row) => {
+    const label = row.pred_label || 'Unknown';
+    const entry = counts.get(label) || { total: 0, confidenceSum: 0 };
+    entry.total += 1;
+    const numericConfidence = Number(row.confidence);
+    if (Number.isFinite(numericConfidence)) {
+      entry.confidenceSum += numericConfidence;
+    }
+    counts.set(label, entry);
+  });
+
+  let bestLabel = null;
+  let bestScore = -Infinity;
+  counts.forEach((entry, label) => {
+    const averageConfidence =
+      entry.total > 0 ? entry.confidenceSum / entry.total : 0;
+    const score = entry.total * 100 + averageConfidence;
+    if (score > bestScore) {
+      bestScore = score;
+      bestLabel = label;
+    }
+  });
+
+  return { label: bestLabel, daysCount: rows.length };
+}
 
 const AcademicsPage = () => {
-  const [students, setStudents] = useState([]);
-  const [studentsLoading, setStudentsLoading] = useState(true);
-  const [studentsError, setStudentsError] = useState(null);
-  const [selectedStudent, setSelectedStudent] = useState('');
-  const [startDay, setStartDay] = useState(1);
-  const [labelsInput, setLabelsInput] = useState(DEFAULT_LABELS.join(', '));
-  const [predictions, setPredictions] = useState([]);
-  const [predictionsLoading, setPredictionsLoading] = useState(false);
-  const [predictionsError, setPredictionsError] = useState(null);
-  const [predictionsMeta, setPredictionsMeta] = useState(null);
-
-  const labels = useMemo(() => {
-    return labelsInput
-      .split(',')
-      .map((value) => value.trim())
-      .filter((value) => Boolean(value));
-  }, [labelsInput]);
-
-  const {
-    data: studentRows,
-    loading: studentDataLoading,
-    error: studentDataError,
-  } = useStudentData(selectedStudent || null);
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedWeek, setSelectedWeek] = useState(null);
 
   useEffect(() => {
     let active = true;
-    (async () => {
+
+    const load = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setStudentsLoading(true);
-        setStudentsError(null);
-        const response = await apiService.getUniqueStudents();
-        if (!active) return;
-        if (response?.success && Array.isArray(response.data)) {
-          setStudents(response.data);
-          setSelectedStudent((prev) => {
-            if (prev) return prev;
-            const first = response.data[0];
-            return first != null ? String(first) : '';
-          });
+        const response = await apiService.getAllStudents();
+        if (!active) {
+          return;
+        }
+        if (response?.success) {
+          let data = response.data || [];
+          const token = localStorage.getItem('token');
+          if (token) {
+            try {
+              const [, payloadBase64] = token.split('.');
+              if (payloadBase64) {
+                const payload = JSON.parse(atob(payloadBase64));
+                const tokenStudentId = parseStudentId(
+                  payload?.id_student ?? payload?.student_id
+                );
+                if (
+                  payload?.role === 'student' &&
+                  tokenStudentId !== null
+                ) {
+                  data = data.filter(
+                    (row) => getRowStudentId(row) === tokenStudentId
+                  );
+                }
+              }
+            } catch (decodeErr) {
+              console.error('[ACADEMICS] Token decode failed:', decodeErr);
+            }
+          }
+          setRecords(data);
         } else {
-          throw new Error(response?.error || 'Unable to load student list');
+          throw new Error(response?.error || 'Unable to load predictions');
         }
       } catch (err) {
-        if (active) {
-          setStudentsError(err?.message || 'Unable to load student list');
+        if (!active) {
+          return;
         }
+        console.error('[ACADEMICS] load failed:', err);
+        setError(err?.message || 'Unable to load predictions');
+        setRecords([]);
       } finally {
         if (active) {
-          setStudentsLoading(false);
+          setLoading(false);
         }
       }
-    })();
+    };
+
+    load();
     return () => {
       active = false;
     };
   }, []);
 
-  useEffect(() => {
-    setStartDay(1);
-  }, [selectedStudent]);
+  const primaryStudentId = useMemo(() => {
+    const first = records.find(
+      (row) => getRowStudentId(row) !== null
+    );
+    return first ? getRowStudentId(first) : null;
+  }, [records]);
 
-  const maxDayInData = useMemo(() => {
-    const numericDays = studentRows
-      .map((row) => Number(row?.date))
-      .filter((value) => Number.isFinite(value) && value > 0);
-    if (!numericDays.length) {
-      return 0;
+  const studentRows = useMemo(() => {
+    if (primaryStudentId === null) {
+      return [];
     }
-    return Math.max(...numericDays);
+    return records
+      .filter((row) => getRowStudentId(row) === primaryStudentId)
+      .sort((a, b) => Number(a.day) - Number(b.day));
+  }, [records, primaryStudentId]);
+
+  const weeks = useMemo(() => {
+    const grouped = new Map();
+    studentRows.forEach((row) => {
+      const weekNumber = getWeekNumber(row.day);
+      if (!grouped.has(weekNumber)) {
+        grouped.set(weekNumber, []);
+      }
+      grouped.get(weekNumber).push(row);
+    });
+    return Array.from(grouped.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([weekNumber, rows]) => ({
+        weekNumber,
+        range: getWeekRange(weekNumber),
+        rows: rows.sort((a, b) => Number(a.day) - Number(b.day)),
+        summary: summariseWeek(rows)
+      }));
   }, [studentRows]);
 
-  const maxStartDay = useMemo(() => {
-    if (!maxDayInData || maxDayInData < 1) {
-      return 1;
-    }
-    return Math.max(1, maxDayInData - WINDOW_SIZE + 1);
-  }, [maxDayInData]);
-
   useEffect(() => {
-    setStartDay((prev) => Math.min(prev, maxStartDay));
-  }, [maxStartDay]);
-
-  const endDay = useMemo(() => {
-    const tentative = startDay + WINDOW_SIZE - 1;
-    if (!maxDayInData || maxDayInData < 1) {
-      return tentative;
-    }
-    return Math.min(tentative, maxDayInData);
-  }, [startDay, maxDayInData]);
-
-  const windowDescription = useMemo(() => {
-    if (!selectedStudent) {
-      return 'Select a student to view predictions.';
-    }
-    return `Showing predictions for days ${startDay}-${endDay}`;
-  }, [selectedStudent, startDay, endDay]);
-
-  const loadPredictions = useCallback(async () => {
-    if (!selectedStudent) {
-      setPredictions([]);
-      setPredictionsMeta(null);
+    if (!weeks.length) {
+      setSelectedWeek(null);
       return;
     }
-
-    try {
-      setPredictionsLoading(true);
-      setPredictionsError(null);
-      const numericStudentId = Number(selectedStudent);
-      if (!Number.isFinite(numericStudentId)) {
-        throw new Error('Student id must be numeric.');
+    setSelectedWeek((prev) => {
+      if (prev === null) {
+        return weeks[0].weekNumber;
       }
-
-      const effectiveLabels = labels.length ? labels : DEFAULT_LABELS;
-      const response = await apiService.getPredictionsWindow({
-        studentId: numericStudentId,
-        startDay,
-        endDay,
-        labels: effectiveLabels,
-      });
-
-      if (!response?.success) {
-        throw new Error(response?.error || 'Prediction service returned an error');
-      }
-
-      setPredictions(Array.isArray(response.data) ? response.data : []);
-      setPredictionsMeta(response.meta || null);
-    } catch (err) {
-      setPredictions([]);
-      setPredictionsMeta(null);
-      console.error("[ACADEMICS] Failed to load predictions", err);
-      setPredictionsError(err?.message || 'Unable to load predictions');
-    } finally {
-      setPredictionsLoading(false);
-    }
-  }, [selectedStudent, startDay, endDay, labels]);
-
-  useEffect(() => {
-    loadPredictions();
-  }, [loadPredictions]);
-
-  const handlePrevWindow = () => {
-    setStartDay((prev) => Math.max(1, prev - WINDOW_SIZE));
-  };
-
-  const handleNextWindow = () => {
-    setStartDay((prev) => {
-      const candidate = prev + WINDOW_SIZE;
-      return Math.min(maxStartDay, candidate);
+      const stillExists = weeks.some((week) => week.weekNumber === prev);
+      return stillExists ? prev : weeks[0].weekNumber;
     });
-  };
+  }, [weeks]);
 
-  const handleRefresh = () => {
-    loadPredictions();
-  };
-
-  const groundTruth = useMemo(() => {
-    if (predictionsMeta?.groundTruth) {
-      return predictionsMeta.groundTruth;
-    }
-    const counts = {};
-    studentRows.forEach((row) => {
-      if (row?.final_result) {
-        const key = String(row.final_result);
-        counts[key] = (counts[key] || 0) + 1;
-      }
-    });
-    const keys = Object.keys(counts);
-    if (!keys.length) {
+  const currentWeek = useMemo(() => {
+    if (selectedWeek === null) {
       return null;
     }
-    return keys.sort((a, b) => counts[b] - counts[a])[0];
-  }, [predictionsMeta, studentRows]);
+    return weeks.find((week) => week.weekNumber === selectedWeek) || null;
+  }, [weeks, selectedWeek]);
 
-  const missingModels = predictionsMeta?.missingModels || [];
-  const azureDownloads = predictionsMeta?.azureDownloads || [];
-  const backendMode = predictionsMeta?.mode;
-  const modelSource = predictionsMeta?.source;
-  const modelSourceLabel = useMemo(() => {
-    if (!modelSource) return 'unknown';
-    if (modelSource === 'azure-only') return 'Azure blob storage';
-    if (modelSource === 'local-cache') return 'Local cache (unexpected)';
-    return modelSource;
-  }, [modelSource]);
-  const unexpectedModelSource = modelSource && modelSource !== 'azure-only';
-  const rowsCount = predictionsMeta?.rowsCount;
-  const rowMinDate = predictionsMeta?.rowMinDate;
-  const rowMaxDate = predictionsMeta?.rowMaxDate;
+  const highestConfidence = useMemo(() => {
+    if (!currentWeek) {
+      return null;
+    }
+    return currentWeek.rows.reduce((acc, row) => {
+      const numeric = Number(row.confidence);
+      if (!Number.isFinite(numeric)) {
+        return acc;
+      }
+      return numeric > acc ? numeric : acc;
+    }, 0);
+  }, [currentWeek]);
+
+  const chartData = useMemo(() => {
+    if (!currentWeek) {
+      return [];
+    }
+    return currentWeek.rows.map((row) => {
+      const dayNumber = Number(row.day);
+      const label = row.pred_label || EMPTY_VALUE;
+      const confidenceRaw = Number(row.confidence);
+      const confidencePercent = Number.isFinite(confidenceRaw)
+        ? confidenceRaw * 100
+        : null;
+      const { border } = getOutcomeColors(label);
+      return {
+        dayNumber,
+        dayLabel: `Day ${dayNumber}`,
+        label,
+        confidencePercent,
+        color: border
+      };
+    });
+  }, [currentWeek]);
+
+  const renderTooltip = ({ active, payload }) => {
+    if (!active || !payload || !payload.length) {
+      return null;
+    }
+    const point = payload[0].payload;
+    return (
+      <div className="rounded-md border border-zinc-700 bg-zinc-900/90 px-3 py-2 text-xs text-slate-200 shadow-lg">
+        <p className="font-semibold" style={{ color: point.color }}>
+          {point.label}
+        </p>
+        <p className="text-slate-300">{point.dayLabel}</p>
+        <p className="text-slate-400">
+          Confidence{' '}
+          {point.confidencePercent !== null
+            ? `${point.confidencePercent.toFixed(1)}%`
+            : EMPTY_VALUE}
+        </p>
+      </div>
+    );
+  };
+
+  const handleWeekShift = (direction) => {
+    if (!currentWeek) {
+      return;
+    }
+    const index = weeks.findIndex(
+      (week) => week.weekNumber === currentWeek.weekNumber
+    );
+    if (index === -1) {
+      return;
+    }
+    const target = weeks[index + direction];
+    if (target) {
+      setSelectedWeek(target.weekNumber);
+    }
+  };
 
   return (
     <Layout>
-      <Header
-        title="Academics"
-        subtitle="Day-wise predictions powered by Azure-hosted ANN models"
-      />
-
       <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200 sdt-dark">
-            <h2 className="text-lg font-semibold text-gray-100">Configuration</h2>
-            <div className="mt-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300">Student</label>
-                {studentsLoading ? (
-                  <p className="text-sm text-gray-400 mt-1">Loading student ids...</p>
-                ) : studentsError ? (
-                  <p className="text-sm text-red-300 mt-1">{studentsError}</p>
-                ) : (
-                  <select
-                    className="mt-1 w-full rounded-lg bg-zinc-900/80 border border-white/10 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                    value={selectedStudent}
-                    onChange={(event) => setSelectedStudent(event.target.value)}
-                  >
-                    {students.map((id) => (
-                      <option key={id} value={id}>
-                        {id}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
+        <div>
+          <h1 className="text-3xl font-bold text-slate-100">
+            Weekly Prediction Tracker
+          </h1>
+          <p className="mt-2 text-sm text-slate-300">
+            Follow how your predicted outcome changes across the term. Each week
+            combines five study days so you can focus on the bigger picture.
+          </p>
+        </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300">Label order</label>
-                <input
-                  type="text"
-                  value={labelsInput}
-                  onChange={(event) => setLabelsInput(event.target.value)}
-                  placeholder="Distinction, Fail, Pass, Withdrawn"
-                  className="mt-1 w-full rounded-lg bg-zinc-900/80 border border-white/10 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  Comma-separated labels mapping to the model output indices.
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-zinc-900/70 border border-white/10 px-3 py-2 text-sm text-gray-300 space-y-1">
-                <p>
-                  Max day in dataset: {' '}
-                  <span className="font-semibold text-indigo-200">
-                    {maxDayInData || 'unknown'}
-                  </span>
-                </p>
-                {studentDataLoading && <p>Loading activity data...</p>}
-                {studentDataError && <p className="text-red-300">{studentDataError}</p>}
-                {groundTruth && (
-                  <p>
-                    Ground truth: {' '}
-                    <span className="font-semibold text-green-200">{groundTruth}</span>
-                  </p>
-                )}
-              </div>
+        <div className="rounded-xl border border-zinc-700 bg-zinc-900/60 p-6 space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <label className="text-sm font-semibold text-slate-200">
+                Week in focus
+              </label>
+              <p className="text-xs text-slate-400">
+                Move between weeks to see how the daily predictions are trending.
+              </p>
             </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200 sdt-dark">
-            <h2 className="text-lg font-semibold text-gray-100">Model status</h2>
-            <div className="mt-4 space-y-3 text-sm text-gray-300">
-              <p>
-                Backend mode: {' '}
-                <span className="font-semibold text-indigo-200">
-                  {backendMode || 'unknown'}
-                </span>
-              </p>
-              <p>
-                Model source: {' '}
-                <span className="font-semibold text-indigo-200">
-                  {modelSourceLabel}
-                </span>
-              </p>
-              {unexpectedModelSource && (
-                <p className="text-xs text-red-300">
-                  Unexpected backend source reported: {modelSource}
-                </p>
-              )}
-              {typeof rowsCount === 'number' && (
-                <p className="text-xs text-gray-400">
-                  Rows fetched: {rowsCount} (min date {rowMinDate ?? 'n/a'}, max date {rowMaxDate ?? 'n/a'})
-                </p>
-              )}
-              <p>
-                Missing models this window: {' '}
-                {missingModels.length ? (
-                  <span className="text-yellow-300 font-semibold">
-                    {missingModels.length}
-                  </span>
-                ) : (
-                  <span className="text-green-300 font-semibold">0</span>
-                )}
-              </p>
-              {missingModels.length > 0 && (
-                <div className="text-xs text-yellow-200 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2">
-                  <p className="font-medium mb-1">Models not found locally:</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    {missingModels.map((name) => (
-                      <li key={name}>{name}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <p>
-                Azure downloads this request: {' '}
-                {azureDownloads.length ? (
-                  <span className="text-indigo-200 font-semibold">
-                    {azureDownloads.length}
-                  </span>
-                ) : (
-                  <span className="text-gray-300 font-semibold">0</span>
-                )}
-              </p>
-              {azureDownloads.length > 0 && (
-                <div className="text-xs text-indigo-200 bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-3 py-2">
-                  <p className="font-medium mb-1">Downloaded artifacts:</p>
-                  <ul className="list-disc list-inside space-y-1">
-                    {azureDownloads.map((item) => (
-                      <li key={item.name}>{item.name}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200 sdt-dark">
-            <h2 className="text-lg font-semibold text-gray-100">Window controls</h2>
-            <p className="text-sm text-gray-400 mt-2">{windowDescription}</p>
-            <div className="mt-4 flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <button
-                  className="px-3 py-2 rounded-lg text-white shadow-sm"
-                  style={{ backgroundColor: '#8b57d4' }}
-                  onClick={handlePrevWindow}
-                  disabled={startDay <= 1 || predictionsLoading}
-                >
-                  Prev {WINDOW_SIZE} days
-                </button>
-                <button
-                  className="px-3 py-2 rounded-lg text-white shadow-sm"
-                  style={{ backgroundColor: '#8b57d4' }}
-                  onClick={handleNextWindow}
-                  disabled={startDay >= maxStartDay || predictionsLoading}
-                >
-                  Next {WINDOW_SIZE} days
-                </button>
-              </div>
+            <div className="flex flex-wrap items-center gap-2">
               <button
-                className="px-3 py-2 rounded-lg text-white shadow-sm w-full md:w-auto"
-                style={{ backgroundColor: '#0ea5e9' }}
-                onClick={handleRefresh}
-                disabled={predictionsLoading}
+                type="button"
+                onClick={() => handleWeekShift(-1)}
+                disabled={
+                  !currentWeek ||
+                  !weeks.length ||
+                  weeks[0].weekNumber === selectedWeek
+                }
+                className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-slate-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {predictionsLoading ? 'Loading...' : 'Refresh predictions'}
+                Prev
+              </button>
+              <select
+                value={selectedWeek ?? ''}
+                onChange={(event) => setSelectedWeek(Number(event.target.value))}
+                className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                {weeks.map((week) => (
+                  <option key={week.weekNumber} value={week.weekNumber}>
+                    Week {week.weekNumber} ({week.range.start}-{week.range.end})
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => handleWeekShift(1)}
+                disabled={
+                  !currentWeek ||
+                  !weeks.length ||
+                  weeks[weeks.length - 1].weekNumber === selectedWeek
+                }
+                className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-slate-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Next
               </button>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 sdt-dark">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-100">
-                Student {selectedStudent || 'N/A'} - Days {startDay} to {endDay}
-              </h3>
-              {predictionsMeta?.modelDir && (
-                <p className="text-xs text-gray-400">Model directory: {predictionsMeta.modelDir}</p>
-              )}
-            </div>
-            {backendMode && (
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                  backendMode === 'python'
-                    ? 'bg-green-200/10 text-green-300 border-green-400/20'
-                    : 'bg-red-200/10 text-red-300 border-red-400/20'
-                }`}
-              >
-                {backendMode === 'python' ? 'Azure predictions' : `Unexpected mode: ${backendMode}`}
-              </span>
+          <div className="rounded-xl border border-zinc-700 bg-zinc-900/70 p-6">
+            {loading ? (
+              <div className="flex flex-col items-center gap-3 py-12 text-slate-300">
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
+                <p>Loading predictions...</p>
+              </div>
+            ) : error ? (
+              <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+                {error}
+              </div>
+            ) : !currentWeek ? (
+              <div className="rounded-lg border border-zinc-700 bg-zinc-900/80 p-4 text-sm text-slate-300">
+                We do not have weekly predictions to show just yet. Check back soon.
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-slate-100">
+                      Week {currentWeek.weekNumber}{' '}
+                      <span className="text-lg text-slate-300">
+                        (days {currentWeek.range.start}-{currentWeek.range.end})
+                      </span>
+                    </h2>
+                    <p className="mt-2 text-sm text-slate-400">
+                      Predictions update daily, showing whether you are on track to
+                      pass, excel, or if extra attention is needed.
+                    </p>
+                  </div>
+                  {currentWeek.summary && (
+                    <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm">
+                      <p className="text-xs uppercase tracking-wide text-emerald-200/80">
+                        Week outlook
+                      </p>
+                      <p className="text-lg font-semibold text-emerald-200">
+                        {currentWeek.summary.label || EMPTY_VALUE}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="overflow-x-auto rounded-lg border border-zinc-800">
+                  <table className="min-w-full divide-y divide-zinc-800 text-sm">
+                    <thead className="bg-zinc-900/80 text-slate-300">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-medium uppercase tracking-wide">
+                          Day
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium uppercase tracking-wide">
+                          Outcome
+                        </th>
+                        <th className="px-4 py-3 text-left font-medium uppercase tracking-wide">
+                          Confidence
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800 text-slate-100">
+                      {currentWeek.rows.map((row) => {
+                        const dayNumber = Number(row.day);
+                        const label = row.pred_label || EMPTY_VALUE;
+                        const { border, background, text } = getOutcomeColors(label);
+                        return (
+                          <tr key={`day-${dayNumber}`} className="hover:bg-zinc-800/40">
+                            <td className="px-4 py-3 font-medium text-slate-200">Day {dayNumber}</td>
+                            <td className="px-4 py-3">
+                              <span
+                                className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium"
+                                style={{
+                                  borderWidth: '1px',
+                                  borderStyle: 'solid',
+                                  borderColor: border,
+                                  color: text,
+                                  backgroundColor: background
+                                }}
+                              >
+                                {label}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              {formatConfidence(row.confidence)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-slate-200">
+                      Confidence trend this week
+                    </h3>
+                  </div>
+                  {chartData.length ? (
+                    <div className="mt-4 h-60">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={chartData} margin={{ top: 10, right: 16, left: -10, bottom: 0 }}>
+                          <CartesianGrid stroke="rgba(148, 163, 184, 0.15)" strokeDasharray="4 4" />
+                          <XAxis
+                            dataKey="dayLabel"
+                            tick={{ fill: '#94a3b8', fontSize: 12 }}
+                            axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                            tickLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                          />
+                          <YAxis
+                            tick={{ fill: '#94a3b8', fontSize: 12 }}
+                            axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                            tickLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                            domain={[0, 100]}
+                            tickFormatter={(value) => `${value}%`}
+                          />
+                          <Tooltip content={renderTooltip} />
+                          <Line
+                            type="monotone"
+                            dataKey="confidencePercent"
+                            stroke="#8b57d4"
+                            strokeWidth={2}
+                            connectNulls
+                            dot={({ cx, cy, payload }) => {
+                              if (payload.confidencePercent === null) {
+                                return null;
+                              }
+                              return (
+                                <circle
+                                  cx={cx}
+                                  cy={cy}
+                                  r={5}
+                                  fill={payload.color}
+                                  stroke="#1f2937"
+                                  strokeWidth={1.5}
+                                />
+                              );
+                            }}
+                            activeDot={({ cx, cy, payload }) => {
+                              if (payload.confidencePercent === null) {
+                                return null;
+                              }
+                              return (
+                                <g>
+                                  <circle cx={cx} cy={cy} r={7} fill={payload.color} opacity={0.25} />
+                                  <circle
+                                    cx={cx}
+                                    cy={cy}
+                                    r={5}
+                                    fill={payload.color}
+                                    stroke="#1f2937"
+                                    strokeWidth={1.5}
+                                  />
+                                </g>
+                              );
+                            }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : (
+                    <p className="mt-4 text-xs text-slate-400">
+                      Confidence information is not available for this week.
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-4">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                      Week highlights
+                    </p>
+                    <ul className="mt-3 space-y-2 text-sm text-slate-300">
+                      <li>- {currentWeek.rows.length} daily predictions were generated.</li>
+                      <li>
+                        - {currentWeek.summary?.label || EMPTY_VALUE} is the most common outcome
+                        this week.
+                      </li>
+                      <li>
+                        - Confidence peaks at {formatConfidence(highestConfidence)}.
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-4 text-sm text-slate-300">
+                    <p>
+                      As new results are added, this view refreshes automatically. Use
+                      the combined weekly outlook and the daily breakdown to decide
+                      whether to keep your current study plan or take action early.
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
-
-          {predictionsError && (
-            <div className="mt-4 text-sm text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
-              {predictionsError}
-            </div>
-          )}
-
-          {!predictionsError && (
-            <div className="mt-5 overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="text-left text-gray-400">
-                    <th className="pb-2 pr-4">Day</th>
-                    <th className="pb-2 pr-4">Model available</th>
-                    <th className="pb-2 pr-4">Predicted label</th>
-                    <th className="pb-2 pr-4">Index</th>
-                    <th className="pb-2 pr-4">Confidence</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700/50">
-                  {predictionsLoading && (
-                    <tr>
-                      <td colSpan={5} className="py-4 text-center text-gray-300">
-                        Loading predictions...
-                      </td>
-                    </tr>
-                  )}
-                  {!predictionsLoading && !predictions.length && (
-                    <tr>
-                      <td colSpan={5} className="py-4 text-center text-gray-300">
-                        No predictions available for this range.
-                      </td>
-                    </tr>
-                  )}
-                  {!predictionsLoading &&
-                    predictions.map((row) => (
-                      <tr key={row.day} className="hover:bg-white/5">
-                        <td className="py-2 pr-4 text-gray-200">{row.day}</td>
-                        <td className="py-2 pr-4">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              row.model_available
-                                ? 'bg-green-200/10 text-green-300 border border-green-400/20'
-                                : 'bg-gray-200/10 text-gray-300 border border-gray-400/20'
-                            }`}
-                          >
-                            {row.model_available ? 'Yes' : 'No'}
-                          </span>
-                        </td>
-                        <td className="py-2 pr-4 text-gray-100">{row.pred_label || '-'}</td>
-                        <td className="py-2 pr-4 text-gray-300">
-                          {row.pred_index != null ? row.pred_index : '-'}
-                        </td>
-                        <td className="py-2 pr-4 text-gray-300">
-                          {row.confidence != null ? `${(row.confidence * 100).toFixed(1)}%` : '-'}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
       </div>
     </Layout>
@@ -455,5 +575,3 @@ const AcademicsPage = () => {
 };
 
 export default AcademicsPage;
-
-

@@ -188,7 +188,19 @@ export const apiService = {
     }
   },
   // Predictions day window
-  async getPredictionsWindow({ studentId, startDay, endDay, labels }) {
+  async getPredictionsWindow({
+    studentId,
+    startDay,
+    endDay,
+    labels,
+    mode,
+    modelDir,
+    dataPath,
+    scalerPath,
+    featsPath,
+    useLocal,
+    signal
+  }) {
     try {
       const params = new URLSearchParams({
         studentId: String(studentId),
@@ -198,8 +210,30 @@ export const apiService = {
       if (labels && labels.length) {
         params.set('labels', labels.join(','));
       }
+      if (mode) {
+        params.set('mode', mode);
+      }
+      if (useLocal) {
+        params.set('useLocal', '1');
+      }
+      if (modelDir) {
+        params.set('modelDir', modelDir);
+      }
+      if (dataPath) {
+        params.set('dataPath', dataPath);
+      }
+      if (scalerPath) {
+        params.set('scalerPath', scalerPath);
+      }
+      if (featsPath) {
+        params.set('featsPath', featsPath);
+      }
       const url = `${API_BASE_URL}/digitaltwin/predictions/day-window?${params.toString()}`;
-      const response = await fetch(url, { headers: getAuthHeaders() });
+      const fetchOptions = {
+        headers: getAuthHeaders(),
+        ...(signal ? { signal } : {})
+      };
+      const response = await fetch(url, fetchOptions);
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('token');
@@ -210,7 +244,29 @@ export const apiService = {
       }
       return await response.json();
     } catch (error) {
-      console.error('API Error (getPredictionsWindow):', error);
+      if (error?.name !== 'AbortError') {
+        console.error('API Error (getPredictionsWindow):', error);
+      }
+      throw error;
+    }
+  }
+  ,
+  async getAllStudents() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/academics/students`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Authentication required. Please login again.');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('API Error (getAllStudents):', error);
       throw error;
     }
   }

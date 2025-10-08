@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const academicsController = require('../controllers/academicsController');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // Example route
 router.get('/getStudentData', (req, res) => {
@@ -11,5 +13,7 @@ router.get('/getStudentData', (req, res) => {
 
   res.json(dummyData);
 });
+
+router.get('/academics/students', authMiddleware, academicsController.getAllStudents);
 
 module.exports = router;

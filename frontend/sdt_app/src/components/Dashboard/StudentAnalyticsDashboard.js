@@ -137,7 +137,7 @@ const StudentAnalyticsDashboard = () => {
               )}
 
 
-              {/* Live data indicator */}
+              Live data indicator
               <div className="flex items-center text-green-600 text-xs sm:text-sm">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
                 <span className="text-sm font-medium">Live Data</span>
@@ -153,13 +153,15 @@ const StudentAnalyticsDashboard = () => {
           />
         )}
 
-        {/* Enhanced Metrics Grid with Evaluation Indicators */}
-        <MetricsGrid
-          analytics={analytics}
-          selectedStudent={effectiveSelectedStudent}
-          selectedWeek={selectedWeek}
-          userRole={userRole}
-        />
+        {effectiveSelectedStudent !== 'all' && (
+          <div className="mt-8 mb-6">
+            <StudentLearningAssessment
+              studentId={effectiveSelectedStudent}
+              analyticsEngine={analyticsEngine}
+              userRole={userRole}
+            />
+          </div>
+        )}
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
@@ -181,17 +183,13 @@ const StudentAnalyticsDashboard = () => {
           data={analytics.dailyActivity}
           title={userRole === 'student' ? 'Your Detailed Activity Pattern' : 'Detailed Activity Pattern'}
         />
-
-        {effectiveSelectedStudent !== 'all' && (
-          <div className="mt-8 mb-6">
-            <StudentLearningAssessment
-              studentId={effectiveSelectedStudent}
-              analyticsEngine={analyticsEngine}
-              userRole={userRole}
-            />
-          </div>
-        )}
-
+        Enhanced Metrics Grid with Evaluation Indicators
+        <MetricsGrid
+          analytics={analytics}
+          selectedStudent={effectiveSelectedStudent}
+          selectedWeek={selectedWeek}
+          userRole={userRole}
+        />
 
       </div>
     </Layout>

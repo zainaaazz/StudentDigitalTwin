@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { User, TrendingUp, TrendingDown, Minus, MessageCircle, Clock, Users, BarChart3, Activity as Timeline, ArrowLeft } from 'lucide-react';
 import { mockDashboardData } from './dummyData';
 import { useInteractionSimulator } from '../../hooks/useInteractionSimulator';
-import { CHART_COLORS } from './types';
 import { InfoIcon } from '../UI/Tooltip';
 
 const StudentDashboard = ({ currentUser = null }) => {
@@ -60,21 +59,11 @@ const StudentDashboard = ({ currentUser = null }) => {
   };
 
   // Memoized chart data calculations (must be before early returns)
-  const interactionTypeData = useMemo(() => {
-    if (!data?.recentInteractions?.interactionTypes) return [];
-    return Object.entries(data.recentInteractions.interactionTypes).map(([type, count]) => ({
-      name: type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' '),
-      value: count
-    }));
-  }, [data?.recentInteractions?.interactionTypes]);
-
   const engagementTrendData = useMemo(() => {
     if (!data?.engagementHistory) return [];
     return data.engagementHistory.map(item => ({
       week: item.week,
       engagement: Math.round(item.interactionFrequency * 10),
-      collaboration: item.collaborationScore,
-      riskScore: item.overallRiskScore,
       sessions: item.sessionCount
     }));
   }, [data?.engagementHistory]);
@@ -249,11 +238,11 @@ const StudentDashboard = ({ currentUser = null }) => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+      <div className="mb-6">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Engagement Trends Over Time</h3>
-            <InfoIcon tooltip="Track your learning engagement, collaboration scores, risk levels, and session counts across recent weeks" />
+            <InfoIcon tooltip="Track your learning engagement and activity levels across recent weeks" />
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={engagementTrendData}>
@@ -261,50 +250,14 @@ const StudentDashboard = ({ currentUser = null }) => {
               <XAxis dataKey="week" />
               <YAxis />
               <Tooltip />
-              <Line 
-                type="monotone" 
-                dataKey="engagement" 
-                stroke="#3B82F6" 
+              <Line
+                type="monotone"
+                dataKey="engagement"
+                stroke="#8b57d4"
                 name="Engagement Score"
                 strokeWidth={2}
               />
-              <Line 
-                type="monotone" 
-                dataKey="collaboration" 
-                stroke="#10B981" 
-                name="Collaboration Score"
-                strokeWidth={2}
-              />
             </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-          <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Interaction Types</h3>
-            <InfoIcon tooltip="Distribution of different learning activities: content views, forum discussions, resource access, and quiz attempts" />
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={interactionTypeData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, value }) => `${name}: ${value}`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                animationBegin={0}
-                animationDuration={800}
-                isAnimationActive={true}
-              >
-                {interactionTypeData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
           </ResponsiveContainer>
         </div>
       </div>

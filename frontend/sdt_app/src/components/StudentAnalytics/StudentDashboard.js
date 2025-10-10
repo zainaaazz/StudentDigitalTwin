@@ -5,6 +5,7 @@ import { User, TrendingUp, TrendingDown, Minus, MessageCircle, Clock, Users, Bar
 import { mockDashboardData } from './dummyData';
 import { useInteractionSimulator } from '../../hooks/useInteractionSimulator';
 import { InfoIcon } from '../UI/Tooltip';
+import PottedPlantVisualization from './PottedPlantVisualization';
 
 const StudentDashboard = ({ currentUser = null }) => {
   const navigate = useNavigate();
@@ -96,7 +97,7 @@ const StudentDashboard = ({ currentUser = null }) => {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <button 
+            <button
               onClick={() => navigate('/dashboard')}
               className="flex items-center justify-center w-10 h-10 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
             >
@@ -115,6 +116,11 @@ const StudentDashboard = ({ currentUser = null }) => {
             View Interaction Timeline
           </Link>
         </div>
+      </div>
+
+      {/* Potted Plant Visualization */}
+      <div className="mb-6">
+        <PottedPlantVisualization stats={data?.recentInteractions} />
       </div>
 
       {/* Header Section */}

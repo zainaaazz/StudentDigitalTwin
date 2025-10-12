@@ -10,13 +10,11 @@ const InteractionTimeline = ({ currentUser = null }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [contextFilter, setContextFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchInteractions();
-  }, [page, typeFilter, contextFilter, simLoading]);
+  }, [page, simLoading]);
 
   const fetchInteractions = () => {
     if (simLoading) return;
@@ -35,14 +33,6 @@ const InteractionTimeline = ({ currentUser = null }) => {
             end: interactions.length > 0 ? new Date(Math.max(...interactions.map(i => i.startTime))) : new Date()
           },
           averageDuration: interactions.length > 0 ? Math.round(interactions.reduce((sum, i) => sum + i.duration, 0) / interactions.length) : 0,
-          interactionsByType: interactions.reduce((acc, i) => {
-            acc[i.interactionType] = (acc[i.interactionType] || 0) + 1;
-            return acc;
-          }, {}),
-          interactionsByContext: interactions.reduce((acc, i) => {
-            acc[i.context] = (acc[i.context] || 0) + 1;
-            return acc;
-          }, {}),
           uniquePartners: new Set(interactions.map(i => i.studentId2)).size
         };
 
@@ -60,26 +50,6 @@ const InteractionTimeline = ({ currentUser = null }) => {
       }
       setLoading(false);
     }, 300);
-  };
-
-  const getInteractionTypeColor = (type) => {
-    switch (type) {
-      case 'discussion': return 'bg-blue-100 text-blue-800';
-      case 'collaboration': return 'bg-green-100 text-green-800';
-      case 'social': return 'bg-purple-100 text-purple-800';
-      case 'help-seeking': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getContextColor = (context) => {
-    switch (context) {
-      case 'lecture': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'group-work': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'lab': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-      case 'break': return 'bg-cyan-100 text-cyan-800 border-cyan-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
   };
 
   const formatDuration = (seconds) => {
@@ -106,13 +76,11 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
   const interactions = Array.isArray(data) ? data : data?.interactions || [];
   const filteredInteractions = interactions.filter(interaction => {
-    const matchesType = typeFilter === 'all' || interaction.interactionType === typeFilter;
-    const matchesContext = contextFilter === 'all' || interaction.context === contextFilter;
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       (interaction.partnerName || interaction.studentId2).toLowerCase().includes(searchTerm.toLowerCase()) ||
       interaction.sessionId.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesType && matchesContext && matchesSearch;
+
+    return matchesSearch;
   }) || [];
 
   if (loading) {
@@ -171,7 +139,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
       </div>
 
       {/* Statistics Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700">
           <div className="flex items-center">
             <div className="p-3 rounded-lg mr-4" style={{ backgroundColor: '#8b57d4' }}>
@@ -205,17 +173,6 @@ const InteractionTimeline = ({ currentUser = null }) => {
             </div>
           </div>
         </div>
-        <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700">
-          <div className="flex items-center">
-            <div className="p-3 rounded-lg mr-4" style={{ backgroundColor: '#8b57d4' }}>
-              <BarChart3 className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{Object.keys(data.stats.interactionsByType).length}</p>
-              <p className="text-sm text-gray-400">Interaction Types</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Filters */}
@@ -224,35 +181,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
           <Filter className="w-5 h-5" style={{color: '#8b57d4'}} />
           <h3 className="text-lg font-semibold text-white">Filters</h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Interaction Type</label>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            >
-              <option value="all">All Types</option>
-              <option value="discussion">Discussion</option>
-              <option value="collaboration">Collaboration</option>
-              <option value="social">Social</option>
-              <option value="help-seeking">Help-seeking</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Context</label>
-            <select
-              value={contextFilter}
-              onChange={(e) => setContextFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            >
-              <option value="all">All Contexts</option>
-              <option value="lecture">Lecture</option>
-              <option value="group-work">Group Work</option>
-              <option value="lab">Lab</option>
-              <option value="break">Break</option>
-            </select>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Search Partner/Session</label>
             <input
@@ -280,8 +209,6 @@ const InteractionTimeline = ({ currentUser = null }) => {
                 <th className="px-6 py-4 text-left text-sm font-medium text-white">Time</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-white">Partner</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-white">Duration</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-white">Type</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-white">Context</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-white">Session</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-white">Details</th>
               </tr>
@@ -321,16 +248,6 @@ const InteractionTimeline = ({ currentUser = null }) => {
                         {formatDuration(interaction.duration)}
                       </span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getInteractionTypeColor(interaction.interactionType)}`}>
-                      {interaction.interactionType.replace('-', ' ')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getContextColor(interaction.context)}`}>
-                      {interaction.context.replace('-', ' ')}
-                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <code className="text-xs font-mono text-gray-300 bg-gray-700 px-2 py-1 rounded">

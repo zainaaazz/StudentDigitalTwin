@@ -1,14 +1,12 @@
 import React, { useMemo } from 'react';
 
 const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
-  // Student ID to name mapping
   const studentNames = {
     '38925958': 'mike',
     '41425626': 'zai', 
     '40954129': 'steph'
   };
 
-  // Base URLs for the OneDrive images
   const imageUrls = {
     'mike-burnout': 'https://nwuac-my.sharepoint.com/:i:/r/personal/38925958_mynwu_ac_za/Documents/studentImages/mike-burnout.jpg?csf=1&web=1&e=wPUOwR',
     'mike-coping': 'https://nwuac-my.sharepoint.com/:i:/r/personal/38925958_mynwu_ac_za/Documents/studentImages/mike-coping.jpg?csf=1&web=1&e=RKdhB7',
@@ -27,8 +25,6 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
     }
 
     const evaluation = analytics.evaluation;
-    
-    // Calculate overall performance score
     let performanceScore = 0;
     let metricsCount = 0;
     
@@ -40,7 +36,6 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
         } else if (metric.status === 'below') {
           performanceScore -= Math.abs(metric.deviation);
         }
-        // 'average' adds 0 to the score
       }
     });
 
@@ -48,11 +43,6 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
 
     const avgPerformance = performanceScore / metricsCount;
 
-    // Determine behavior state based on performance
-    // Burnout: Very high performance (>50%) or very low performance (<-50%)
-    // Thriving: Good performance (10% to 50%)
-    // Coping: Around average (-10% to 10%)
-    
     if (avgPerformance > 50 || avgPerformance < -50) {
       return 'burnout';
     } else if (avgPerformance >= 10) {
@@ -62,7 +52,6 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
     }
   }, [analytics, selectedStudent]);
 
-  // Don't render if no specific student selected or student not in our demo set
   if (selectedStudent === 'all' || !studentNames[selectedStudent] || !behaviorState) {
     return null;
   }
@@ -71,31 +60,42 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
   const imageKey = `${studentName}-${behaviorState}`;
   const imageUrl = imageUrls[imageKey];
 
-  // Behavior state configuration
   const stateConfig = {
     burnout: {
       title: 'Burnout Risk',
       description: 'This student may be experiencing high stress or disengagement',
-      color: 'border-red-500',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-700',
-      icon: '🔥'
+      gradient: 'from-red-500 to-rose-600',
+      bgGradient: 'from-red-950/30 to-rose-950/30',
+      textColor: 'text-red-400',
+      badgeBg: 'bg-red-950/50 border-red-800',
+      badgeText: 'text-red-400',
+      icon: '🔥',
+      ringColor: 'ring-red-500/50',
+      borderColor: 'border-red-800/50'
     },
     thriving: {
       title: 'Thriving',
       description: 'This student is performing well and engaged with learning',
-      color: 'border-green-500',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-700',
-      icon: '🌟'
+      gradient: 'from-teal-500 to-emerald-600',
+      bgGradient: 'from-teal-950/30 to-emerald-950/30',
+      textColor: 'text-teal-400',
+      badgeBg: 'bg-teal-950/50 border-teal-800',
+      badgeText: 'text-teal-400',
+      icon: '🌟',
+      ringColor: 'ring-teal-500/50',
+      borderColor: 'border-teal-800/50'
     },
     coping: {
       title: 'Coping Well',
       description: 'This student is maintaining steady progress',
-      color: 'border-blue-500',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-700',
-      icon: '⚖️'
+      gradient: 'from-indigo-500 to-cyan-600',
+      bgGradient: 'from-indigo-950/30 to-cyan-950/30',
+      textColor: 'text-indigo-400',
+      badgeBg: 'bg-indigo-950/50 border-indigo-800',
+      badgeText: 'text-indigo-400',
+      icon: '⚖️',
+      ringColor: 'ring-indigo-500/50',
+      borderColor: 'border-indigo-800/50'
     }
   };
 
@@ -106,39 +106,64 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
   }
 
   return (
-    <div className={`bg-white rounded-lg shadow-md border-l-4 ${config.color} p-6 mb-6`}>
-      <div className="flex justify-center items-center gap-6">
-        {/* Student Image */}
+    <div className={`relative overflow-hidden bg-gradient-to-br ${config.bgGradient} rounded-2xl p-6 border ${config.borderColor} shadow-xl`}>
+      <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-br ${config.gradient} rounded-full blur-3xl opacity-20`} />
+      <div className={`absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr ${config.gradient} rounded-full blur-2xl opacity-15`} />
+      
+      <div className="relative flex flex-col sm:flex-row items-center gap-6">
         <div className="flex-shrink-0">
-          <div className="relative">
-            <img
-              src={imageUrl}
-              alt={`${studentName} - ${behaviorState}`}
-              className="w-32 h-32 rounded-full object-cover shadow-lg"
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-            <div className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-full ${config.bgColor} border-2 border-white flex items-center justify-center shadow-md`}>
-              <span className="text-lg">{config.icon}</span>
+          <div className="relative group">
+            <div className={`absolute -inset-2 bg-gradient-to-br ${config.gradient} rounded-full blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300`} />
+            
+            <div className={`relative w-36 h-36 rounded-full overflow-hidden ring-4 ${config.ringColor} shadow-2xl`}>
+              <img
+                src={imageUrl}
+                alt={`${studentName} - ${behaviorState}`}
+                className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+            
+            <div className={`absolute -bottom-3 -right-3 w-14 h-14 rounded-full bg-gradient-to-br ${config.gradient} border-4 border-slate-800 flex items-center justify-center shadow-xl`}>
+              <span className="text-2xl">{config.icon}</span>
             </div>
           </div>
         </div>
 
-        {/* Behavior Information */}
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <h3 className={`text-xl font-semibold ${config.textColor} capitalize`}>
+        <div className="flex-1 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 mb-4">
+            <h3 className={`text-3xl font-black capitalize ${config.textColor}`}>
               {studentName}
             </h3>
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${config.bgColor} ${config.textColor}`}>
+            <span className={`inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold ${config.badgeBg} border shadow-lg`}>
+              <span className="mr-2 text-lg">{config.icon}</span>
               {config.title}
             </span>
           </div>
           
-          <p className="text-gray-600 text-sm">
+          <p className="text-slate-300 text-base font-semibold leading-relaxed mb-4">
             {config.description}
           </p>
+
+          {analytics?.evaluation && (
+            <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+              {Object.entries(analytics.evaluation).slice(0, 3).map(([key, metric], idx) => {
+                if (!metric) return null;
+                const statusColors = {
+                  above: 'bg-teal-950/50 text-teal-400 border-teal-800',
+                  below: 'bg-rose-950/50 text-rose-400 border-rose-800',
+                  average: 'bg-indigo-950/50 text-indigo-400 border-indigo-800'
+                };
+                return (
+                  <span key={idx} className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border shadow-md ${statusColors[metric.status] || 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                    {key.replace(/([A-Z])/g, ' $1').trim()}: {metric.status}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

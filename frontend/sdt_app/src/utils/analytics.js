@@ -10,69 +10,8 @@ export class StudentAnalytics {
   }
 
   // Calculate individual student statistics
-  /*getStudentStats() {
-    const studentStats = {};
-
-    this.data.forEach(record => {
-      const studentId = record.id_student;
-      
-      if (!studentStats[studentId]) {
-        studentStats[studentId] = {
-          totalClicks: 0,
-          homepageViews: 0,
-          contentViews: 0,
-          subpageViews: 0,
-          resourceViews: 0,
-          forumViews: 0,
-          urlViews: 0,
-          sessionDuration: 0,
-          totalRecords: 0,
-          dailyActivity: []
-        };
-      }
-
-      // Calculate total clicks from all activity types
-      const totalClicks = (record.homepage || 0) + 
-                         (record.oucontent || 0) + 
-                         (record.subpage || 0) + 
-                         (record.url || 0) + 
-                         (record.forumng || 0) + 
-                         (record.resource || 0);
-
-      studentStats[studentId].totalClicks += totalClicks;
-      studentStats[studentId].homepageViews += record.homepage || 0;
-      studentStats[studentId].contentViews += record.oucontent || 0;
-      studentStats[studentId].subpageViews += record.subpage || 0;
-      studentStats[studentId].resourceViews += record.resource || 0;
-      studentStats[studentId].forumViews += record.forumng || 0;
-      studentStats[studentId].urlViews += record.url || 0;
-      studentStats[studentId].sessionDuration += record.session_duration || 0;
-      studentStats[studentId].totalRecords += 1;
-
-      // Add daily activity record
-      studentStats[studentId].dailyActivity.push({
-        //date: `Day ${record.date}`,
-        date: record.date || 0,
-        homepage: record.homepage || 0,
-        content: record.oucontent || 0,
-        subpage: record.subpage || 0,
-        total: totalClicks
-      });
-    });
-
-    return studentStats;
-  }*/
-
-  // Calculate individual student statistics
   getStudentStats() {
     const studentStats = {};
-
-    // console.log('Total raw data records:', this.data.length);
-    // console.log('Student 11391 records in raw data:');
-    const student11391Records = this.data.filter(r => r.id_student === 11391);
-    // console.log('Count:', student11391Records.length);
-    // console.log('Dates found:', student11391Records.map(r => r.date));
-
 
     // First pass: collect all records for each student
     const studentRecords = {};
@@ -115,9 +54,7 @@ export class StudentAnalytics {
       const sortedDates = Object.keys(dateGroups).sort((a, b) => parseInt(a) - parseInt(b));
       
       sortedDates.forEach((dateKey, dayIndex) => {
-        //console.log(`Processing date ${dateKey} as day ${dayIndex}`);
         const dateRecords = dateGroups[dateKey];
-        //console.log(`Found ${dateRecords.length} records for this date`);
 
         // Aggregate all records for this date
         let dayTotalClicks = 0;
@@ -170,10 +107,10 @@ export class StudentAnalytics {
       });
     });
 
-    console.log('Final studentStats for 11391:', studentStats[11391]?.dailyActivity);
     return studentStats;
-}
-  // Calculate overall averages
+  }
+
+  // Calculate overall averages PER WEEK (not per day)
   calculateAverages() {
     const studentStats = this.getStudentStats();
     const students = Object.keys(studentStats);
@@ -188,26 +125,38 @@ export class StudentAnalytics {
       };
     }
 
-    const totals = students.reduce((acc, studentId) => {
+    // Calculate weekly averages across all students
+    const weeklyTotals = students.reduce((acc, studentId) => {
       const stats = studentStats[studentId];
-      acc.totalClicks += stats.totalClicks;
-      acc.homepageViews += stats.homepageViews;
-      acc.contentViews += stats.contentViews;
-      acc.sessionDuration += stats.sessionDuration;
-      acc.totalDays += stats.dailyActivity.length;
+      const totalDays = stats.dailyActivity.length;
+      const weeks = totalDays / 7; // Convert days to weeks
+      
+      if (weeks > 0) {
+        acc.totalClicks += stats.totalClicks / weeks;
+        acc.homepageViews += stats.homepageViews / weeks;
+        acc.contentViews += stats.contentViews / weeks;
+        acc.totalWeeks += weeks;
+      }
+      
+      acc.totalDays += totalDays;
+      acc.totalClicksForDaily += stats.totalClicks;
+      
       return acc;
-    }, { totalClicks: 0, homepageViews: 0, contentViews: 0, sessionDuration: 0, totalDays: 0 });
-
-    // Calculate weekly averages for meaningful comparison
-    const avgTotalDays = totals.totalDays / students.length; // Average days per student
-    const avgWeeks = avgTotalDays / 7; // Convert to average weeks per student
+    }, { 
+      totalClicks: 0, 
+      homepageViews: 0, 
+      contentViews: 0, 
+      totalWeeks: 0, 
+      totalDays: 0, 
+      totalClicksForDaily: 0 
+    });
 
     return {
-      totalClicks: avgWeeks ? Math.round(totals.totalClicks / students.length / avgWeeks) : 0,
-      homepageViews: avgWeeks ? Math.round(totals.homepageViews / students.length / avgWeeks) : 0,
-      contentViews: avgWeeks ? Math.round(totals.contentViews / students.length / avgWeeks) : 0,
-      dailyActivity: totals.totalDays ? Math.round(totals.totalClicks / totals.totalDays) : 0,
-      sessionDuration: Math.round(totals.sessionDuration / students.length)
+      totalClicks: Math.round(weeklyTotals.totalClicks / students.length), // Weekly average
+      homepageViews: Math.round(weeklyTotals.homepageViews / students.length), // Weekly average
+      contentViews: Math.round(weeklyTotals.contentViews / students.length), // Weekly average
+      dailyActivity: weeklyTotals.totalDays ? Math.round(weeklyTotals.totalClicksForDaily / weeklyTotals.totalDays) : 0,
+      sessionDuration: 0
     };
   }
 
@@ -224,6 +173,32 @@ export class StudentAnalytics {
     else if (ratio < (1 - threshold)) status = 'below';
     
     return { status, deviation };
+  }
+
+  // Get available weeks for a student
+  getAvailableWeeks(studentId) {
+    if (!this.data.length) return [];
+    
+    const studentRecords = this.data.filter(record => record.id_student == studentId);
+    const weeks = [...new Set(studentRecords.map(record => Math.floor((record.date || 0) / 7)))];
+    return weeks.sort((a, b) => a - b);
+  }
+
+  // Filter daily activity by week (7 days per week)
+  filterByWeek(dailyActivity, selectedWeek) {
+    if (!selectedWeek || selectedWeek === 'all') return dailyActivity;
+    
+    const weekNumber = parseInt(selectedWeek);
+    const startDay = weekNumber * 7;
+    const endDay = startDay + 6;
+    
+    return dailyActivity.filter(day => {
+      const originalDate = day.originalDate || day.date;
+      return originalDate >= startDay && originalDate <= endDay;
+    }).map((day, index) => ({
+      ...day,
+      date: index // Re-index to 0, 1, 2... for the week
+    }));
   }
 
   // Calculate analytics for a specific student or all students
@@ -272,8 +247,10 @@ export class StudentAnalytics {
         return { error: 'Student not found' };
       }
 
+      const availableWeeks = this.getAvailableWeeks(selectedStudent);
       const filteredDailyActivity = this.filterByWeek(student.dailyActivity, selectedWeek);
 
+      // Calculate weekly totals
       const weeklyTotals = filteredDailyActivity.reduce((acc, day) => {
         acc.totalClicks += day.total || 0;
         acc.homepageClicks += day.homepage || 0;
@@ -281,10 +258,23 @@ export class StudentAnalytics {
         return acc;
       }, { totalClicks: 0, homepageClicks: 0, contentClicks: 0 });
 
-      const totalClicks = selectedWeek === 'all' ? student.totalClicks : weeklyTotals.totalClicks;
-      const homepageClicks = selectedWeek === 'all' ? student.homepageViews : weeklyTotals.homepageClicks;
-      const contentClicks = selectedWeek === 'all' ? student.contentViews : weeklyTotals.contentClicks;
-      const avgClicksPerDay = filteredDailyActivity.length ? Math.round(totalClicks / filteredDailyActivity.length) : 0;
+      // For specific week, use weekly totals; for 'all', calculate weekly average
+      let totalClicks, homepageClicks, contentClicks;
+      
+      if (selectedWeek === 'all') {
+        // Calculate weekly average across all weeks
+        const totalWeeks = Math.ceil(student.dailyActivity.length / 7);
+        totalClicks = totalWeeks > 0 ? Math.round(student.totalClicks / totalWeeks) : student.totalClicks;
+        homepageClicks = totalWeeks > 0 ? Math.round(student.homepageViews / totalWeeks) : student.homepageViews;
+        contentClicks = totalWeeks > 0 ? Math.round(student.contentViews / totalWeeks) : student.contentViews;
+      } else {
+        // Use the specific week's totals
+        totalClicks = weeklyTotals.totalClicks;
+        homepageClicks = weeklyTotals.homepageClicks;
+        contentClicks = weeklyTotals.contentClicks;
+      }
+
+      const avgClicksPerDay = filteredDailyActivity.length ? Math.round(weeklyTotals.totalClicks / filteredDailyActivity.length) : 0;
 
       analytics = {
         totalClicks,
@@ -292,8 +282,14 @@ export class StudentAnalytics {
         contentClicks,
         uniqueStudents: 1,
         dailyActivity: filteredDailyActivity,
-        availableWeeks: this.getAvailableWeeks(selectedStudent),
+        availableWeeks: availableWeeks,
         avgClicksPerDay,
+        averages: {
+          totalClicks: averages.totalClicks,
+          homepageViews: averages.homepageViews,
+          contentViews: averages.contentViews,
+          dailyActivity: averages.dailyActivity
+        },
         evaluation: {
           totalClicks: this.getEvaluationStatus(totalClicks, averages.totalClicks),
           homepageViews: this.getEvaluationStatus(homepageClicks, averages.homepageViews),
@@ -332,38 +328,9 @@ export class StudentAnalytics {
     }
 
     analytics.activityBreakdown = activityBreakdown.filter(item => item.value > 0);
-    analytics.averages = averages;
     analytics.students = uniqueStudents;
 
     return analytics;
-  }
-
-  // Add these methods to your StudentAnalytics class:
-
-// Get available weeks for a student
-getAvailableWeeks(studentId) {
-  if (!this.data.length) return [];
-  
-  const studentRecords = this.data.filter(record => record.id_student == studentId);
-  const weeks = [...new Set(studentRecords.map(record => Math.floor((record.date || 0) / 7)))];
-  return weeks.sort((a, b) => a - b);
-}
-
-  // Filter daily activity by week (7 days per week)
-  filterByWeek(dailyActivity, selectedWeek) {
-    if (!selectedWeek || selectedWeek === 'all') return dailyActivity;
-    
-    const weekNumber = parseInt(selectedWeek);
-    const startDay = weekNumber * 7;
-    const endDay = startDay + 6;
-    
-    return dailyActivity.filter(day => {
-      const originalDate = day.originalDate || day.date;
-      return originalDate >= startDay && originalDate <= endDay;
-    }).map((day, index) => ({
-      ...day,
-      date: index // Re-index to 0, 1, 2... for the week
-    }));
   }
 
   // Generate risk assessment for a student
@@ -371,29 +338,26 @@ getAvailableWeeks(studentId) {
     const analytics = this.calculateAnalytics(studentId);
     if (!analytics.evaluation || !analytics.dailyActivity?.length) return 'normal';
 
-    // Get basic student data
     const studentStats = this.getStudentStats();
     const student = studentStats[studentId];
     if (!student) return 'normal';
 
-    // Calculate multiple risk factors
     let riskScore = 0;
     let factors = 0;
 
-    // Factor 1: Activity consistency (using coefficient of variation)
+    // Factor 1: Activity consistency
     const dailyTotals = student.dailyActivity.map(day => day.total || 0);
     if (dailyTotals.length > 3) {
       const mean = dailyTotals.reduce((sum, val) => sum + val, 0) / dailyTotals.length;
       const variance = dailyTotals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / dailyTotals.length;
       const cv = mean > 0 ? Math.sqrt(variance) / mean : 0;
 
-      // High variability suggests inconsistent learning patterns
-      if (cv > 1.5) riskScore += 2; // Very inconsistent
-      else if (cv > 1.0) riskScore += 1; // Moderately inconsistent
+      if (cv > 1.5) riskScore += 2;
+      else if (cv > 1.0) riskScore += 1;
       factors++;
     }
 
-    // Factor 2: Activity trend (are they declining?)
+    // Factor 2: Activity trend
     if (dailyTotals.length >= 5) {
       const firstHalf = dailyTotals.slice(0, Math.floor(dailyTotals.length / 2));
       const secondHalf = dailyTotals.slice(Math.floor(dailyTotals.length / 2));
@@ -402,25 +366,24 @@ getAvailableWeeks(studentId) {
 
       if (firstAvg > 0) {
         const trendChange = (secondAvg - firstAvg) / firstAvg;
-        if (trendChange < -0.3) riskScore += 2; // Declining significantly
-        else if (trendChange < -0.1) riskScore += 1; // Declining moderately
+        if (trendChange < -0.3) riskScore += 2;
+        else if (trendChange < -0.1) riskScore += 1;
       }
       factors++;
     }
 
-    // Factor 3: Absolute activity level (compared to realistic thresholds)
+    // Factor 3: Absolute activity level
     const avgDaily = analytics.avgClicksPerDay || 0;
-    if (avgDaily < 5) riskScore += 3; // Very low activity
-    else if (avgDaily < 15) riskScore += 1; // Low activity
-    else if (avgDaily > 100) riskScore += 2; // Potentially excessive activity
+    if (avgDaily < 5) riskScore += 3;
+    else if (avgDaily < 15) riskScore += 1;
+    else if (avgDaily > 100) riskScore += 2;
     factors++;
 
-    // Factor 4: Learning diversity (are they engaging with different content types?)
+    // Factor 4: Learning diversity
     const contentTypes = [student.homepageViews, student.contentViews, student.subpageViews, student.resourceViews].filter(val => val > 0);
-    if (contentTypes.length < 2) riskScore += 1; // Limited engagement diversity
+    if (contentTypes.length < 2) riskScore += 1;
     factors++;
 
-    // Calculate final risk level
     const avgRisk = factors > 0 ? riskScore / factors : 0;
 
     if (avgRisk >= 2.5) return 'high';
@@ -441,9 +404,7 @@ getAvailableWeeks(studentId) {
     const dailyTotals = student.dailyActivity.map(day => day.total || 0);
     const avgDaily = analytics.avgClicksPerDay || 0;
 
-    // Analyze activity patterns and generate specific recommendations
-
-    // 1. Activity Level Assessment
+    // Activity Level Assessment
     if (avgDaily < 5) {
       recommendations.push({
         type: 'engagement',
@@ -464,7 +425,7 @@ getAvailableWeeks(studentId) {
       });
     }
 
-    // 2. Consistency Analysis
+    // Consistency Analysis
     if (dailyTotals.length > 3) {
       const mean = dailyTotals.reduce((sum, val) => sum + val, 0) / dailyTotals.length;
       const variance = dailyTotals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / dailyTotals.length;
@@ -485,7 +446,7 @@ getAvailableWeeks(studentId) {
       }
     }
 
-    // 3. Learning Trend Analysis
+    // Learning Trend Analysis
     if (dailyTotals.length >= 5) {
       const firstHalf = dailyTotals.slice(0, Math.floor(dailyTotals.length / 2));
       const secondHalf = dailyTotals.slice(Math.floor(dailyTotals.length / 2));
@@ -510,7 +471,7 @@ getAvailableWeeks(studentId) {
       }
     }
 
-    // 4. Content Diversity Analysis
+    // Content Diversity Analysis
     const contentTypes = [
       { name: 'homepage', value: student.homepageViews, label: 'course homepage' },
       { name: 'content', value: student.contentViews, label: 'learning content' },
@@ -526,7 +487,6 @@ getAvailableWeeks(studentId) {
       });
     }
 
-    // If student is doing well overall, give positive reinforcement
     if (recommendations.length === 0 || recommendations.every(r => r.priority === 'low')) {
       recommendations.push({
         type: 'improvement',

@@ -15,8 +15,8 @@ const ActivityBarChart = ({ data, title = "Daily Activity Details" }) => {
             <svg className="w-16 h-16 text-indigo-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            <p className="text-indigo-400 font-medium">No activity data available</p>
-            <p className="text-indigo-500 text-sm mt-1">Detailed breakdown will appear once activity is recorded</p>
+            <p className="text-indigo-100 font-medium">No activity data available</p>
+            <p className="text-indigo-200 text-sm mt-1">Detailed breakdown will appear once activity is recorded</p>
           </div>
         </div>
       </div>
@@ -34,14 +34,14 @@ const ActivityBarChart = ({ data, title = "Daily Activity Details" }) => {
               <div key={index} className="flex items-center justify-between gap-6">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded" style={{ backgroundColor: entry.color }} />
-                  <span className="text-sm text-indigo-400 font-medium">{entry.name}:</span>
+                  <span className="text-sm text-teal-300 font-medium">{entry.name}:</span>
                 </div>
                 <span className="font-bold text-teal-400 text-sm">{entry.value}</span>
               </div>
             ))}
           </div>
           <div className="mt-3 pt-3 border-t border-indigo-800 flex items-center justify-between">
-            <span className="text-sm text-indigo-400 font-semibold">Total:</span>
+            <span className="text-sm text-indigo-100 font-semibold">Total:</span>
             <span className="font-bold text-teal-400">{total}</span>
           </div>
         </div>

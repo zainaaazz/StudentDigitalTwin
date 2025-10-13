@@ -20,10 +20,10 @@ const ActivityChart = ({ data, title = "Daily Activity Trend" }) => {
         </div>
         <div className="flex items-center justify-center h-64 bg-indigo-900/30 rounded-lg border-2 border-dashed border-indigo-800/50">
           <div className="text-center">
-            <svg className="w-16 h-16 text-indigo-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-16 h-16 text-teal-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
             </svg>
-            <p className="text-indigo-400 font-semibold">No activity data available</p>
+            <p className="text-teal-300 font-semibold">No activity data available</p>
             <p className="text-indigo-500 text-sm mt-1">Data will appear once activity is recorded</p>
           </div>
         </div>
@@ -42,22 +42,22 @@ const ActivityChart = ({ data, title = "Daily Activity Trend" }) => {
           </div>
           <div>
             <h3 className="text-base font-bold text-teal-400">{title}</h3>
-            <p className="text-xs text-indigo-400">Daily engagement trends</p>
+            <p className="text-xs text-teal-300">Daily engagement trends</p>
           </div>
           <InfoIcon tooltip="Line chart showing daily learning platform interactions over time." />
         </div>
         <div className="flex items-center gap-3 text-xs font-semibold">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full bg-teal-500" />
-            <span className="text-indigo-400">Total</span>
+            <span className="text-teal-300">Total</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full bg-red-500" />
-            <span className="text-indigo-400">Homepage</span>
+            <span className="text-teal-300">Homepage</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full bg-indigo-500" />
-            <span className="text-indigo-400">Content</span>
+            <span className="text-teal-300">Content</span>
           </div>
         </div>
       </div>

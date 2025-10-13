@@ -13,14 +13,14 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
         <div className="relative flex items-center gap-4">
           <div className="flex-shrink-0">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg">
-              <svg className="w-7 h-7 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-7 h-7 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-teal-400 mb-1">Great Learning Balance</h3>
-            <p className="text-sm text-indigo-400">Your learning activity looks healthy and consistent. Keep up the excellent work!</p>
+            <h3 className="text-xl font-bold text-teal-300 mb-1">Great Learning Balance</h3>
+            <p className="text-sm text-indigo-100">Your learning activity looks healthy and consistent. Keep up the excellent work!</p>
           </div>
         </div>
       </div>
@@ -32,40 +32,40 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
       label: 'High Attention', 
       gradient: 'from-red-500 to-rose-600',
       bgGradient: 'from-red-950/30 to-rose-950/30',
-      textColor: 'text-red-400',
-      badgeBg: 'bg-red-950/50 border-red-800', 
-      badgeText: 'text-red-400',
-      dotColor: 'bg-red-500',
+      textColor: 'text-red-300',
+      badgeBg: 'bg-red-900/70 border-red-600', 
+      badgeText: 'text-red-200',
+      dotColor: 'bg-red-400',
       borderColor: 'border-red-800/50'
     },
     medium: { 
       label: 'Moderate Attention', 
       gradient: 'from-teal-500 to-emerald-600',
       bgGradient: 'from-teal-950/30 to-emerald-950/30',
-      textColor: 'text-teal-400',
-      badgeBg: 'bg-teal-950/50 border-teal-800', 
-      badgeText: 'text-teal-400',
-      dotColor: 'bg-teal-500',
+      textColor: 'text-teal-300',
+      badgeBg: 'bg-teal-900/70 border-teal-600', 
+      badgeText: 'text-teal-200',
+      dotColor: 'bg-teal-400',
       borderColor: 'border-teal-800/50'
     },
     low: { 
       label: 'Minor Adjustments', 
       gradient: 'from-indigo-500 to-cyan-600',
       bgGradient: 'from-indigo-950/30 to-cyan-950/30',
-      textColor: 'text-indigo-400',
-      badgeBg: 'bg-indigo-950/50 border-indigo-800', 
-      badgeText: 'text-indigo-400',
-      dotColor: 'bg-indigo-500',
+      textColor: 'text-indigo-300',
+      badgeBg: 'bg-indigo-900/70 border-indigo-600', 
+      badgeText: 'text-indigo-200',
+      dotColor: 'bg-indigo-400',
       borderColor: 'border-indigo-800/50'
     },
     normal: { 
       label: 'Monitoring Recommended', 
       gradient: 'from-teal-500 to-emerald-600',
       bgGradient: 'from-teal-950/30 to-emerald-950/30',
-      textColor: 'text-teal-400',
-      badgeBg: 'bg-teal-950/50 border-teal-800', 
-      badgeText: 'text-teal-400',
-      dotColor: 'bg-teal-500',
+      textColor: 'text-teal-300',
+      badgeBg: 'bg-teal-900/70 border-teal-600', 
+      badgeText: 'text-teal-200',
+      dotColor: 'bg-teal-400',
       borderColor: 'border-teal-800/50'
     }
   };
@@ -86,8 +86,8 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
           title: 'Burnout Prevention', 
           gradient: 'from-red-500 to-rose-600',
           bgColor: 'bg-gradient-to-br from-red-950/30 to-rose-950/30',
-          textColor: 'text-red-400',
-          iconBg: 'bg-red-950/50',
+          textColor: 'text-red-300',
+          iconBg: 'bg-red-900/70',
           borderColor: 'border-red-800/50'
         };
       case 'balance': 
@@ -96,8 +96,8 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
           title: 'Learning Balance', 
           gradient: 'from-teal-500 to-emerald-600',
           bgColor: 'bg-gradient-to-br from-teal-950/30 to-emerald-950/30',
-          textColor: 'text-teal-400',
-          iconBg: 'bg-teal-950/50',
+          textColor: 'text-teal-300',
+          iconBg: 'bg-teal-900/70',
           borderColor: 'border-teal-800/50'
         };
       case 'engagement': 
@@ -106,8 +106,8 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
           title: 'Increase Engagement', 
           gradient: 'from-indigo-500 to-cyan-600',
           bgColor: 'bg-gradient-to-br from-indigo-950/30 to-cyan-950/30',
-          textColor: 'text-indigo-400',
-          iconBg: 'bg-indigo-950/50',
+          textColor: 'text-indigo-300',
+          iconBg: 'bg-indigo-900/70',
           borderColor: 'border-indigo-800/50'
         };
       case 'improvement': 
@@ -116,8 +116,8 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
           title: 'Performance Enhancement', 
           gradient: 'from-teal-500 to-emerald-600',
           bgColor: 'bg-gradient-to-br from-teal-950/30 to-emerald-950/30',
-          textColor: 'text-teal-400',
-          iconBg: 'bg-teal-950/50',
+          textColor: 'text-teal-300',
+          iconBg: 'bg-teal-900/70',
           borderColor: 'border-teal-800/50'
         };
       default: 
@@ -126,8 +126,8 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
           title: 'General Recommendations', 
           gradient: 'from-indigo-500 to-cyan-600',
           bgColor: 'bg-gradient-to-br from-indigo-950/30 to-cyan-950/30',
-          textColor: 'text-indigo-400',
-          iconBg: 'bg-indigo-950/50',
+          textColor: 'text-indigo-300',
+          iconBg: 'bg-indigo-900/70',
           borderColor: 'border-indigo-800/50'
         };
     }
@@ -164,9 +164,9 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
   };
 
   const priorityConfig = (p) => {
-    if (p === 'high') return { dot: 'bg-red-500', ring: 'ring-red-800/50' };
-    if (p === 'medium') return { dot: 'bg-teal-500', ring: 'ring-teal-800/50' };
-    return { dot: 'bg-indigo-500', ring: 'ring-indigo-800/50' };
+    if (p === 'high') return { dot: 'bg-red-400', ring: 'ring-red-600/60' };
+    if (p === 'medium') return { dot: 'bg-teal-400', ring: 'ring-teal-600/60' };
+    return { dot: 'bg-indigo-400', ring: 'ring-indigo-600/60' };
   };
 
   return (
@@ -177,25 +177,25 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
         <div className="flex items-start gap-4 mb-6">
           <div className="flex-shrink-0">
             <div className={`w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br ${riskConfig.gradient} shadow-lg`}>
-              <svg className="w-7 h-7 text-teal-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-7 h-7 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-teal-400 mb-1">
+            <h3 className="text-xl font-bold text-teal-300 mb-1">
               {userRole === 'student' ? 'Your Learning Assessment' : 'Student Learning Assessment'}
             </h3>
-            <p className="text-sm text-indigo-400">
+            <p className="text-sm text-indigo-100">
               <span className="font-semibold">{riskConfig.label}</span> — {summaryMessage()}
             </p>
           </div>
 
           <div className="flex-shrink-0">
-            <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl ${riskConfig.badgeBg} shadow-sm`}>
-              <span className={`w-2.5 h-2.5 rounded-full ${riskConfig.dotColor} animate-pulse`} />
-              <span className={`text-sm font-bold ${riskConfig.badgeText} capitalize`}>{riskLevel}</span>
+            <div className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl ${riskConfig.badgeBg} shadow-lg border-2`}>
+              <span className={`w-3 h-3 rounded-full ${riskConfig.dotColor} animate-pulse shadow-lg`} />
+              <span className={`text-base font-bold ${riskConfig.badgeText} capitalize tracking-wide`}>{riskLevel}</span>
             </div>
           </div>
         </div>
@@ -210,11 +210,11 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
               <div key={type} className={`${cfg.bgColor} rounded-xl p-4 border ${cfg.borderColor} shadow-sm`}>
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${cfg.iconBg} shadow-sm`}>
-                    <cfg.icon className={`w-5 h-5 ${cfg.textColor}`} />
+                    <cfg.icon className={`w-5 h-5 text-white`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className={`text-base font-bold ${cfg.textColor}`}>{cfg.title}</div>
-                    <div className="text-xs text-indigo-400">{recs.length} recommendation{recs.length !== 1 ? 's' : ''}</div>
+                    <div className="text-xs text-indigo-200">{recs.length} recommendation{recs.length !== 1 ? 's' : ''}</div>
                   </div>
                 </div>
 
@@ -222,12 +222,12 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
                   {recs.map((rec, i) => {
                     const pConfig = priorityConfig(rec.priority);
                     return (
-                      <div key={i} className="flex items-start gap-3 bg-indigo-950/70 backdrop-blur-sm rounded-lg p-3 border border-indigo-800/50">
+                      <div key={i} className="flex items-start gap-3 bg-indigo-950/70 backdrop-blur-sm rounded-lg p-3 border border-indigo-700/50">
                         <div className="mt-0.5">
-                          <span className={`inline-block w-2.5 h-2.5 rounded-full ${pConfig.dot} ring-2 ${pConfig.ring}`} />
+                          <span className={`inline-block w-2.5 h-2.5 rounded-full ${pConfig.dot} ring-2 ${pConfig.ring} shadow-lg`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-indigo-400 leading-relaxed">{rec.message}</p>
+                          <p className="text-sm text-indigo-100 leading-relaxed">{rec.message}</p>
                           <div className="flex items-center gap-2 mt-2">
                             <span className={`text-xs font-semibold ${cfg.textColor} uppercase tracking-wide`}>
                               {rec.priority} priority

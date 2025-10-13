@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
+import { Sprout, Users, Leaf, Flower2 } from 'lucide-react';
 
-const PottedPlantVisualization = ({ stats }) => {
+const PottedPlantVisualization = ({ stats, showHeading = false }) => {
   // Calculate growth stage based on total interactions
   const growthStage = useMemo(() => {
     if (!stats?.totalInteractions) return 0;
@@ -62,12 +63,47 @@ const PottedPlantVisualization = ({ stats }) => {
 
   return (
     <div className="w-full bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left side - Information block with vine decorations */}
-        <div className="relative rounded-xl p-6 shadow-sm flex items-center" style={{
+      {showHeading && (
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '2rem',
+          padding: '1.5rem',
           background: 'linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%)',
-          border: '4px solid #000',
-          borderImage: 'linear-gradient(to right, #000 0%, #000 45%, transparent 45%, transparent 55%, #000 55%, #000 100%) 1'
+          borderRadius: '1rem',
+          border: '6px solid #1B5E20'
+        }}>
+          <h2 style={{
+            fontSize: '2rem',
+            fontWeight: 'bold',
+            color: '#1B5E20',
+            marginBottom: '0.5rem',
+            textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem'
+          }}>
+            <Sprout size={32} strokeWidth={2.5} />
+            Your Social Garden
+            <Sprout size={32} strokeWidth={2.5} />
+          </h2>
+          <p style={{
+            fontSize: '1rem',
+            color: '#424242',
+            maxWidth: '600px',
+            margin: '0 auto',
+            lineHeight: '1.6'
+          }}>
+            Every interaction with your classmates helps your plant grow. Build connections and watch it flourish!
+          </p>
+        </div>
+      )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left side - Information block */}
+        <div className="relative p-6 shadow-sm flex items-center" style={{
+          background: 'linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%)',
+          borderRadius: '1rem',
+          border: '6px solid #1B5E20'
         }}>
           {/* Content wrapper vertically centered */}
           <div className="w-full">
@@ -127,146 +163,28 @@ const PottedPlantVisualization = ({ stats }) => {
               <h4 className="text-sm font-semibold mb-2" style={{ color: '#33691E' }}>How it Works</h4>
               <ul className="text-sm space-y-2" style={{ color: '#4A4A4A' }}>
                 <li className="flex items-start">
-                  <span className="mr-2">🌱</span>
-                  <span>Every interaction helps your plant grow</span>
+                  <Users className="mr-2 flex-shrink-0" size={18} style={{ color: '#33691E' }} />
+                  <span>Every interaction with classmates helps your plant grow</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="mr-2">🍃</span>
+                  <Leaf className="mr-2 flex-shrink-0" size={18} style={{ color: '#33691E' }} />
                   <span>Leaves appear as you progress through stages</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="mr-2">🌼</span>
+                  <Flower2 className="mr-2 flex-shrink-0" size={18} style={{ color: '#33691E' }} />
                   <span>Keep engaging to maintain your blooming flower</span>
                 </li>
               </ul>
             </div>
+            </div>
           </div>
-          </div>
-
-          {/* Decorative vines overlaying the edges */}
-          <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" viewBox="0 0 600 500" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
-            <defs>
-              {/* Stalk gradient for vines - Two tone green */}
-              <linearGradient id="vineStalkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style={{ stopColor: '#7CB342', stopOpacity: 1 }} />
-                <stop offset="100%" style={{ stopColor: '#558B2F', stopOpacity: 1 }} />
-              </linearGradient>
-            </defs>
-            {/* Top edge vine - running from left to right */}
-            <g>
-              {/* Leaves positioned away from vine */}
-              {/* Leaf 1 stem and leaf - rotated 45 degrees anticlockwise, not moved closer */}
-              <path d="M 70 22 L 45 -5" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="20" y="-20" width="42" height="42" transform="rotate(-90, 45, -5)" />
-
-              {/* Leaf 2 stem and leaf - moved 2 pixels up */}
-              <path d="M 150 12 L 162 -10" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="147" y="-25" width="40" height="40" transform="rotate(0, 162, -10)" />
-
-              {/* Leaf 3 stem and leaf - rotated 135 degrees clockwise, moved slightly farther */}
-              <path d="M 250 28 L 237 47" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="217" y="32" width="38" height="38" transform="rotate(180, 237, 47)" />
-
-              {/* Leaf 4 stem and leaf - moved 2 pixels up */}
-              <path d="M 350 14 L 362 -7" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="347" y="-22" width="42" height="42" transform="rotate(0, 362, -7)" />
-
-              {/* Leaf 5 stem and leaf - rotated 135 degrees clockwise, moved slightly farther */}
-              <path d="M 450 22 L 437 43" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="417" y="28" width="40" height="40" transform="rotate(180, 437, 43)" />
-
-              {/* Leaf 6 stem and leaf - moved 2 pixels up */}
-              <path d="M 550 10 L 562 -10" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="547" y="-25" width="42" height="42" transform="rotate(0, 562, -10)" />
-
-              {/* Vine drawn last (on top of leaves) */}
-              {/* Disconnected black outline sections (drawn first, thicker) */}
-              <path
-                d="M 0 15 C 80 25 120 5 200 20"
-                stroke="#000"
-                strokeWidth="7"
-                fill="none"
-                strokeLinecap="round"
-              />
-              {/* Disconnect gap from 200 to 206 (tiny gap) */}
-              <path
-                d="M 206 20.3 C 280 35 320 10 400 18 C 480 26 520 5 600 15"
-                stroke="#000"
-                strokeWidth="7"
-                fill="none"
-                strokeLinecap="round"
-              />
-              {/* Main vine stalk - continuous wavy line on top (drawn second, thinner) */}
-              <path
-                d="M 0 15 C 80 25 120 5 200 20 C 280 35 320 10 400 18 C 480 26 520 5 600 15"
-                stroke="url(#vineStalkGradient)"
-                strokeWidth="4"
-                fill="none"
-                strokeLinecap="round"
-              />
-            </g>
-
-            {/* Bottom edge vine - running from left to right */}
-            <g>
-              {/* Leaves positioned away from vine */}
-              {/* Leaf 1 stem and leaf - rotated 90 degrees clockwise */}
-              <path d="M 70 478 L 45 505" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="20" y="490" width="42" height="42" transform="rotate(180, 45, 505)" />
-
-              {/* Leaf 2 stem and leaf - moved slightly closer to stalk */}
-              <path d="M 150 488 L 157 502" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="142" y="487" width="40" height="40" transform="rotate(90, 157, 502)" />
-
-              {/* Leaf 3 stem and leaf - moved closer to stalk */}
-              <path d="M 250 472 L 240 455" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="220" y="440" width="38" height="38" transform="rotate(-90, 240, 455)" />
-
-              {/* Leaf 4 stem and leaf - moved slightly closer to stalk */}
-              <path d="M 350 486 L 357 500" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="342" y="485" width="42" height="42" transform="rotate(90, 357, 500)" />
-
-              {/* Leaf 5 stem and leaf - moved closer to stalk */}
-              <path d="M 450 478 L 440 460" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="420" y="445" width="40" height="40" transform="rotate(-90, 440, 460)" />
-
-              {/* Leaf 6 stem and leaf - moved slightly closer to stalk */}
-              <path d="M 550 490 L 557 503" stroke="url(#vineStalkGradient)" strokeWidth="2" fill="none" />
-              <image href="/leaf.png" x="542" y="488" width="42" height="42" transform="rotate(90, 557, 503)" />
-
-              {/* Vine drawn last (on top of leaves) */}
-              {/* Disconnected black outline sections (drawn first, thicker) */}
-              <path
-                d="M 0 485 C 80 475 120 495 200 480"
-                stroke="#000"
-                strokeWidth="7"
-                fill="none"
-                strokeLinecap="round"
-              />
-              {/* Disconnect gap from 200 to 206 (tiny gap) */}
-              <path
-                d="M 206 479.7 C 280 465 320 490 400 482 C 480 474 520 495 600 485"
-                stroke="#000"
-                strokeWidth="7"
-                fill="none"
-                strokeLinecap="round"
-              />
-              {/* Main vine stalk - continuous wavy line on top (drawn second, thinner) */}
-              <path
-                d="M 0 485 C 80 475 120 495 200 480 C 280 465 320 490 400 482 C 480 474 520 495 600 485"
-                stroke="url(#vineStalkGradient)"
-                strokeWidth="4"
-                fill="none"
-                strokeLinecap="round"
-              />
-            </g>
-          </svg>
         </div>
 
         {/* Right side - Plant visualization */}
-        <div className="relative rounded-xl shadow-sm overflow-hidden" style={{
+        <div className="relative shadow-sm overflow-hidden" style={{
           background: 'transparent',
-          border: '4px solid #000',
-          borderImage: 'linear-gradient(to right, #000 0%, #000 45%, transparent 45%, transparent 55%, #000 55%, #000 100%) 1'
+          borderRadius: '1rem',
+          border: '6px solid #1B5E20'
         }}>
 
       <svg

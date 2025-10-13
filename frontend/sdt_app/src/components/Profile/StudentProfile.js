@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Layout from '../layout/Layout';
 import { useStudentData } from '../../hooks/useStudentData';
+import { useInteractionSimulator } from '../../hooks/useInteractionSimulator';
+import PottedPlantVisualization from '../StudentAnalytics/PottedPlantVisualization';
 import { TrendingUp, Zap, Award, Target, X } from 'lucide-react';
 
 /**
@@ -94,6 +96,8 @@ const detailsData = {
 const StudentProfile = () => {
   // --- keep original hook usage and id handling ---
   const { currentStudentId } = useStudentData();
+  const { getDashboardData } = useInteractionSimulator(currentStudentId);
+  const [dashboardData, setDashboardData] = useState(null);
 
   const studentPrefix = useMemo(() => {
     if (currentStudentId === undefined || currentStudentId === null) {
@@ -266,6 +270,14 @@ const StudentProfile = () => {
     setActiveImageSrc(null);
     playWaveThenLoop();
   }, [studentPrefix, playWaveThenLoop]);
+
+  // Fetch dashboard data for plant visualization
+  useEffect(() => {
+    if (currentStudentId) {
+      const data = getDashboardData();
+      setDashboardData(data);
+    }
+  }, [currentStudentId, getDashboardData]);
 
   // tiles with visual props (kept from original)
   const tiles = useMemo(() => [
@@ -507,6 +519,16 @@ const StudentProfile = () => {
                 <button style={{ width: 48, borderRadius: 10, background: '#0b0e1f', color: PALETTE.body }}>✉️</button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Potted Plant Visualization Section */}
+        {dashboardData?.recentInteractions && (
+          <div style={{ marginTop: '2rem' }}>
+            <PottedPlantVisualization
+              stats={dashboardData.recentInteractions}
+              showHeading={true}
+            />
           </div>
         )}
 

@@ -45,7 +45,7 @@ const ActivityBreakDown = ({ data, title = "Activity Breakdown" }) => {
 
   const unifiedData = data.map((entry, index) => ({
     ...entry,
-    color: ['#0099CC', '#00C4CC', '#00D2B8'][index % 3]
+    color: ['#f7fc00ff', '#00C4CC', '#ff0000ff'][index % 3]
   }));
 
   return (
@@ -72,13 +72,13 @@ const ActivityBreakDown = ({ data, title = "Activity Breakdown" }) => {
               innerRadius={45}
               dataKey="value"
               label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              labelLine={{ stroke: '#AAB3D1', strokeWidth: 1 }}
+              labelLine={{ stroke: '#ffffffff', strokeWidth: 1 }}
             >
               {unifiedData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
                   fill={entry.color}
-                  stroke="#1A1B4B"
+                  stroke="#f4f4f5ff"
                   strokeWidth={2}
                 />
               ))}

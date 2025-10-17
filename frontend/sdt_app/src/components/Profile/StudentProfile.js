@@ -305,18 +305,17 @@ const StudentProfile = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-primary-bg-start to-primary-bg-end p-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-card-bg/60 to-card-bg/60 rounded-xl p-6 border border-card-accent-end/50 shadow-lg">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-card-accent-start to-card-accent-end rounded-full blur-3xl opacity-20" />
-            <div className="relative">
-              <h1 className="text-3xl font-bold text-title-text mb-2">Welcome {displayName}</h1>
-              <p className="text-sm text-secondary-text">Your Digital Twin Learning Profile</p>
-            </div>
+      <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6">
+        <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+          <div className="relative">
+            <h1 className="text-3xl font-bold text-title-text mb-2">Welcome {displayName}</h1>
+            <p className="text-sm text-secondary-text">Your Digital Twin Learning Profile</p>
           </div>
+        </div>
+      </div>
 
-          {/* Main Grid */}
+      <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6">
+        <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
             {/* Left Column - First Two Tiles */}
             <div className="space-y-6 flex flex-col">
@@ -360,18 +359,19 @@ const StudentProfile = () => {
               ))}
             </div>
           </div>
-
-          {/* Potted Plant Visualization Section */}
-          {dashboardData?.recentInteractions && (
-            <div className="mt-8">
-              <PottedPlantVisualization
-                stats={dashboardData.recentInteractions}
-                showHeading={true}
-              />
-            </div>
-          )}
         </div>
       </div>
+
+      {dashboardData?.recentInteractions && (
+        <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6">
+          <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+            <PottedPlantVisualization
+              stats={dashboardData.recentInteractions}
+              showHeading={true}
+            />
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };

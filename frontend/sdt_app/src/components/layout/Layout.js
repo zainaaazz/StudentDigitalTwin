@@ -51,7 +51,7 @@ const Layout = ({ children, className = '' }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className={`min-h-screen bg-zinc-900 ${className}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-primary-bg-start to-primary-bg-end ${className}`}>
       {/* Mobile menu button - positioned absolutely */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -125,7 +125,7 @@ const Layout = ({ children, className = '' }) => {
         </aside>
 
         {/* Content */}
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 sdt-dark bg-zinc-800 text-slate-100">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 bg-card-bg text-body">
           {children}
         </main>
       </div>

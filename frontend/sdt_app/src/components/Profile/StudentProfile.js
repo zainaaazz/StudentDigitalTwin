@@ -231,7 +231,7 @@ const StudentProfile = () => {
       mediaSuffix: `${MEDIA_THEME}_top-left.jpg`, 
       icon: TrendingUp, 
       gradient: 'from-engagement-icon-start to-engagement-icon-end', 
-      bgGradient: 'from-primary-bg-start/30 to-primary-bg-end/30', 
+      bgGradient: 'from-card-bg/60 to-card-bg/60', 
       textColor: 'text-primary-text', 
       borderColor: 'border-card-accent-end/50' 
     },
@@ -242,7 +242,7 @@ const StudentProfile = () => {
       mediaSuffix: `${MEDIA_THEME}_bottom-left.jpg`, 
       icon: Zap, 
       gradient: 'from-interactivity-icon-start to-interactivity-icon-end', 
-      bgGradient: 'from-primary-bg-start/30 to-primary-bg-end/30', 
+      bgGradient: 'from-card-bg/60 to-card-bg/60', 
       textColor: 'text-primary-text', 
       borderColor: 'border-card-accent-end/50' 
     },
@@ -253,7 +253,7 @@ const StudentProfile = () => {
       mediaSuffix: `${MEDIA_THEME}_top-right.jpg`, 
       icon: Award, 
       gradient: 'from-academic-icon-start to-academic-icon-end', 
-      bgGradient: 'from-primary-bg-start/30 to-primary-bg-end/30', 
+      bgGradient: 'from-card-bg/60 to-card-bg/60', 
       textColor: 'text-primary-text', 
       borderColor: 'border-card-accent-end/50' 
     },
@@ -264,7 +264,7 @@ const StudentProfile = () => {
       mediaSuffix: `${MEDIA_THEME}_bottom-right.jpg`, 
       icon: Target, 
       gradient: 'from-card-accent-start to-card-accent-end', 
-      bgGradient: 'from-primary-bg-start/30 to-primary-bg-end/30', 
+      bgGradient: 'from-card-bg/60 to-card-bg/60', 
       textColor: 'text-primary-text', 
       borderColor: 'border-card-accent-end/50' 
     }
@@ -308,8 +308,8 @@ const StudentProfile = () => {
       <div className="min-h-screen bg-gradient-to-br from-primary-bg-start to-primary-bg-end p-8">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-primary-bg-start/30 to-primary-bg-end/30 rounded-xl p-6 border border-card-accent-end/50 shadow-lg">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-card-accent-end/50 rounded-full blur-3xl opacity-30" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-card-bg/60 to-card-bg/60 rounded-xl p-6 border border-card-accent-end/50 shadow-lg">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-card-accent-start to-card-accent-end rounded-full blur-3xl opacity-20" />
             <div className="relative">
               <h1 className="text-3xl font-bold text-title-text mb-2">Welcome {displayName}</h1>
               <p className="text-sm text-secondary-text">Your Digital Twin Learning Profile</p>
@@ -329,29 +329,26 @@ const StudentProfile = () => {
 
             {/* Center - Video/Image Display */}
             <div 
-              className="relative overflow-hidden bg-gradient-to-br from-primary-bg-start/30 to-primary-bg-end/30 rounded-xl border border-card-accent-end/50 shadow-lg cursor-pointer transition-all duration-300 hover:border-card-accent-end/70 hover:shadow-xl hover:shadow-card-accent-end/30"
+              className="relative aspect-[3/4] flex items-center justify-center p-4 bg-avatar-frame rounded-lg"
               onMouseEnter={handleCenterMouseEnter}
             >
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-card-accent-start to-card-accent-end rounded-full blur-3xl opacity-20" />
-              <div className="relative aspect-[3/4] flex items-center justify-center p-4">
-                <video
-                  id="heroVideo"
-                  ref={heroVideoRef}
+              <video
+                id="heroVideo"
+                ref={heroVideoRef}
+                className="w-full h-full object-cover rounded-lg"
+                playsInline
+                muted
+                preload="auto"
+                style={{ display: activeImageSrc ? 'none' : 'block' }}
+                poster={buildMediaUrl(straightPoster) || undefined}
+              />
+              {activeImageSrc && (
+                <img
+                  src={activeImageSrc}
+                  alt="Preview"
                   className="w-full h-full object-cover rounded-lg"
-                  playsInline
-                  muted
-                  preload="auto"
-                  style={{ display: activeImageSrc ? 'none' : 'block' }}
-                  poster={buildMediaUrl(straightPoster) || undefined}
                 />
-                {activeImageSrc && (
-                  <img
-                    src={activeImageSrc}
-                    alt="Preview"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                )}
-              </div>
+              )}
             </div>
 
             {/* Right Column - Last Two Tiles */}

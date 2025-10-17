@@ -3,8 +3,7 @@ import React from 'react';
 const WeekSelector = ({ weeks, selectedWeek, onWeekChange }) => {
   return (
     <div className="flex items-center gap-3">
-      <label htmlFor="week-select" className="text-sm font-bold text-gray-700 whitespace-nowrap">
-        Week:
+<label htmlFor="week-select" className="text-sm font-bold text-white whitespace-nowrap">        Week:
       </label>
       <div className="relative">
         <select

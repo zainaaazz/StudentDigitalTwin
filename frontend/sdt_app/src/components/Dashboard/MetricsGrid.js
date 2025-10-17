@@ -1,67 +1,62 @@
 import MetricCard from './MetricCard';
 
 const MetricsGrid = ({ analytics, selectedStudent, selectedWeek = 'all' }) => {
-  // If no data, show loading state
   if (!analytics) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="bg-indigo-950/30 backdrop-blur-sm rounded-xl shadow-lg border border-indigo-800/50 p-6 animate-pulse">
-            <div className="h-4 bg-indigo-800/50 rounded w-3/4 mb-2"></div>
-            <div className="h-8 bg-indigo-800/50 rounded w-1/2"></div>
+          <div key={i} className="bg-card-bg backdrop-blur-sm rounded-xl shadow-lg border border-card-accent-end/50 p-6 animate-pulse">
+            <div className="h-4 bg-primary-bg-start/50 rounded w-3/4 mb-2"></div>
+            <div className="h-8 bg-primary-bg-start/50 rounded w-1/2"></div>
           </div>
         ))}
       </div>
     );
   }
 
-  // Map hex colors to colorClass values for MetricCard
   const getColorClass = (color) => {
     switch (color) {
       case '#2563EB': return 'teal';
-      case '#16A34A': return 'red'; // Using red to align with theme, as green is not used
-      case '#6B7280': return 'indigo';
+      case '#16A34A': return 'cyan';
+      case '#6B7280': return 'purple';
       default: return 'teal';
     }
   };
 
-  // Icons for each metric - updated strokes to theme colors
   const TotalClicksIcon = () => (
-    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#00C4B4">
+    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#00C4CC">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.108l-1.414 1.414M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
     </svg>
   );
 
   const HomepageIcon = () => (
-    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#FF0000">
+    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#0099CC">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
     </svg>
   );
 
   const ContentIcon = () => (
-    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#00C4B4">
+    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#00C4CC">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
   );
 
   const StudentsIcon = () => (
-    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#4B0082">
+    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#00D2B8">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
     </svg>
   );
 
   const ActivityIcon = () => (
-    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#00C4B4">
+    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#00C4CC">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
     </svg>
   );
 
-  // Determine if we're showing individual student data or aggregate
   const isIndividualStudent = selectedStudent && selectedStudent !== 'all';
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {/* Total Clicks */}
       <MetricCard
         title="Total Clicks"
         value={analytics.totalClicks}
@@ -71,8 +66,6 @@ const MetricsGrid = ({ analytics, selectedStudent, selectedWeek = 'all' }) => {
         subtitle={isIndividualStudent ? `Weekly Avg: ${analytics.averages?.totalClicks || 0}` : null}
         tooltip={selectedWeek === 'all' ? "Total number of all platform interactions including homepage visits, content views, and resource access" : `Total interactions for Week ${selectedWeek}`}
       />
-
-      {/* Homepage Views */}
       <MetricCard
         title="Homepage Views"
         value={analytics.homepageClicks}
@@ -82,8 +75,6 @@ const MetricsGrid = ({ analytics, selectedStudent, selectedWeek = 'all' }) => {
         subtitle={isIndividualStudent ? `Weekly Avg: ${analytics.averages?.homepageViews || 0}` : null}
         tooltip={selectedWeek === 'all' ? "Number of times the course homepage was accessed" : `Homepage visits for Week ${selectedWeek}`}
       />
-
-      {/* Content Views */}
       <MetricCard
         title="Content Views"
         value={analytics.contentClicks}
@@ -93,8 +84,6 @@ const MetricsGrid = ({ analytics, selectedStudent, selectedWeek = 'all' }) => {
         subtitle={isIndividualStudent ? `Weekly Avg: ${analytics.averages?.contentViews || 0}` : null}
         tooltip={selectedWeek === 'all' ? "Number of times course content and learning materials were accessed" : `Content views for Week ${selectedWeek}`}
       />
-
-      {/* Active Students or Daily Activity */}
       {isIndividualStudent ? (
         <MetricCard
           title={selectedWeek === 'all' ? 'Avg Clicks Per Day' : `Week ${selectedWeek} Avg/Day`}

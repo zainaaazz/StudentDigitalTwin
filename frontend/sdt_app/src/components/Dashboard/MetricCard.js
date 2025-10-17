@@ -1,11 +1,11 @@
 import React from 'react';
 import { InfoIcon } from '../UI/Tooltip';
 
-const MetricCard = ({ title, value, icon: Icon, colorClass = 'teal', evaluation, subtitle, tooltip }) => {
+const MetricCard = ({ title, value, icon: Icon, colorClass = 'cyan', evaluation, subtitle, tooltip }) => {
   const colorClasses = {
-    teal: 'bg-teal-950/50 text-teal-300 border-teal-800/50 from-teal-500 to-emerald-600',
-    red: 'bg-red-950/50 text-red-300 border-red-800/50 from-red-500 to-rose-600',
-    indigo: 'bg-indigo-950/50 text-indigo-300 border-indigo-800/50 from-indigo-500 to-cyan-600',
+    cyan: 'bg-card-bg text-primary-text border-card-accent-end/30 from-card-accent-start to-card-accent-end',
+    teal: 'bg-card-bg text-primary-text border-academic-icon-end/30 from-academic-icon-start to-academic-icon-end',
+    purple: 'bg-card-bg text-primary-text border-interactivity-icon-end/30 from-interactivity-icon-start to-interactivity-icon-end',
   };
 
   const EvaluationIndicator = ({ evaluation }) => {
@@ -13,10 +13,10 @@ const MetricCard = ({ title, value, icon: Icon, colorClass = 'teal', evaluation,
 
     const getStatusColor = (status) => {
       switch (status) {
-        case 'above': return 'text-teal-200 bg-teal-900/70 border-teal-600';
-        case 'below': return 'text-red-200 bg-red-900/70 border-red-600';
-        case 'average': return 'text-indigo-200 bg-indigo-900/70 border-indigo-600';
-        default: return 'text-indigo-200 bg-indigo-900/70 border-indigo-600';
+        case 'above': return 'text-good-status-dot bg-good-status-dot/20 border-good-status-dot/50';
+        case 'below': return 'text-red-400 bg-red-400/20 border-red-400/50';
+        case 'average': return 'text-primary-text bg-card-accent-end/20 border-card-accent-end/50';
+        default: return 'text-secondary-text bg-secondary-text/20 border-secondary-text/50';
       }
     };
 
@@ -73,22 +73,22 @@ const MetricCard = ({ title, value, icon: Icon, colorClass = 'teal', evaluation,
   };
 
   return (
-    <div className="relative bg-indigo-950/30 backdrop-blur-sm rounded-xl shadow-lg border border-indigo-800/50 p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-teal-500/20 group">
-      <div className="absolute inset-0 bg-gradient-to-br from-teal-950/30 to-emerald-950/30 opacity-0 group-hover:opacity-20 rounded-xl transition-opacity duration-300" />
+    <div className="relative bg-card-bg backdrop-blur-sm rounded-xl shadow-lg border border-card-accent-end/30 p-6 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-card-accent-end/20 group">
+      <div className="absolute inset-0 bg-gradient-to-br from-card-accent-start/10 to-card-accent-end/10 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity duration-300" />
       <div className="relative flex items-center justify-between">
         <div>
           <div className="flex items-center gap-1">
-            <p className="text-indigo-200 text-sm font-medium tracking-wide">{title}</p>
+            <p className="text-secondary-text text-sm font-medium tracking-wide">{title}</p>
           </div>
-          <p className="text-3xl font-bold text-teal-300 mt-1">
+          <p className="text-3xl font-bold text-primary-text mt-1">
             {typeof value === 'number' ? formatNumber(value) : value}
           </p>
           {subtitle && (
-            <div className="text-xs text-indigo-200 mt-1">{subtitle}</div>
+            <div className="text-xs text-subtitle-text mt-1">{subtitle}</div>
           )}
           <EvaluationIndicator evaluation={evaluation} />
         </div>
-        <div className={`p-3 rounded-full border ${colorClasses[colorClass]} bg-gradient-to-br shadow-sm group-hover:shadow-lg group-hover:shadow-teal-500/30 transition-shadow`}>
+        <div className={`p-3 rounded-full border ${colorClasses[colorClass]} bg-gradient-to-br shadow-sm group-hover:shadow-lg group-hover:shadow-card-accent-end/30 transition-shadow`}>
           <Icon className="w-6 h-6 text-white" />
         </div>
       </div>

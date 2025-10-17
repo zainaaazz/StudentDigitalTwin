@@ -76,26 +76,26 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
     thriving: {
       title: 'Thriving',
       description: 'This student is performing well and engaged with learning',
-      gradient: 'from-teal-500 to-emerald-600',
-      bgGradient: 'from-teal-950/30 to-emerald-950/30',
-      textColor: 'text-teal-400',
-      badgeBg: 'bg-teal-950/50 border-teal-800',
-      badgeText: 'text-teal-400',
+      gradient: 'from-good-status-dot to-academic-icon-end',
+      bgGradient: 'from-good-status-dot/30 to-academic-icon-end/30',
+      textColor: 'text-good-text-label',
+      badgeBg: 'bg-good-status-dot/50 border-good-status-dot',
+      badgeText: 'text-good-text-label',
       icon: '🌟',
-      ringColor: 'ring-teal-500/50',
-      borderColor: 'border-teal-800/50'
+      ringColor: 'ring-good-status-dot/50',
+      borderColor: 'border-good-status-dot/50'
     },
     coping: {
       title: 'Coping Well',
       description: 'This student is maintaining steady progress',
-      gradient: 'from-indigo-500 to-cyan-600',
-      bgGradient: 'from-indigo-950/30 to-cyan-950/30',
-      textColor: 'text-indigo-400',
-      badgeBg: 'bg-indigo-950/50 border-indigo-800',
-      badgeText: 'text-indigo-400',
+      gradient: 'from-yellow-500 to-yellow-600',
+      bgGradient: 'from-yellow-950/30 to-yellow-950/30',
+      textColor: 'text-yellow-400',
+      badgeBg: 'bg-yellow-950/50 border-yellow-800',
+      badgeText: 'text-yellow-400',
       icon: '⚖️',
-      ringColor: 'ring-indigo-500/50',
-      borderColor: 'border-indigo-800/50'
+      ringColor: 'ring-yellow-500/50',
+      borderColor: 'border-yellow-800/50'
     }
   };
 
@@ -126,7 +126,7 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
               />
             </div>
             
-            <div className={`absolute -bottom-3 -right-3 w-14 h-14 rounded-full bg-gradient-to-br ${config.gradient} border-4 border-slate-800 flex items-center justify-center shadow-xl`}>
+            <div className={`absolute -bottom-3 -right-3 w-14 h-14 rounded-full bg-gradient-to-br ${config.gradient} border-4 border-primary-bg-end flex items-center justify-center shadow-xl`}>
               <span className="text-2xl">{config.icon}</span>
             </div>
           </div>
@@ -143,7 +143,7 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
             </span>
           </div>
           
-          <p className="text-slate-300 text-base font-semibold leading-relaxed mb-4">
+          <p className="text-body-text text-base font-semibold leading-relaxed mb-4">
             {config.description}
           </p>
 
@@ -152,12 +152,12 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
               {Object.entries(analytics.evaluation).slice(0, 3).map(([key, metric], idx) => {
                 if (!metric) return null;
                 const statusColors = {
-                  above: 'bg-teal-950/50 text-teal-400 border-teal-800',
-                  below: 'bg-rose-950/50 text-rose-400 border-rose-800',
-                  average: 'bg-indigo-950/50 text-indigo-400 border-indigo-800'
+                  above: 'bg-good-status-dot/50 text-good-text-label border-good-status-dot',
+                  below: 'bg-red-950/50 text-red-400 border-red-800',
+                  average: 'bg-card-bg text-secondary-text border-card-accent-end'
                 };
                 return (
-                  <span key={idx} className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border shadow-md ${statusColors[metric.status] || 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                  <span key={idx} className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border shadow-md ${statusColors[metric.status] || 'bg-primary-bg-start text-secondary-text border-card-accent-end'}`}>
                     {key.replace(/([A-Z])/g, ' $1').trim()}: {metric.status}
                   </span>
                 );

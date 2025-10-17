@@ -8,19 +8,19 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
 
   if (!recommendations.length && (riskLevel === 'normal' || riskLevel === 'low')) {
     return (
-      <div className="relative overflow-hidden bg-gradient-to-br from-teal-950/30 to-emerald-950/30 rounded-xl p-6 border border-teal-800/50">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-teal-950/50 rounded-full blur-3xl opacity-30" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary-bg-start/30 to-primary-bg-end/30 rounded-xl p-6 border border-card-accent-end/50">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-card-accent-end/50 rounded-full blur-3xl opacity-30" />
         <div className="relative flex items-center gap-4">
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-card-accent-start to-card-accent-end shadow-lg">
               <svg className="w-7 h-7 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-teal-300 mb-1">Great Learning Balance</h3>
-            <p className="text-sm text-indigo-100">Your learning activity looks healthy and consistent. Keep up the excellent work!</p>
+            <h3 className="text-xl font-bold text-primary-text mb-1">Great Learning Balance</h3>
+            <p className="text-sm text-body-text">Your learning activity looks healthy and consistent. Keep up the excellent work!</p>
           </div>
         </div>
       </div>
@@ -40,33 +40,33 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
     },
     medium: { 
       label: 'Moderate Attention', 
-      gradient: 'from-teal-500 to-emerald-600',
-      bgGradient: 'from-teal-950/30 to-emerald-950/30',
-      textColor: 'text-teal-300',
-      badgeBg: 'bg-teal-900/70 border-teal-600', 
-      badgeText: 'text-teal-200',
-      dotColor: 'bg-teal-400',
-      borderColor: 'border-teal-800/50'
+      gradient: 'from-good-status-dot to-academic-icon-end',
+      bgGradient: 'from-good-status-dot/30 to-academic-icon-end/30',
+      textColor: 'text-good-text-label',
+      badgeBg: 'bg-good-status-dot/70 border-good-status-dot', 
+      badgeText: 'text-good-text-label',
+      dotColor: 'bg-good-status-dot',
+      borderColor: 'border-good-status-dot/50'
     },
     low: { 
       label: 'Minor Adjustments', 
-      gradient: 'from-indigo-500 to-cyan-600',
-      bgGradient: 'from-indigo-950/30 to-cyan-950/30',
-      textColor: 'text-indigo-300',
-      badgeBg: 'bg-indigo-900/70 border-indigo-600', 
-      badgeText: 'text-indigo-200',
-      dotColor: 'bg-indigo-400',
-      borderColor: 'border-indigo-800/50'
+      gradient: 'from-card-accent-start to-card-accent-end',
+      bgGradient: 'from-primary-bg-start/30 to-primary-bg-end/30',
+      textColor: 'text-primary-text',
+      badgeBg: 'bg-card-bg/70 border-card-accent-end', 
+      badgeText: 'text-secondary-text',
+      dotColor: 'bg-card-accent-end',
+      borderColor: 'border-card-accent-end/50'
     },
     normal: { 
       label: 'Monitoring Recommended', 
-      gradient: 'from-teal-500 to-emerald-600',
-      bgGradient: 'from-teal-950/30 to-emerald-950/30',
-      textColor: 'text-teal-300',
-      badgeBg: 'bg-teal-900/70 border-teal-600', 
-      badgeText: 'text-teal-200',
-      dotColor: 'bg-teal-400',
-      borderColor: 'border-teal-800/50'
+      gradient: 'from-card-accent-start to-card-accent-end',
+      bgGradient: 'from-primary-bg-start/30 to-primary-bg-end/30',
+      textColor: 'text-primary-text',
+      badgeBg: 'bg-card-bg/70 border-card-accent-end', 
+      badgeText: 'text-secondary-text',
+      dotColor: 'bg-card-accent-end',
+      borderColor: 'border-card-accent-end/50'
     }
   };
   const riskConfig = riskConfigMap[riskLevel] || riskConfigMap.normal;
@@ -94,67 +94,56 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
         return { 
           icon: Scale, 
           title: 'Learning Balance', 
-          gradient: 'from-teal-500 to-emerald-600',
-          bgColor: 'bg-gradient-to-br from-teal-950/30 to-emerald-950/30',
-          textColor: 'text-teal-300',
-          iconBg: 'bg-teal-900/70',
-          borderColor: 'border-teal-800/50'
+          gradient: 'from-good-status-dot to-academic-icon-end',
+          bgColor: 'bg-gradient-to-br from-good-status-dot/30 to-academic-icon-end/30',
+          textColor: 'text-good-text-label',
+          iconBg: 'bg-good-status-dot/70',
+          borderColor: 'border-good-status-dot/50'
         };
       case 'engagement': 
         return { 
           icon: TrendingUp, 
           title: 'Increase Engagement', 
-          gradient: 'from-indigo-500 to-cyan-600',
-          bgColor: 'bg-gradient-to-br from-indigo-950/30 to-cyan-950/30',
-          textColor: 'text-indigo-300',
-          iconBg: 'bg-indigo-900/70',
-          borderColor: 'border-indigo-800/50'
+          gradient: 'from-interactivity-icon-start to-interactivity-icon-end',
+          bgColor: 'bg-gradient-to-br from-interactivity-icon-start/30 to-interactivity-icon-end/30',
+          textColor: 'text-primary-text',
+          iconBg: 'bg-interactivity-icon-start/70',
+          borderColor: 'border-interactivity-icon-end/50'
         };
       case 'improvement': 
         return { 
           icon: Target, 
           title: 'Performance Enhancement', 
-          gradient: 'from-teal-500 to-emerald-600',
-          bgColor: 'bg-gradient-to-br from-teal-950/30 to-emerald-950/30',
-          textColor: 'text-teal-300',
-          iconBg: 'bg-teal-900/70',
-          borderColor: 'border-teal-800/50'
+          gradient: 'from-good-status-dot to-academic-icon-end',
+          bgColor: 'bg-gradient-to-br from-good-status-dot/30 to-academic-icon-end/30',
+          textColor: 'text-good-text-label',
+          iconBg: 'bg-good-status-dot/70',
+          borderColor: 'border-good-status-dot/50'
         };
       default: 
         return { 
           icon: Lightbulb, 
           title: 'General Recommendations', 
-          gradient: 'from-indigo-500 to-cyan-600',
-          bgColor: 'bg-gradient-to-br from-indigo-950/30 to-cyan-950/30',
-          textColor: 'text-indigo-300',
-          iconBg: 'bg-indigo-900/70',
-          borderColor: 'border-indigo-800/50'
+          gradient: 'from-card-accent-start to-card-accent-end',
+          bgColor: 'bg-gradient-to-br from-primary-bg-start/30 to-primary-bg-end/30',
+          textColor: 'text-primary-text',
+          iconBg: 'bg-card-bg/70',
+          borderColor: 'border-card-accent-end/50'
         };
     }
   };
 
-  const getTotalActivity = () => analytics?.totalActivity || 0;
-  const getAvgDaily = () => analytics?.avgClicksPerDay || 0;
-  const getActiveDays = () => analytics?.dailyActivity?.length || 0;
-
   const summaryMessage = () => {
-    const totalActivity = getTotalActivity();
-    const avgDaily = getAvgDaily();
-    const activeDays = getActiveDays();
-    
-    const burnoutCount = grouped.burnout?.length || 0;
-    const engagementCount = grouped.engagement?.length || 0;
-    const balanceCount = grouped.balance?.length || 0;
-    const improvementCount = grouped.improvement?.length || 0;
-    
-    if (burnoutCount > 0) {
-      return `High activity intensity (${totalActivity} total) — monitor for burnout signs.`;
+    const totalActivity = analytics?.totalClicks || 0;
+    const activeDays = analytics?.dailyActivity?.length || 0;
+    const avgDaily = activeDays ? Math.round(totalActivity / activeDays) : 0;
+    const improvementCount = recommendations.filter(r => r.type === 'improvement').length;
+
+    if (riskLevel === 'high' || improvementCount > 3) {
+      return `High attention needed with ${totalActivity} total interactions — consider workload adjustments.`;
     }
-    if (engagementCount > 0) {
-      return `Low engagement pattern (${avgDaily} interactions/day) — consider increasing daily participation.`;
-    }
-    if (balanceCount > 0) {
-      return `Irregular activity pattern across ${activeDays} active days — establish consistent routines.`;
+    if (riskLevel === 'medium') {
+      return `Moderate activity pattern across ${activeDays} active days — establish consistent routines.`;
     }
     if (improvementCount > 0) {
       return `Moderate activity level with ${totalActivity} total interactions — room for enhancement.`;
@@ -165,8 +154,8 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
 
   const priorityConfig = (p) => {
     if (p === 'high') return { dot: 'bg-red-400', ring: 'ring-red-600/60' };
-    if (p === 'medium') return { dot: 'bg-teal-400', ring: 'ring-teal-600/60' };
-    return { dot: 'bg-indigo-400', ring: 'ring-indigo-600/60' };
+    if (p === 'medium') return { dot: 'bg-good-status-dot', ring: 'ring-good-status-dot/60' };
+    return { dot: 'bg-card-accent-end', ring: 'ring-card-accent-end/60' };
   };
 
   return (
@@ -184,10 +173,10 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-teal-300 mb-1">
+            <h3 className="text-xl font-bold text-primary-text mb-1">
               {userRole === 'student' ? 'Your Learning Assessment' : 'Student Learning Assessment'}
             </h3>
-            <p className="text-sm text-indigo-100">
+            <p className="text-sm text-body-text">
               <span className="font-semibold">{riskConfig.label}</span> — {summaryMessage()}
             </p>
           </div>
@@ -214,7 +203,7 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className={`text-base font-bold ${cfg.textColor}`}>{cfg.title}</div>
-                    <div className="text-xs text-indigo-200">{recs.length} recommendation{recs.length !== 1 ? 's' : ''}</div>
+                    <div className="text-xs text-secondary-text">{recs.length} recommendation{recs.length !== 1 ? 's' : ''}</div>
                   </div>
                 </div>
 
@@ -222,12 +211,12 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
                   {recs.map((rec, i) => {
                     const pConfig = priorityConfig(rec.priority);
                     return (
-                      <div key={i} className="flex items-start gap-3 bg-indigo-950/70 backdrop-blur-sm rounded-lg p-3 border border-indigo-700/50">
+                      <div key={i} className="flex items-start gap-3 bg-primary-bg-start/70 backdrop-blur-sm rounded-lg p-3 border border-card-accent-end/50">
                         <div className="mt-0.5">
                           <span className={`inline-block w-2.5 h-2.5 rounded-full ${pConfig.dot} ring-2 ${pConfig.ring} shadow-lg`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-indigo-100 leading-relaxed">{rec.message}</p>
+                          <p className="text-sm text-body-text leading-relaxed">{rec.message}</p>
                           <div className="flex items-center gap-2 mt-2">
                             <span className={`text-xs font-semibold ${cfg.textColor} uppercase tracking-wide`}>
                               {rec.priority} priority

@@ -124,7 +124,7 @@ const StudentDashboard = ({ currentUser = null }) => {
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-1">
                   <span className="text-sm font-semibold text-teal-100">Weekly Engagement</span>
-                  <InfoIcon tooltip="Percentage of active learning sessions this week compared to expected activity levels" />
+                  <InfoIcon tooltip="Percentage of time spent in social interactions with classmates this week compared to typical levels" />
                 </div>
                 <span className="text-sm font-bold text-teal-400">{data.currentStats.weeklyEngagement}%</span>
               </div>
@@ -157,7 +157,7 @@ const StudentDashboard = ({ currentUser = null }) => {
             <div className="flex justify-between items-center pt-2">
               <div className="flex items-center gap-1">
                 <span className="text-sm font-semibold text-teal-100">Participation Trend</span>
-                <InfoIcon tooltip="Shows whether your participation is increasing, decreasing, or staying stable over recent weeks" />
+                <InfoIcon tooltip="Shows whether your social interaction frequency with classmates is increasing, decreasing, or staying stable over recent weeks" />
               </div>
               <div className="flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-900/40 border border-teal-500/30">
                 {getTrendIcon(data.currentStats.participationTrend)}
@@ -184,7 +184,7 @@ const StudentDashboard = ({ currentUser = null }) => {
                   <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{data.recentInteractions.totalInteractions}</p>
                   <div className="flex items-center gap-1">
                     <p className="text-sm text-teal-400 font-medium">Total Interactions</p>
-                    <InfoIcon tooltip="Total number of learning platform interactions including content views, forum posts, quiz attempts, and resource access" />
+                    <InfoIcon tooltip="Total number of face-to-face social interactions with classmates detected in the classroom environment" />
                   </div>
                 </div>
               </div>
@@ -203,7 +203,7 @@ const StudentDashboard = ({ currentUser = null }) => {
                   <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{Math.round(data.recentInteractions.averageDuration / 60)}m</p>
                   <div className="flex items-center gap-1">
                     <p className="text-sm text-cyan-400 font-medium">Avg Duration</p>
-                    <InfoIcon tooltip="Average time spent per learning session. Longer durations often indicate deeper engagement with course materials" />
+                    <InfoIcon tooltip="Average duration of face-to-face social interactions with classmates. Longer durations may indicate deeper social connections" />
                   </div>
                 </div>
               </div>
@@ -241,7 +241,7 @@ const StudentDashboard = ({ currentUser = null }) => {
                   <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{data.currentStats.sessionsThisWeek}</p>
                   <div className="flex items-center gap-1">
                     <p className="text-sm text-cyan-400 font-medium">Sessions This Week</p>
-                    <InfoIcon tooltip="Number of distinct learning sessions recorded this week. A session is a continuous period of platform activity" />
+                    <InfoIcon tooltip="Number of distinct social interaction sessions with classmates this week. A session is a continuous period of face-to-face interaction" />
                   </div>
                 </div>
               </div>
@@ -256,7 +256,7 @@ const StudentDashboard = ({ currentUser = null }) => {
           <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-8">
             <div className="flex items-center gap-2 mb-6">
               <h3 className="text-2xl font-bold text-teal-400">Engagement Trends Over Time</h3>
-              <InfoIcon tooltip="Track your learning engagement and activity levels across recent weeks" />
+              <InfoIcon tooltip="Track your social interaction frequency and activity with classmates across recent weeks" />
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={engagementTrendData}>
@@ -295,14 +295,14 @@ const StudentDashboard = ({ currentUser = null }) => {
 
       {/* Recent Interactions and Partners */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="group">
-          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300">
-            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-8">
+        <div className="group h-full">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300 h-full">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-8 h-full flex flex-col">
             <div className="flex items-center gap-2 mb-6">
               <h3 className="text-2xl font-bold text-teal-400">Top Interaction Partners</h3>
-              <InfoIcon tooltip="Classmates you interact with most frequently through collaborative activities, discussions, and group work" />
+              <InfoIcon tooltip="Classmates you interact with most frequently through face-to-face conversations and social activities in the classroom" />
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 flex-1">
               {data.recentInteractions.topInteractionPartners.map((partner, index) => (
                 <div key={partner.studentId} className="flex items-center space-x-3 p-4 rounded-xl transition-all transform hover:scale-105 bg-gradient-to-br from-indigo-900/40 to-cyan-900/40 border border-teal-500/30 shadow-lg hover:shadow-teal-500/50">
                   <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white shadow-lg bg-gradient-to-br from-teal-500 to-emerald-600">
@@ -319,40 +319,49 @@ const StudentDashboard = ({ currentUser = null }) => {
         </div>
         </div>
 
-        <div className="group">
-          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300">
-            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-8">
-            <div className="flex items-center gap-2 mb-6">
-              <h3 className="text-2xl font-bold text-teal-400">Weekly Session Activity</h3>
-              <InfoIcon tooltip="Number of learning sessions per week. Each bar represents total sessions for that week" />
-            </div>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={weeklySessionData}>
-                <defs>
-                  <linearGradient id="tealBarGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#14B8A6" />
-                    <stop offset="100%" stopColor="#10B981" />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(20, 184, 166, 0.2)" />
-                <XAxis dataKey="week" stroke="#5EEAD4" />
-                <YAxis stroke="#5EEAD4" />
-                <Tooltip
-                  contentStyle={{
-                    background: 'rgba(30, 41, 59, 0.95)',
-                    border: '2px solid #14B8A6',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
-                    color: '#5EEAD4'
-                  }}
-                />
-                <Bar dataKey="sessions" radius={[10, 10, 0, 0]}>
-                  {weeklySessionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill="url(#tealBarGradient)" />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+        <div className="group h-full">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300 h-full">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-8 h-full flex flex-col">
+              <div className="flex items-center gap-2 mb-6">
+                <h3 className="text-2xl font-bold text-teal-400">Weekly Session Activity</h3>
+                <InfoIcon tooltip="Number of social interaction sessions with classmates per week. Each bar represents total face-to-face interaction sessions for that week" />
+              </div>
+              <div className="flex-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={weeklySessionData}>
+                    <defs>
+                      <linearGradient id="tealBarGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#14B8A6" />
+                        <stop offset="100%" stopColor="#10B981" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(20, 184, 166, 0.2)" />
+                    <XAxis dataKey="week" stroke="#5EEAD4" />
+                    <YAxis stroke="#5EEAD4" />
+                    <Tooltip
+                      contentStyle={{
+                        background: 'rgba(30, 41, 59, 0.95)',
+                        border: '2px solid #14B8A6',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
+                        color: '#5EEAD4'
+                      }}
+                      labelStyle={{
+                        color: '#5EEAD4',
+                        fontWeight: 'bold'
+                      }}
+                      itemStyle={{
+                        color: '#5EEAD4'
+                      }}
+                    />
+                    <Bar dataKey="sessions" radius={[10, 10, 0, 0]}>
+                      {weeklySessionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill="url(#tealBarGradient)" />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </div>

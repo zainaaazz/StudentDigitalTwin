@@ -235,26 +235,6 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
                     </li>
                   </ul>
                 </div>
-
-                {/* HUD-style label */}
-                <div className="mt-4 pt-4" style={{
-                  borderTop: '1px solid rgba(0, 194, 255, 0.2)'
-                }}>
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full animate-pulse" style={{
-                        background: '#00E0B8',
-                        boxShadow: '0 0 10px #00E0B8'
-                      }} />
-                      <span className="font-bold tracking-wider" style={{ color: '#C7FFF6' }}>
-                        ACTIVE
-                      </span>
-                    </div>
-                    <span style={{ color: '#AAB3D1' }}>
-                      Stage {growthStage}/10 • {stats?.totalInteractions || 0} Interactions
-                    </span>
-                  </div>
-                </div>
               </div>
             </div>
 

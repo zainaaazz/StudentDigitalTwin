@@ -74,48 +74,39 @@ const StudentDashboard = ({ currentUser = null }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #2c1810 0%, #4a2c2a 100%)'}}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-200"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400"></div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #2c1810 0%, #4a2c2a 100%)'}}>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
         <div className="text-center">
-          <p style={{color: '#f5e6d3'}}>No dashboard data available</p>
+          <p className="text-teal-100">No dashboard data available</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-6" style={{background: 'linear-gradient(135deg, #2c1810 0%, #4a2c2a 100%)'}}>
+    <div className="min-h-screen p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
       {/* Navigation Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center justify-center w-10 h-10 rounded-lg transition-all transform hover:scale-105"
-              style={{
-                background: 'rgba(245, 230, 211, 0.15)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(212, 165, 116, 0.3)'
-              }}
+              className="flex items-center justify-center w-10 h-10 rounded-lg transition-all transform hover:scale-105 bg-indigo-950/50 backdrop-blur-md border border-indigo-800/50 hover:shadow-teal-500/50"
             >
-              <ArrowLeft className="w-5 h-5" style={{color: '#f5e6d3'}} />
+              <ArrowLeft className="w-5 h-5 text-teal-400" />
             </button>
-            <h1 className="text-3xl font-bold drop-shadow-lg" style={{color: '#f5e6d3'}}>Student Interaction Dashboard</h1>
+            <h1 className="text-3xl font-bold drop-shadow-lg text-teal-100">Student Interaction Dashboard</h1>
           </div>
           <Link
             to="/student-interactions"
-            className="inline-flex items-center px-6 py-3 rounded-xl transition-all transform hover:scale-105 shadow-lg"
-            style={{
-              background: 'linear-gradient(135deg, #d4a574 0%, #8b6f47 100%)',
-              color: '#fff'
-            }}
+            className="inline-flex items-center px-6 py-3 rounded-xl transition-all transform hover:scale-105 shadow-lg bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-teal-500/30"
           >
             <Timeline className="w-4 h-4 mr-2" />
             View Interaction Timeline
@@ -125,29 +116,23 @@ const StudentDashboard = ({ currentUser = null }) => {
 
       {/* Header Section */}
       <div className="grid grid-cols-1 gap-6 mb-6">
-        <div className="rounded-2xl shadow-xl p-8 backdrop-blur-md" style={{
-          background: 'linear-gradient(135deg, #f5e6d3 0%, #e8d5c4 100%)',
-          border: '2px solid rgba(139, 111, 71, 0.2)'
-        }}>
-          <h3 className="text-2xl font-bold mb-6" style={{
-            color: '#3d2817'
-          }}>Current Week Stats</h3>
+        <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1">
+          <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-8">
+            <h3 className="text-2xl font-bold mb-6 text-teal-400">Current Week Stats</h3>
           <div className="space-y-6">
             <div>
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm font-semibold" style={{color: '#5d3a1a'}}>Weekly Engagement</span>
+                  <span className="text-sm font-semibold text-teal-100">Weekly Engagement</span>
                   <InfoIcon tooltip="Percentage of active learning sessions this week compared to expected activity levels" />
                 </div>
-                <span className="text-sm font-bold" style={{color: '#8b6f47'}}>{data.currentStats.weeklyEngagement}%</span>
+                <span className="text-sm font-bold text-teal-400">{data.currentStats.weeklyEngagement}%</span>
               </div>
-              <div className="w-full rounded-full h-3 overflow-hidden" style={{background: 'rgba(139, 111, 71, 0.2)'}}>
+              <div className="w-full rounded-full h-3 overflow-hidden bg-indigo-900/40">
                 <div
-                  className="h-3 rounded-full transition-all duration-500"
+                  className="h-3 rounded-full transition-all duration-500 bg-gradient-to-r from-teal-500 to-emerald-600 shadow-lg shadow-teal-500/50"
                   style={{
-                    background: 'linear-gradient(90deg, #d4a574 0%, #8b6f47 100%)',
-                    width: `${data.currentStats.weeklyEngagement}%`,
-                    boxShadow: '0 2px 8px rgba(139, 111, 71, 0.3)'
+                    width: `${data.currentStats.weeklyEngagement}%`
                   }}
                 ></div>
               </div>
@@ -155,110 +140,110 @@ const StudentDashboard = ({ currentUser = null }) => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm font-semibold" style={{color: '#5d3a1a'}}>Network Centrality</span>
+                  <span className="text-sm font-semibold text-teal-100">Network Centrality</span>
                   <InfoIcon tooltip="Measures how central you are in the class collaboration network. Higher values indicate more connections with peers" />
                 </div>
-                <span className="text-sm font-bold" style={{color: '#a0826d'}}>{Math.round(data.currentStats.networkCentrality * 100)}%</span>
+                <span className="text-sm font-bold text-cyan-400">{Math.round(data.currentStats.networkCentrality * 100)}%</span>
               </div>
-              <div className="w-full rounded-full h-3 overflow-hidden" style={{background: 'rgba(160, 130, 109, 0.2)'}}>
+              <div className="w-full rounded-full h-3 overflow-hidden bg-indigo-900/40">
                 <div
-                  className="h-3 rounded-full transition-all duration-500"
+                  className="h-3 rounded-full transition-all duration-500 bg-gradient-to-r from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/50"
                   style={{
-                    background: 'linear-gradient(90deg, #c9b8a8 0%, #a0826d 100%)',
-                    width: `${data.currentStats.networkCentrality * 100}%`,
-                    boxShadow: '0 2px 8px rgba(160, 130, 109, 0.3)'
+                    width: `${data.currentStats.networkCentrality * 100}%`
                   }}
                 ></div>
               </div>
             </div>
             <div className="flex justify-between items-center pt-2">
               <div className="flex items-center gap-1">
-                <span className="text-sm font-semibold" style={{color: '#5d3a1a'}}>Participation Trend</span>
+                <span className="text-sm font-semibold text-teal-100">Participation Trend</span>
                 <InfoIcon tooltip="Shows whether your participation is increasing, decreasing, or staying stable over recent weeks" />
               </div>
-              <div className="flex items-center space-x-2 px-4 py-2 rounded-full" style={{
-                background: 'linear-gradient(135deg, #e8d5c4 0%, #d4c5b1 100%)',
-                border: '1px solid rgba(139, 111, 71, 0.3)'
-              }}>
+              <div className="flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-900/40 border border-teal-500/30">
                 {getTrendIcon(data.currentStats.participationTrend)}
-                <span className="text-sm font-bold capitalize" style={{color: '#3d2817'}}>
+                <span className="text-sm font-bold capitalize text-teal-100">
                   {data.currentStats.participationTrend}
                 </span>
               </div>
             </div>
           </div>
         </div>
+        </div>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="rounded-2xl shadow-xl p-6 transform hover:scale-105 transition-all duration-300" style={{
-          background: 'linear-gradient(135deg, #d4a574 0%, #8b6f47 100%)',
-          border: '2px solid rgba(61, 40, 23, 0.3)'
-        }}>
-          <div className="flex items-center">
-            <div className="p-3 rounded-xl mr-4" style={{background: 'rgba(255, 255, 255, 0.2)'}}>
-              <MessageCircle className="w-7 h-7 text-white" />
-            </div>
-            <div className="flex-1">
-              <p className="text-3xl font-bold text-white drop-shadow-lg">{data.recentInteractions.totalInteractions}</p>
-              <div className="flex items-center gap-1">
-                <p className="text-sm text-white/95 font-medium">Total Interactions</p>
-                <InfoIcon tooltip="Total number of learning platform interactions including content views, forum posts, quiz attempts, and resource access" />
+        <div className="group transform hover:scale-105 transition-all duration-300">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-xl mr-4 bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg">
+                  <MessageCircle className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{data.recentInteractions.totalInteractions}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm text-teal-400 font-medium">Total Interactions</p>
+                    <InfoIcon tooltip="Total number of learning platform interactions including content views, forum posts, quiz attempts, and resource access" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl shadow-xl p-6 transform hover:scale-105 transition-all duration-300" style={{
-          background: 'linear-gradient(135deg, #e8b298 0%, #c9a485 100%)',
-          border: '2px solid rgba(139, 111, 71, 0.3)'
-        }}>
-          <div className="flex items-center">
-            <div className="p-3 rounded-xl mr-4" style={{background: 'rgba(255, 255, 255, 0.25)'}}>
-              <Clock className="w-7 h-7 text-white" />
-            </div>
-            <div className="flex-1">
-              <p className="text-3xl font-bold text-white drop-shadow-lg">{Math.round(data.recentInteractions.averageDuration / 60)}m</p>
-              <div className="flex items-center gap-1">
-                <p className="text-sm text-white/95 font-medium">Avg Duration</p>
-                <InfoIcon tooltip="Average time spent per learning session. Longer durations often indicate deeper engagement with course materials" />
+        <div className="group transform hover:scale-105 transition-all duration-300">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-xl mr-4 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg">
+                  <Clock className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{Math.round(data.recentInteractions.averageDuration / 60)}m</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm text-cyan-400 font-medium">Avg Duration</p>
+                    <InfoIcon tooltip="Average time spent per learning session. Longer durations often indicate deeper engagement with course materials" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl shadow-xl p-6 transform hover:scale-105 transition-all duration-300" style={{
-          background: 'linear-gradient(135deg, #a0826d 0%, #8b6f47 100%)',
-          border: '2px solid rgba(61, 40, 23, 0.3)'
-        }}>
-          <div className="flex items-center">
-            <div className="p-3 rounded-xl mr-4" style={{background: 'rgba(255, 255, 255, 0.2)'}}>
-              <Users className="w-7 h-7 text-white" />
-            </div>
-            <div className="flex-1">
-              <p className="text-3xl font-bold text-white drop-shadow-lg">{data.recentInteractions.topInteractionPartners.length}</p>
-              <div className="flex items-center gap-1">
-                <p className="text-sm text-white/95 font-medium">Active Partners</p>
-                <InfoIcon tooltip="Number of classmates you've actively collaborated with through discussions, group work, or peer interactions" />
+        <div className="group transform hover:scale-105 transition-all duration-300">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-xl mr-4 bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg">
+                  <Users className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{data.recentInteractions.topInteractionPartners.length}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm text-teal-400 font-medium">Active Partners</p>
+                    <InfoIcon tooltip="Number of classmates you've actively collaborated with through discussions, group work, or peer interactions" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl shadow-xl p-6 transform hover:scale-105 transition-all duration-300" style={{
-          background: 'linear-gradient(135deg, #c9b8a8 0%, #a0826d 100%)',
-          border: '2px solid rgba(139, 111, 71, 0.3)'
-        }}>
-          <div className="flex items-center">
-            <div className="p-3 rounded-xl mr-4" style={{background: 'rgba(255, 255, 255, 0.25)'}}>
-              <BarChart3 className="w-7 h-7 text-white" />
-            </div>
-            <div className="flex-1">
-              <p className="text-3xl font-bold text-white drop-shadow-lg">{data.currentStats.sessionsThisWeek}</p>
-              <div className="flex items-center gap-1">
-                <p className="text-sm text-white/95 font-medium">Sessions This Week</p>
-                <InfoIcon tooltip="Number of distinct learning sessions recorded this week. A session is a continuous period of platform activity" />
+        <div className="group transform hover:scale-105 transition-all duration-300">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-xl mr-4 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg">
+                  <BarChart3 className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{data.currentStats.sessionsThisWeek}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm text-cyan-400 font-medium">Sessions This Week</p>
+                    <InfoIcon tooltip="Number of distinct learning sessions recorded this week. A session is a continuous period of platform activity" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -266,129 +251,116 @@ const StudentDashboard = ({ currentUser = null }) => {
       </div>
 
       {/* Charts Section */}
-      <div className="mb-6">
-        <div className="rounded-2xl shadow-xl p-8" style={{
-          background: 'linear-gradient(135deg, #f5e6d3 0%, #e8d5c4 100%)',
-          border: '2px solid rgba(139, 111, 71, 0.2)'
-        }}>
-          <div className="flex items-center gap-2 mb-6">
-            <h3 className="text-2xl font-bold" style={{color: '#3d2817'}}>Engagement Trends Over Time</h3>
-            <InfoIcon tooltip="Track your learning engagement and activity levels across recent weeks" />
+      <div className="mb-6 group">
+        <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300">
+          <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-8">
+            <div className="flex items-center gap-2 mb-6">
+              <h3 className="text-2xl font-bold text-teal-400">Engagement Trends Over Time</h3>
+              <InfoIcon tooltip="Track your learning engagement and activity levels across recent weeks" />
+            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={engagementTrendData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(20, 184, 166, 0.2)" />
+                <XAxis dataKey="week" stroke="#5EEAD4" style={{fontSize: '12px'}} />
+                <YAxis stroke="#5EEAD4" style={{fontSize: '12px'}} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'rgba(30, 41, 59, 0.95)',
+                    border: '2px solid #14B8A6',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
+                    color: '#5EEAD4'
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="engagement"
+                  stroke="url(#tealGradient)"
+                  name="Engagement Score"
+                  strokeWidth={3}
+                  dot={{ fill: '#14B8A6', strokeWidth: 2, r: 5 }}
+                  activeDot={{ r: 7, fill: '#2DD4BF' }}
+                />
+                <defs>
+                  <linearGradient id="tealGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#14B8A6" />
+                    <stop offset="100%" stopColor="#10B981" />
+                  </linearGradient>
+                </defs>
+              </LineChart>
+            </ResponsiveContainer>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={engagementTrendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(139, 111, 71, 0.2)" />
-              <XAxis dataKey="week" stroke="#5d3a1a" style={{fontSize: '12px'}} />
-              <YAxis stroke="#5d3a1a" style={{fontSize: '12px'}} />
-              <Tooltip
-                contentStyle={{
-                  background: '#f5e6d3',
-                  border: '2px solid #d4a574',
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  color: '#3d2817'
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="engagement"
-                stroke="url(#coffeeGradient)"
-                name="Engagement Score"
-                strokeWidth={3}
-                dot={{ fill: '#8b6f47', strokeWidth: 2, r: 5 }}
-                activeDot={{ r: 7, fill: '#d4a574' }}
-              />
-              <defs>
-                <linearGradient id="coffeeGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#d4a574" />
-                  <stop offset="100%" stopColor="#8b6f47" />
-                </linearGradient>
-              </defs>
-            </LineChart>
-          </ResponsiveContainer>
         </div>
       </div>
 
       {/* Recent Interactions and Partners */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-2xl shadow-xl p-8" style={{
-          background: 'linear-gradient(135deg, #f5e6d3 0%, #e8d5c4 100%)',
-          border: '2px solid rgba(139, 111, 71, 0.2)'
-        }}>
-          <div className="flex items-center gap-2 mb-6">
-            <h3 className="text-2xl font-bold" style={{
-              color: '#3d2817'
-            }}>Top Interaction Partners</h3>
-            <InfoIcon tooltip="Classmates you interact with most frequently through collaborative activities, discussions, and group work" />
-          </div>
-          <div className="space-y-3">
-            {data.recentInteractions.topInteractionPartners.map((partner, index) => (
-              <div key={partner.studentId} className="flex items-center space-x-3 p-4 rounded-xl transition-all transform hover:scale-105" style={{
-                background: index % 2 === 0
-                  ? 'linear-gradient(135deg, #d4a574 0%, #8b6f47 100%)'
-                  : 'linear-gradient(135deg, #e8b298 0%, #c9a485 100%)',
-                border: '1px solid rgba(61, 40, 23, 0.3)',
-                boxShadow: '0 2px 8px rgba(139, 111, 71, 0.2)'
-              }}>
-                <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white shadow-lg" style={{
-                  background: index % 2 === 0
-                    ? 'linear-gradient(135deg, #8b6f47 0%, #5d3a1a 100%)'
-                    : 'linear-gradient(135deg, #a0826d 0%, #8b6f47 100%)'
-                }}>
-                  {partner.name.charAt(0)}
+        <div className="group">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-8">
+            <div className="flex items-center gap-2 mb-6">
+              <h3 className="text-2xl font-bold text-teal-400">Top Interaction Partners</h3>
+              <InfoIcon tooltip="Classmates you interact with most frequently through collaborative activities, discussions, and group work" />
+            </div>
+            <div className="space-y-3">
+              {data.recentInteractions.topInteractionPartners.map((partner, index) => (
+                <div key={partner.studentId} className="flex items-center space-x-3 p-4 rounded-xl transition-all transform hover:scale-105 bg-gradient-to-br from-indigo-900/40 to-cyan-900/40 border border-teal-500/30 shadow-lg hover:shadow-teal-500/50">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white shadow-lg bg-gradient-to-br from-teal-500 to-emerald-600">
+                    {partner.name.charAt(0)}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-teal-100">{partner.name}</p>
+                    <p className="text-sm font-medium text-teal-400">{partner.count} interactions</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-bold" style={{color: '#fff'}}>{partner.name}</p>
-                  <p className="text-sm font-medium" style={{color: 'rgba(255, 255, 255, 0.9)'}}>{partner.count} interactions</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
+        </div>
 
-        <div className="rounded-2xl shadow-xl p-8" style={{
-          background: 'linear-gradient(135deg, #f5e6d3 0%, #e8d5c4 100%)',
-          border: '2px solid rgba(139, 111, 71, 0.2)'
-        }}>
-          <div className="flex items-center gap-2 mb-6">
-            <h3 className="text-2xl font-bold" style={{
-              color: '#3d2817'
-            }}>Weekly Session Activity</h3>
-            <InfoIcon tooltip="Number of learning sessions per week. Each bar represents total sessions for that week" />
+        <div className="group">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-8">
+            <div className="flex items-center gap-2 mb-6">
+              <h3 className="text-2xl font-bold text-teal-400">Weekly Session Activity</h3>
+              <InfoIcon tooltip="Number of learning sessions per week. Each bar represents total sessions for that week" />
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={weeklySessionData}>
+                <defs>
+                  <linearGradient id="tealBarGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#14B8A6" />
+                    <stop offset="100%" stopColor="#10B981" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(20, 184, 166, 0.2)" />
+                <XAxis dataKey="week" stroke="#5EEAD4" />
+                <YAxis stroke="#5EEAD4" />
+                <Tooltip
+                  contentStyle={{
+                    background: 'rgba(30, 41, 59, 0.95)',
+                    border: '2px solid #14B8A6',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
+                    color: '#5EEAD4'
+                  }}
+                />
+                <Bar dataKey="sessions" radius={[10, 10, 0, 0]}>
+                  {weeklySessionData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill="url(#tealBarGradient)" />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            </div>
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={weeklySessionData}>
-              <defs>
-                <linearGradient id="coffeeBarGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#d4a574" />
-                  <stop offset="100%" stopColor="#8b6f47" />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(139, 111, 71, 0.2)" />
-              <XAxis dataKey="week" stroke="#5d3a1a" />
-              <YAxis stroke="#5d3a1a" />
-              <Tooltip
-                contentStyle={{
-                  background: '#f5e6d3',
-                  border: '2px solid #d4a574',
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 12px rgba(139, 111, 71, 0.3)',
-                  color: '#3d2817'
-                }}
-              />
-              <Bar dataKey="sessions" radius={[10, 10, 0, 0]}>
-                {weeklySessionData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill="url(#coffeeBarGradient)" />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
         </div>
       </div>
 
       {/* Footer Info */}
       <div className="mt-8 text-center">
-        <p className="text-sm font-medium drop-shadow-lg" style={{color: '#f5e6d3'}}>
+        <p className="text-sm font-medium drop-shadow-lg text-teal-100">
           Last updated: {new Date(data.lastUpdated).toLocaleString()}
         </p>
       </div>

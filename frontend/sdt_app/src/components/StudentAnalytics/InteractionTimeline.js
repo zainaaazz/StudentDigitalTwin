@@ -85,44 +85,40 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{borderColor: '#8b57d4'}}></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400"></div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
         <div className="text-center">
-          <p className="text-gray-400">No interaction data available</p>
+          <p className="text-teal-100">No interaction data available</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-6">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
       {/* Navigation Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/student-dashboard')}
-              className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-800 border border-gray-700 hover:bg-gray-700 transition-colors"
+              className="flex items-center justify-center w-10 h-10 rounded-lg transition-all transform hover:scale-105 bg-indigo-950/50 backdrop-blur-md border border-indigo-800/50 hover:shadow-teal-500/50"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-300" />
+              <ArrowLeft className="w-5 h-5 text-teal-400" />
             </button>
-            <TimelineIcon className="w-8 h-8" style={{color: '#8b57d4'}} />
-            <h1 className="text-3xl font-bold text-white">Interaction Timeline</h1>
+            <h1 className="text-3xl font-bold drop-shadow-lg text-teal-100">Interaction Timeline</h1>
           </div>
           <div className="flex items-center space-x-3">
             <Link
               to="/student-dashboard"
-              className="inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors"
-              style={{backgroundColor: '#8b57d4'}}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#3E46B6'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#8b57d4'}
+              className="inline-flex items-center px-6 py-3 rounded-xl transition-all transform hover:scale-105 shadow-lg bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-teal-500/30"
             >
               <BarChart3 className="w-4 h-4 mr-2" />
               View Dashboard
@@ -130,7 +126,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
             <button
               onClick={fetchInteractions}
               disabled={loading}
-              className="inline-flex items-center px-4 py-2 bg-gray-800 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 rounded-lg transition-all bg-indigo-950/50 backdrop-blur-md border border-indigo-800/50 text-teal-400 hover:shadow-teal-500/50"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -140,129 +136,149 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
       {/* Statistics Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700">
-          <div className="flex items-center">
-            <div className="p-3 rounded-lg mr-4" style={{ backgroundColor: '#8b57d4' }}>
-              <MessageCircle className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{data.stats.totalInteractions}</p>
-              <p className="text-sm text-gray-400">Total Interactions</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700">
-          <div className="flex items-center">
-            <div className="p-3 rounded-lg mr-4" style={{ backgroundColor: '#8b57d4' }}>
-              <Clock className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{formatDuration(Math.round(data.stats.averageDuration))}</p>
-              <p className="text-sm text-gray-400">Average Duration</p>
+        <div className="group transform hover:scale-105 transition-all duration-300">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-xl mr-4 bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg">
+                  <MessageCircle className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{data.stats.totalInteractions}</p>
+                  <p className="text-sm text-teal-400 font-medium">Total Interactions</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700">
-          <div className="flex items-center">
-            <div className="p-3 rounded-lg mr-4" style={{ backgroundColor: '#8b57d4' }}>
-              <Users className="w-6 h-6 text-white" />
+        <div className="group transform hover:scale-105 transition-all duration-300">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-xl mr-4 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg">
+                  <Clock className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{formatDuration(Math.round(data.stats.averageDuration))}</p>
+                  <p className="text-sm text-cyan-400 font-medium">Average Duration</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{data.stats.uniquePartners}</p>
-              <p className="text-sm text-gray-400">Unique Partners</p>
+          </div>
+        </div>
+        <div className="group transform hover:scale-105 transition-all duration-300">
+          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50">
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-xl mr-4 bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg">
+                  <Users className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{data.stats.uniquePartners}</p>
+                  <p className="text-sm text-teal-400 font-medium">Unique Partners</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700 mb-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <Filter className="w-5 h-5" style={{color: '#8b57d4'}} />
-          <h3 className="text-lg font-semibold text-white">Filters</h3>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Search Partner/Session</label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Enter partner ID or session..."
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </div>
-          <div className="flex items-end">
-            <p className="text-sm text-gray-400">
-              Showing {filteredInteractions.length} of {data.stats.totalInteractions} interactions
-            </p>
+      <div className="group mb-6">
+        <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300">
+          <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+            <div className="flex items-center space-x-2 mb-4">
+              <Filter className="w-5 h-5 text-teal-400" />
+              <h3 className="text-lg font-semibold text-teal-100">Filters</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-teal-200">Search Partner/Session</label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Enter partner ID or session..."
+                  className="w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-teal-500 transition-all bg-indigo-900/40 border border-teal-500/30 text-teal-100 placeholder-teal-400/50"
+                />
+              </div>
+              <div className="flex items-end">
+                <p className="text-sm text-cyan-400">
+                  Showing {filteredInteractions.length} of {data.stats.totalInteractions} interactions
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Interactions Table */}
-      <div className="bg-gray-800 rounded-xl shadow-lg border border-gray-700">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-700" style={{ backgroundColor: '#8b57d4' }}>
-                <th className="px-6 py-4 text-left text-sm font-medium text-white">Time</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-white">Partner</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-white">Duration</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-white">Session</th>
-                <th className="px-6 py-4 text-left text-sm font-medium text-white">Details</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700">
-              {filteredInteractions.map((interaction) => (
-                <tr key={interaction.id} className="hover:bg-gray-700">
-                  <td className="px-6 py-4">
-                    <div>
-                      <p className="text-sm font-medium text-white">
+      <div className="group">
+        <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300">
+          <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gradient-to-r from-teal-600 to-cyan-600 border-b-2 border-indigo-800/50">
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Time</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Partner</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Duration</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Session</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Details</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-teal-500/20">
+                  {filteredInteractions.map((interaction, index) => (
+                    <tr key={interaction.id} className="transition-all hover:bg-indigo-900/40" style={{
+                      background: index % 2 === 0 ? 'rgba(20, 184, 166, 0.05)' : 'rgba(6, 182, 212, 0.05)'
+                    }}>
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="text-sm font-medium text-teal-100">
                         {new Date(interaction.startTime).toLocaleDateString()}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-cyan-400">
                         {new Date(interaction.startTime).toLocaleTimeString()} - {new Date(interaction.endTime).toLocaleTimeString()}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-teal-500">
                         {formatRelativeTime(interaction.startTime)}
                       </p>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{backgroundColor: '#8b57d41A'}}>
-                        <span className="text-xs font-medium" style={{color: '#8b57d4'}}>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm bg-gradient-to-br from-teal-500 to-emerald-600">
+                        <span className="text-xs font-bold text-white">
                           {interaction.studentId2.slice(-2)}
                         </span>
                       </div>
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-teal-100">
                         {interaction.partnerName || interaction.studentId2}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-1">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-white">
+                      <Clock className="w-4 h-4 text-cyan-400" />
+                      <span className="text-sm font-medium text-teal-100">
                         {formatDuration(interaction.duration)}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <code className="text-xs font-mono text-gray-300 bg-gray-700 px-2 py-1 rounded">
+                    <code className="text-xs font-mono px-2 py-1 rounded text-teal-200 bg-indigo-900/40 border border-teal-500/30">
                       {interaction.sessionId.slice(-8)}
                     </code>
                   </td>
                   <td className="px-6 py-4">
                     <div>
                       <div className="flex items-center space-x-1 mb-1">
-                        <MapPin className="w-3 h-3 text-gray-400" />
-                        <span className="text-xs text-gray-300">
+                        <MapPin className="w-3 h-3 text-cyan-400" />
+                        <span className="text-xs font-medium text-teal-200">
                           {interaction.avgDistance.toFixed(1)}m
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-teal-400">
                         Confidence: {Math.round(interaction.confidence * 100)}%
                       </p>
                     </div>
@@ -274,32 +290,34 @@ const InteractionTimeline = ({ currentUser = null }) => {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-700 bg-gray-800">
+        <div className="px-6 py-4 border-t border-indigo-800/50 bg-gradient-to-r from-indigo-900/40 to-cyan-900/40">
           <div className="flex items-center justify-center space-x-2">
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-purple-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-teal-500 to-emerald-600 text-white border border-teal-500/30 disabled:from-indigo-900/40 disabled:to-indigo-900/40 disabled:text-teal-500"
             >
               Previous
             </button>
-            <span className="px-3 py-2 text-sm font-medium" style={{color: '#8b57d4'}}>
+            <span className="px-4 py-2 text-sm font-bold text-teal-100">
               Page {page}
             </span>
             <button
               disabled={!data.pagination.hasMore}
               onClick={() => setPage(page + 1)}
-              className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-purple-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-teal-500 to-emerald-600 text-white border border-teal-500/30 disabled:from-indigo-900/40 disabled:to-indigo-900/40 disabled:text-teal-500"
             >
               Next
             </button>
           </div>
         </div>
+          </div>
+        </div>
       </div>
 
       {/* Summary Footer */}
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-400">
+      <div className="mt-8 text-center">
+        <p className="text-sm font-medium drop-shadow-lg text-teal-100">
           Data from {new Date(data.stats.dateRange.start).toLocaleDateString()} to {new Date(data.stats.dateRange.end).toLocaleDateString()}
         </p>
       </div>

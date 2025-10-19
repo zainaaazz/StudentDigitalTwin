@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Filter, Activity as TimelineIcon, MapPin, Clock, BarChart3, MessageCircle, Users } from 'lucide-react';
 import { mockInteractionData } from './dummyData';
 import { useInteractionSimulator } from '../../hooks/useInteractionSimulator';
+import GrainTexture from '../UI/GrainTexture';
+import MountFuji from '../UI/MountFuji';
 
 const InteractionTimeline = ({ currentUser = null }) => {
   const navigate = useNavigate();
@@ -85,98 +87,100 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400"></div>
+      <div className="min-h-screen flex items-center justify-center bg-ksg-gradient relative overflow-hidden">
+        <GrainTexture />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ksg-magenta relative z-10"></div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
-        <div className="text-center">
-          <p className="text-teal-100">No interaction data available</p>
+      <div className="min-h-screen flex items-center justify-center bg-ksg-gradient relative overflow-hidden">
+        <GrainTexture />
+        <div className="text-center relative z-10">
+          <p className="text-ksg-lilac">No interaction data available</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
-      {/* Navigation Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => navigate('/student-dashboard')}
-              className="flex items-center justify-center w-10 h-10 rounded-lg transition-all transform hover:scale-105 bg-indigo-950/50 backdrop-blur-md border border-indigo-800/50 hover:shadow-teal-500/50"
-            >
-              <ArrowLeft className="w-5 h-5 text-teal-400" />
-            </button>
-            <h1 className="text-3xl font-bold drop-shadow-lg text-teal-100">Interaction Timeline</h1>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Link
-              to="/student-dashboard"
-              className="inline-flex items-center px-6 py-3 rounded-xl transition-all transform hover:scale-105 shadow-lg bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-teal-500/30"
-            >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              View Dashboard
-            </Link>
-            <button
-              onClick={fetchInteractions}
-              disabled={loading}
-              className="inline-flex items-center px-4 py-2 rounded-lg transition-all bg-indigo-950/50 backdrop-blur-md border border-indigo-800/50 text-teal-400 hover:shadow-teal-500/50"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
+    <div className="min-h-screen p-6 bg-ksg-gradient relative overflow-hidden">
+      <GrainTexture />
+      <MountFuji className="z-0" />
+      {/* Navigation Header - Darker Anchor */}
+      <div className="mb-8 relative z-10">
+        <div className="backdrop-blur-strong bg-ksg-anchor-header rounded-3xl p-6 shadow-ksg-depth border border-ksg-slate/40">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/student-dashboard')}
+                className="flex items-center justify-center w-12 h-12 rounded-2xl transition-all transform hover:scale-110 hover:rotate-3 bg-ksg-ground/80 backdrop-blur-glass border border-ksg-lilac/30 hover:shadow-ksg-hover hover:border-ksg-magenta/70 shadow-ksg-inner"
+              >
+                <ArrowLeft className="w-5 h-5 text-ksg-lilac" />
+              </button>
+              <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(211,169,248,0.5)]" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700 }}>
+                Interaction Timeline
+              </h1>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Link
+                to="/student-dashboard"
+                className="inline-flex items-center px-8 py-4 rounded-2xl transition-all transform hover:scale-105 shadow-ksg-glow bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal hover:shadow-ksg-hover font-bold tracking-relaxed"
+              >
+                <BarChart3 className="w-5 h-5 mr-2" />
+                View Dashboard
+              </Link>
+              <button
+                onClick={fetchInteractions}
+                disabled={loading}
+                className="inline-flex items-center justify-center w-12 h-12 rounded-2xl transition-all bg-ksg-ground/80 backdrop-blur-glass border border-ksg-lilac/30 text-ksg-lilac hover:shadow-ksg-hover hover:border-ksg-magenta/70 shadow-ksg-inner"
+              >
+                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Statistics Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <div className="group transform hover:scale-105 transition-all duration-300">
-          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50">
-            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
-              <div className="flex items-center">
-                <div className="p-3 rounded-xl mr-4 bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg">
-                  <MessageCircle className="w-7 h-7 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{data.stats.totalInteractions}</p>
-                  <p className="text-sm text-teal-400 font-medium">Total Interactions</p>
-                </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 relative z-10">
+        <div className="group transform hover:scale-105 hover:-rotate-1 transition-all duration-300">
+          <div className="backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 p-6 hover:shadow-ksg-hover hover:border-ksg-teal/50">
+            <div className="flex items-center">
+              <div className="p-4 rounded-2xl mr-4 bg-gradient-to-br from-ksg-teal to-ksg-magenta shadow-lg" style={{ filter: 'drop-shadow(0 4px 8px rgba(255, 156, 238, 0.4))' }}>
+                <MessageCircle className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-4xl font-bold text-white drop-shadow-lg tracking-tight" style={{ fontWeight: 800 }}>{data.stats.totalInteractions}</p>
+                <p className="text-sm text-ksg-neutral font-medium tracking-relaxed" style={{ fontWeight: 500 }}>Total Interactions</p>
               </div>
             </div>
           </div>
         </div>
-        <div className="group transform hover:scale-105 transition-all duration-300">
-          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50">
-            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
-              <div className="flex items-center">
-                <div className="p-3 rounded-xl mr-4 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg">
-                  <Clock className="w-7 h-7 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{formatDuration(Math.round(data.stats.averageDuration))}</p>
-                  <p className="text-sm text-cyan-400 font-medium">Average Duration</p>
-                </div>
+        <div className="group transform hover:scale-105 hover:rotate-1 transition-all duration-300">
+          <div className="backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 p-6 hover:shadow-ksg-hover hover:border-ksg-coral/50">
+            <div className="flex items-center">
+              <div className="p-4 rounded-2xl mr-4 bg-gradient-to-br from-ksg-coral to-ksg-orange shadow-lg" style={{ filter: 'drop-shadow(0 4px 8px rgba(255, 198, 168, 0.4))' }}>
+                <Clock className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-4xl font-bold text-white drop-shadow-lg tracking-tight" style={{ fontWeight: 800 }}>{formatDuration(Math.round(data.stats.averageDuration))}</p>
+                <p className="text-sm text-ksg-neutral font-medium tracking-relaxed" style={{ fontWeight: 500 }}>Average Duration</p>
               </div>
             </div>
           </div>
         </div>
-        <div className="group transform hover:scale-105 transition-all duration-300">
-          <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50">
-            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
-              <div className="flex items-center">
-                <div className="p-3 rounded-xl mr-4 bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg">
-                  <Users className="w-7 h-7 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-3xl font-bold text-teal-100 drop-shadow-lg">{data.stats.uniquePartners}</p>
-                  <p className="text-sm text-teal-400 font-medium">Unique Partners</p>
-                </div>
+        <div className="group transform hover:scale-105 hover:-rotate-1 transition-all duration-300">
+          <div className="backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 p-6 hover:shadow-ksg-hover hover:border-ksg-lilac/50">
+            <div className="flex items-center">
+              <div className="p-4 rounded-2xl mr-4 bg-gradient-to-br from-ksg-lilac to-ksg-magenta shadow-lg" style={{ filter: 'drop-shadow(0 4px 8px rgba(211, 169, 248, 0.4))' }}>
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-4xl font-bold text-white drop-shadow-lg tracking-tight" style={{ fontWeight: 800 }}>{data.stats.uniquePartners}</p>
+                <p className="text-sm text-ksg-neutral font-medium tracking-relaxed" style={{ fontWeight: 500 }}>Unique Partners</p>
               </div>
             </div>
           </div>
@@ -184,26 +188,26 @@ const InteractionTimeline = ({ currentUser = null }) => {
       </div>
 
       {/* Filters */}
-      <div className="group mb-6">
-        <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300">
-          <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
-            <div className="flex items-center space-x-2 mb-4">
-              <Filter className="w-5 h-5 text-teal-400" />
-              <h3 className="text-lg font-semibold text-teal-100">Filters</h3>
+      <div className="group mb-6 relative z-10">
+        <div className="backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 p-1 hover:shadow-ksg-hover transition-all duration-500">
+          <div className="rounded-3xl p-6 bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40">
+            <div className="flex items-center space-x-2 mb-6">
+              <Filter className="w-5 h-5 text-ksg-lilac" />
+              <h3 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700 }}>Filters</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2 text-teal-200">Search Partner/Session</label>
+                <label className="block text-sm font-semibold mb-2 text-ksg-neutral-light tracking-relaxed" style={{ fontWeight: 600 }}>Search Partner/Session</label>
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Enter partner ID or session..."
-                  className="w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-teal-500 transition-all bg-indigo-900/40 border border-teal-500/30 text-teal-100 placeholder-teal-400/50"
+                  className="w-full px-4 py-3 rounded-2xl focus:ring-2 focus:ring-ksg-magenta focus:outline-none transition-all bg-ksg-ground/60 border border-ksg-slate/40 text-white placeholder-ksg-neutral font-medium"
                 />
               </div>
               <div className="flex items-end">
-                <p className="text-sm text-cyan-400">
+                <p className="text-sm text-ksg-neutral font-medium tracking-relaxed" style={{ fontWeight: 500 }}>
                   Showing {filteredInteractions.length} of {data.stats.totalInteractions} interactions
                 </p>
               </div>
@@ -213,72 +217,72 @@ const InteractionTimeline = ({ currentUser = null }) => {
       </div>
 
       {/* Interactions Table */}
-      <div className="group">
-        <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 hover:shadow-cyan-500/50 transition-all duration-300">
-          <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl overflow-hidden">
+      <div className="group relative z-10">
+        <div className="backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 p-1 hover:shadow-ksg-hover transition-all duration-500">
+          <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gradient-to-r from-teal-600 to-cyan-600 border-b-2 border-indigo-800/50">
-                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Time</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Partner</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Duration</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Session</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-white">Details</th>
+                  <tr className="bg-ksg-charcoal/80 border-b-2 border-ksg-slate/40">
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white tracking-wide">Time</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white tracking-wide">Partner</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white tracking-wide">Duration</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white tracking-wide">Session</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-white tracking-wide">Details</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-teal-500/20">
+                <tbody className="divide-y divide-ksg-slate/20">
                   {filteredInteractions.map((interaction, index) => (
-                    <tr key={interaction.id} className="transition-all hover:bg-indigo-900/40" style={{
-                      background: index % 2 === 0 ? 'rgba(20, 184, 166, 0.05)' : 'rgba(6, 182, 212, 0.05)'
+                    <tr key={interaction.id} className="transition-all hover:bg-ksg-ground/40" style={{
+                      background: index % 2 === 0 ? 'rgba(45, 40, 69, 0.2)' : 'rgba(74, 69, 101, 0.15)'
                     }}>
                       <td className="px-6 py-4">
                         <div>
-                          <p className="text-sm font-medium text-teal-100">
+                          <p className="text-sm font-semibold text-white">
                         {new Date(interaction.startTime).toLocaleDateString()}
                       </p>
-                      <p className="text-xs text-cyan-400">
+                      <p className="text-xs text-ksg-neutral font-medium">
                         {new Date(interaction.startTime).toLocaleTimeString()} - {new Date(interaction.endTime).toLocaleTimeString()}
                       </p>
-                      <p className="text-xs text-teal-500">
+                      <p className="text-xs text-ksg-magenta font-medium">
                         {formatRelativeTime(interaction.startTime)}
                       </p>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm bg-gradient-to-br from-teal-500 to-emerald-600">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-md bg-gradient-to-br from-ksg-teal to-ksg-magenta" style={{ filter: 'drop-shadow(0 2px 6px rgba(255, 156, 238, 0.3))' }}>
                         <span className="text-xs font-bold text-white">
                           {interaction.studentId2.slice(-2)}
                         </span>
                       </div>
-                      <span className="text-sm font-medium text-teal-100">
+                      <span className="text-sm font-semibold text-white">
                         {interaction.partnerName || interaction.studentId2}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center space-x-1">
-                      <Clock className="w-4 h-4 text-cyan-400" />
-                      <span className="text-sm font-medium text-teal-100">
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-4 h-4 text-ksg-coral" />
+                      <span className="text-sm font-semibold text-white">
                         {formatDuration(interaction.duration)}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <code className="text-xs font-mono px-2 py-1 rounded text-teal-200 bg-indigo-900/40 border border-teal-500/30">
+                    <code className="text-xs font-mono px-3 py-1 rounded-lg text-ksg-neutral-light bg-ksg-charcoal/60 border border-ksg-slate/30 font-semibold">
                       {interaction.sessionId.slice(-8)}
                     </code>
                   </td>
                   <td className="px-6 py-4">
                     <div>
                       <div className="flex items-center space-x-1 mb-1">
-                        <MapPin className="w-3 h-3 text-cyan-400" />
-                        <span className="text-xs font-medium text-teal-200">
+                        <MapPin className="w-3 h-3 text-ksg-sky" />
+                        <span className="text-xs font-semibold text-ksg-neutral-light">
                           {interaction.avgDistance.toFixed(1)}m
                         </span>
                       </div>
-                      <p className="text-xs text-teal-400">
+                      <p className="text-xs text-ksg-neutral font-medium">
                         Confidence: {Math.round(interaction.confidence * 100)}%
                       </p>
                     </div>
@@ -290,22 +294,22 @@ const InteractionTimeline = ({ currentUser = null }) => {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-indigo-800/50 bg-gradient-to-r from-indigo-900/40 to-cyan-900/40">
-          <div className="flex items-center justify-center space-x-2">
+        <div className="px-6 py-4 border-t border-ksg-slate/30 bg-ksg-charcoal/60">
+          <div className="flex items-center justify-center space-x-3">
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-teal-500 to-emerald-600 text-white border border-teal-500/30 disabled:from-indigo-900/40 disabled:to-indigo-900/40 disabled:text-teal-500"
+              className="px-6 py-3 text-sm font-bold rounded-2xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal border border-ksg-coral/30 disabled:from-ksg-ground/60 disabled:to-ksg-ground/60 disabled:text-ksg-neutral hover:scale-105 hover:shadow-ksg-glow tracking-relaxed"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm font-bold text-teal-100">
+            <span className="px-5 py-3 text-sm font-bold text-white bg-ksg-ground/80 backdrop-blur-sm rounded-2xl border border-ksg-slate/40 shadow-ksg-inner">
               Page {page}
             </span>
             <button
               disabled={!data.pagination.hasMore}
               onClick={() => setPage(page + 1)}
-              className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-teal-500 to-emerald-600 text-white border border-teal-500/30 disabled:from-indigo-900/40 disabled:to-indigo-900/40 disabled:text-teal-500"
+              className="px-6 py-3 text-sm font-bold rounded-2xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal border border-ksg-coral/30 disabled:from-ksg-ground/60 disabled:to-ksg-ground/60 disabled:text-ksg-neutral hover:scale-105 hover:shadow-ksg-glow tracking-relaxed"
             >
               Next
             </button>
@@ -315,11 +319,13 @@ const InteractionTimeline = ({ currentUser = null }) => {
         </div>
       </div>
 
-      {/* Summary Footer */}
-      <div className="mt-8 text-center">
-        <p className="text-sm font-medium drop-shadow-lg text-teal-100">
-          Data from {new Date(data.stats.dateRange.start).toLocaleDateString()} to {new Date(data.stats.dateRange.end).toLocaleDateString()}
-        </p>
+      {/* Footer Anchor */}
+      <div className="mt-8 relative z-10">
+        <div className="backdrop-blur-strong bg-ksg-anchor-header rounded-3xl p-4 shadow-ksg-depth border border-ksg-slate/40 text-center">
+          <p className="text-sm font-medium text-ksg-neutral-light tracking-relaxed" style={{ fontWeight: 500 }}>
+            Data from {new Date(data.stats.dateRange.start).toLocaleDateString()} to {new Date(data.stats.dateRange.end).toLocaleDateString()}
+          </p>
+        </div>
       </div>
     </div>
   );

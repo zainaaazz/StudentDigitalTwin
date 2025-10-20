@@ -6,14 +6,16 @@ import StudentDashboardWrapper from './components/StudentAnalytics/StudentDashbo
 import InteractionTimelineWrapper from './components/StudentAnalytics/InteractionTimelineWrapper';
 import StudentProfile from './components/Profile/StudentProfile';
 import AcademicsPage from './components/Academics/AcademicsPage';
+import { ThemeProvider } from './contexts/ThemeContext';
 import './styles/global.css';
 
 function App() {
   const isAuthenticated = () => localStorage.getItem('token');
 
   return (
-    <Router>
-      <Routes>
+    <ThemeProvider>
+      <Router>
+        <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/profile"
@@ -68,7 +70,8 @@ function App() {
         {/* Optional: Redirect root to login */}
         <Route path="/" element={<LoginPage />} />
       </Routes>
-    </Router>
+      </Router>
+    </ThemeProvider>
   );
 }
 

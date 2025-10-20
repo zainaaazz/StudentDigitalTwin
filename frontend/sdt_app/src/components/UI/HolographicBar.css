@@ -1,0 +1,77 @@
+/* Holographic shine animation for MiniDisc bars */
+.holographic-chart-container {
+  position: relative;
+}
+
+.holographic-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.holographic-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shine 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Add subtle depth to MiniDisc progress bars */
+.md-progress-bar {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(90, 90, 90, 0.15);
+}
+
+.md-progress-fill {
+  position: relative;
+  background: linear-gradient(to top, #B58AFF 0%, #EAD9FF 80%, rgba(255,255,255,0.6) 100%);
+  box-shadow: 0 2px 8px rgba(154, 111, 232, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.md-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0.1)
+  );
+  background-size: 200% 100%;
+  animation: shine-sweep 4s linear infinite;
+}
+
+@keyframes shine-sweep {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

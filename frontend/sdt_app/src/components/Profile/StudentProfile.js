@@ -6,16 +6,13 @@ import PottedPlantVisualization from '../StudentAnalytics/PottedPlantVisualizati
 import { TrendingUp, Zap, Award, Target } from 'lucide-react';
 
 /**
- * StudentProfile (Regenerated)
- * - Layout matches the provided image exactly (no sidebar).
- * - Left: large avatar/video area. Right: stacked performance tiles.
- * - Uses original media/video logic and buildMediaUrl behavior.
- * - Visuals use the palette you supplied.
- *
- * Replace your existing StudentProfile with this file. It keeps original logic intact.
+ * StudentProfile with Color-Coded Performance
+ * - Green: Pass (Good performance)
+ * - Orange: Pass (Warning - some issues)
+ * - Red: Fail (Poor performance)
  */
 
-/* ---------- Palette (from your provided hex codes) ---------- */
+/* ---------- Palette ---------- */
 const PALETTE = {
   primaryA: '#0B0E26',
   primaryB: '#1A1B4B',
@@ -35,10 +32,59 @@ const PALETTE = {
   viewLink: '#36E0F8'
 };
 
-const MEDIA_THEME = 'green';
+// Hard-coded student performance data
+const STUDENT_PROFILES = {
+  '38925958': {
+    name: 'Michael',
+    theme: 'green',
+    overallStatus: 'PASS',
+    overallStatusColor: 'text-green-400',
+    statusDotColor: 'bg-green-400',
+    metrics: {
+      engagement: { status: 'GOOD', statusColor: 'text-green-400', dotColor: 'bg-green-400' },
+      interactivity: { status: 'GOOD', statusColor: 'text-green-400', dotColor: 'bg-green-400' },
+      academic: { status: 'GOOD', statusColor: 'text-green-400', dotColor: 'bg-green-400' }
+    }
+  },
+  '41425626': {
+    name: 'Zai',
+    theme: 'red',
+    overallStatus: 'FAIL',
+    overallStatusColor: 'text-red-400',
+    statusDotColor: 'bg-red-400',
+    metrics: {
+      engagement: { status: 'LOW', statusColor: 'text-red-400', dotColor: 'bg-red-400' },
+      interactivity: { status: 'TOO LOW', statusColor: 'text-red-400', dotColor: 'bg-red-400' },
+      academic: { status: 'LOW', statusColor: 'text-red-400', dotColor: 'bg-red-400' }
+    }
+  },
+  '40954129': {
+    name: 'Stefan',
+    theme: 'red',
+    overallStatus: 'FAIL',
+    overallStatusColor: 'text-red-400',
+    statusDotColor: 'bg-red-400',
+    metrics: {
+      engagement: { status: 'GOOD', statusColor: 'text-green-400', dotColor: 'bg-green-400' },
+      interactivity: { status: 'TOO LOW', statusColor: 'text-red-400', dotColor: 'bg-red-400' },
+      academic: { status: 'LOW', statusColor: 'text-red-400', dotColor: 'bg-red-400' }
+    }
+  },
+  '40977676': {
+    name: 'Maderi',
+    theme: 'orange',
+    overallStatus: 'PASS',
+    overallStatusColor: 'text-orange-400',
+    statusDotColor: 'bg-orange-400',
+    metrics: {
+      engagement: { status: 'TOO LOW', statusColor: 'text-orange-400', dotColor: 'bg-orange-400' },
+      interactivity: { status: 'GOOD', statusColor: 'text-green-400', dotColor: 'bg-green-400' },
+      academic: { status: 'GOOD', statusColor: 'text-green-400', dotColor: 'bg-green-400' }
+    }
+  }
+};
 
 const StudentProfile = () => {
-  // --- keep original hook usage and id handling ---
   const { currentStudentId } = useStudentData();
   const { getDashboardData } = useInteractionSimulator(currentStudentId);
   const [dashboardData, setDashboardData] = useState(null);
@@ -54,7 +100,22 @@ const StudentProfile = () => {
     }
   }, [currentStudentId]);
 
-  // --- media base logic (same as original) ---
+  // Get student profile data
+  const studentProfile = useMemo(() => {
+    return STUDENT_PROFILES[studentPrefix] || {
+      name: 'Student',
+      theme: 'green',
+      overallStatus: 'UNKNOWN',
+      overallStatusColor: 'text-gray-400',
+      statusDotColor: 'bg-gray-400',
+      metrics: {
+        engagement: { status: 'N/A', statusColor: 'text-gray-400', dotColor: 'bg-gray-400' },
+        interactivity: { status: 'N/A', statusColor: 'text-gray-400', dotColor: 'bg-gray-400' },
+        academic: { status: 'N/A', statusColor: 'text-gray-400', dotColor: 'bg-gray-400' }
+      }
+    };
+  }, [studentPrefix]);
+
   const mediaBase = useMemo(() => {
     const fallbackOrigin =
       typeof window !== 'undefined' && window.location
@@ -88,13 +149,10 @@ const StudentProfile = () => {
   );
 
   const displayName = useMemo(() => {
-    if (!studentPrefix || studentPrefix === 'default') {
-      return 'Student';
-    }
-    return `Student ${studentPrefix}`;
-  }, [studentPrefix]);
+    return studentProfile.name;
+  }, [studentProfile]);
 
-  // --- original media/video logic preserved ---
+  // Video logic
   const heroVideoRef = useRef(null);
   const hoveringTileRef = useRef(false);
   const playingWaveRef = useRef(false);
@@ -112,7 +170,7 @@ const StudentProfile = () => {
     try {
       video.pause();
     } catch (error) {
-      // ignore pause issues
+      // ignore
     }
 
     if (needsUpdate) {
@@ -125,7 +183,7 @@ const StudentProfile = () => {
     try {
       video.currentTime = 0;
     } catch (error) {
-      // ignore reset issues
+      // ignore
     }
 
     if (autoplay) {
@@ -136,9 +194,9 @@ const StudentProfile = () => {
     }
   }, []);
 
-  const loopSuffix = useMemo(() => `${MEDIA_THEME}_loop.mp4`, []);
-  const waveSuffix = useMemo(() => `${MEDIA_THEME}_wave.mp4`, []);
-  const straightPoster = useMemo(() => `${MEDIA_THEME}_straight.jpg`, []);
+  const loopSuffix = useMemo(() => `${studentProfile.theme}_loop.mp4`, [studentProfile.theme]);
+  const waveSuffix = useMemo(() => `${studentProfile.theme}_wave.mp4`, [studentProfile.theme]);
+  const straightPoster = useMemo(() => `${studentProfile.theme}_straight.jpg`, [studentProfile.theme]);
 
   const startLoop = useCallback(() => {
     if (hoveringTileRef.current) {
@@ -169,7 +227,7 @@ const StudentProfile = () => {
         try {
           video.pause();
         } catch (error) {
-          // ignore pause errors
+          // ignore
         }
       }
       const url = buildMediaUrl(suffix);
@@ -214,7 +272,6 @@ const StudentProfile = () => {
     playWaveThenLoop();
   }, [studentPrefix, playWaveThenLoop]);
 
-  // Fetch dashboard data for plant visualization
   useEffect(() => {
     if (currentStudentId) {
       const data = getDashboardData();
@@ -222,13 +279,15 @@ const StudentProfile = () => {
     }
   }, [currentStudentId, getDashboardData]);
 
-  // tiles with visual props
+  // Tiles with dynamic status from student profile
   const tiles = useMemo(() => [
     { 
       id: 'tl', 
       label: 'Engagement', 
-      status: 'GOOD', 
-      mediaSuffix: `${MEDIA_THEME}_top-left.jpg`, 
+      status: studentProfile.metrics.engagement.status,
+      statusColor: studentProfile.metrics.engagement.statusColor,
+      dotColor: studentProfile.metrics.engagement.dotColor,
+      mediaSuffix: `${studentProfile.theme}_top-left.jpg`, 
       icon: TrendingUp, 
       gradient: 'from-engagement-icon-start to-engagement-icon-end', 
       bgGradient: 'from-card-bg/60 to-card-bg/60', 
@@ -238,8 +297,10 @@ const StudentProfile = () => {
     { 
       id: 'bl', 
       label: 'Interactivity', 
-      status: 'GOOD', 
-      mediaSuffix: `${MEDIA_THEME}_bottom-left.jpg`, 
+      status: studentProfile.metrics.interactivity.status,
+      statusColor: studentProfile.metrics.interactivity.statusColor,
+      dotColor: studentProfile.metrics.interactivity.dotColor,
+      mediaSuffix: `${studentProfile.theme}_bottom-left.jpg`, 
       icon: Zap, 
       gradient: 'from-interactivity-icon-start to-interactivity-icon-end', 
       bgGradient: 'from-card-bg/60 to-card-bg/60', 
@@ -249,8 +310,10 @@ const StudentProfile = () => {
     { 
       id: 'tr', 
       label: 'Academic Performance', 
-      status: 'GOOD', 
-      mediaSuffix: `${MEDIA_THEME}_top-right.jpg`, 
+      status: studentProfile.metrics.academic.status,
+      statusColor: studentProfile.metrics.academic.statusColor,
+      dotColor: studentProfile.metrics.academic.dotColor,
+      mediaSuffix: `${studentProfile.theme}_top-right.jpg`, 
       icon: Award, 
       gradient: 'from-academic-icon-start to-academic-icon-end', 
       bgGradient: 'from-card-bg/60 to-card-bg/60', 
@@ -260,15 +323,17 @@ const StudentProfile = () => {
     { 
       id: 'br', 
       label: 'Overall Performance', 
-      status: 'GOOD', 
-      mediaSuffix: `${MEDIA_THEME}_bottom-right.jpg`, 
+      status: studentProfile.overallStatus,
+      statusColor: studentProfile.overallStatusColor,
+      dotColor: studentProfile.statusDotColor,
+      mediaSuffix: `${studentProfile.theme}_bottom-right.jpg`, 
       icon: Target, 
       gradient: 'from-card-accent-start to-card-accent-end', 
       bgGradient: 'from-card-bg/60 to-card-bg/60', 
       textColor: 'text-primary-text', 
       borderColor: 'border-card-accent-end/50' 
     }
-  ], []);
+  ], [studentProfile]);
 
   const renderTile = (tile) => {
     const Icon = tile.icon;
@@ -293,8 +358,8 @@ const StudentProfile = () => {
             <div className="flex-1 min-w-0">
               <div className={`text-sm font-bold ${tile.textColor} mb-0.5`}>{tile.label}</div>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-good-status-dot animate-pulse shadow-lg" />
-                <span className="text-xs text-good-text-label font-semibold">{tile.status}</span>
+                <span className={`w-2 h-2 rounded-full ${tile.dotColor} animate-pulse shadow-lg`} />
+                <span className={`text-xs ${tile.statusColor} font-semibold`}>{tile.status}</span>
               </div>
             </div>
           </div>

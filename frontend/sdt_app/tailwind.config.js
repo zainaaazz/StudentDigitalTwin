@@ -81,6 +81,8 @@ module.exports = {
         'md-gradient': 'linear-gradient(180deg, #EAE8EC 0%, #DDD7E6 100%)',
         'md-iridescent': 'linear-gradient(135deg, #F3D0FF 0%, #E0F6FF 50%, #FFE5C9 100%)',
         'md-card-glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(221, 215, 230, 0.75) 100%)',
+        'md-card-deep': 'linear-gradient(135deg, rgba(30, 20, 50, 0.45) 0%, rgba(74, 69, 101, 0.35) 100%)',
+        'md-anchor-header': 'linear-gradient(180deg, rgba(26, 22, 48, 0.50) 0%, rgba(45, 40, 69, 0.40) 100%)',
         'md-halo': 'radial-gradient(ellipse at top, rgba(255, 216, 154, 0.3) 0%, transparent 60%)',
         'md-bar-holographic': 'linear-gradient(to top, #B58AFF 0%, #EAD9FF 80%, rgba(255,255,255,0.6) 100%)',
         'md-shine': 'linear-gradient(120deg, rgba(255,255,255,0.1), rgba(255,255,255,0.5), rgba(255,255,255,0.1))',

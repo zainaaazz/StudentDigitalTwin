@@ -3,32 +3,30 @@
 export const getCardStyles = (isKSG) => ({
   container: isKSG
     ? 'backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 hover:shadow-ksg-hover'
-    : 'backdrop-blur-glass bg-md-card-glass rounded-xl shadow-md-holographic border border-md-grey-metallic hover:shadow-md-hover',
+    : 'backdrop-blur-strong bg-md-card-deep rounded-3xl shadow-md-holographic border border-md-grey-metallic hover:shadow-md-hover',
   innerGradient: isKSG
     ? 'bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40'
-    : 'bg-gradient-to-br from-md-glass-transparent/40 to-md-glass-medium/30',
+    : 'bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40',
 });
 
 export const getTextStyles = (isKSG) => ({
   heading: isKSG ? 'text-white' : 'text-md-charcoal',
-  subheading: isKSG ? 'text-ksg-neutral-light' : 'text-md-text-soft',
-  body: isKSG ? 'text-ksg-neutral' : 'text-md-grey',
+  subheading: isKSG ? 'text-ksg-neutral-light' : 'text-md-grey',
+  body: isKSG ? 'text-ksg-neutral' : 'text-md-text-soft',
   headingFont: isKSG ? 'Poppins, sans-serif' : 'sans-serif',
-  headingWeight: isKSG ? 700 : 400,
-  bodyWeight: isKSG ? 500 : 300,
-  letterSpacing: isKSG ? '0.025em' : '0.05em',
+  headingWeight: isKSG ? 700 : 600,
+  bodyWeight: 500,
+  letterSpacing: '0.025em',
 });
 
 export const getChartStyles = (isKSG) => ({
-  grid: isKSG ? 'rgba(184, 181, 201, 0.15)' : 'rgba(100, 100, 120, 0.1)',
-  axis: isKSG ? '#B8B5C9' : '#4A4A4A',
-  tooltipBg: isKSG ? 'rgba(45, 40, 69, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-  tooltipBorder: isKSG ? '#D3A9F8' : '#B58AFF',
-  tooltipColor: isKSG ? '#E8E6F0' : '#2E2E2E',
-  tooltipShadow: isKSG
-    ? '0 8px 20px rgba(211, 169, 248, 0.4)'
-    : '0 4px 12px rgba(180, 160, 255, 0.25)',
-  chartBg: isKSG ? 'transparent' : 'rgba(230, 230, 240, 0.8)',
+  grid: 'rgba(184, 181, 201, 0.15)',
+  axis: '#B8B5C9',
+  tooltipBg: 'rgba(45, 40, 69, 0.95)',
+  tooltipBorder: '#D3A9F8',
+  tooltipColor: '#E8E6F0',
+  tooltipShadow: '0 8px 20px rgba(211, 169, 248, 0.4)',
+  chartBg: 'transparent',
 });
 
 export const getStatCardColors = (index, isKSG) => {

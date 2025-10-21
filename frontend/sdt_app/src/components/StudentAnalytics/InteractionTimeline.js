@@ -5,10 +5,13 @@ import { mockInteractionData } from './dummyData';
 import { useInteractionSimulator } from '../../hooks/useInteractionSimulator';
 import GrainTexture from '../UI/GrainTexture';
 import MountFuji from '../UI/MountFuji';
+import CircularReflections from '../UI/CircularReflections';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const InteractionTimeline = ({ currentUser = null }) => {
   const navigate = useNavigate();
   const { loading: simLoading, getInteractionHistory } = useInteractionSimulator(currentUser?.id);
+  const { isKSG } = useTheme();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -87,38 +90,46 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ksg-gradient relative overflow-hidden">
-        <GrainTexture />
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ksg-magenta relative z-10"></div>
+      <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${isKSG ? 'bg-ksg-gradient' : 'bg-md-gradient'}`}>
+        {isKSG ? <GrainTexture /> : <CircularReflections />}
+        <div className={`animate-spin rounded-full h-12 w-12 border-b-2 relative z-10 ${isKSG ? 'border-ksg-magenta' : 'border-md-lavender-neon'}`}></div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ksg-gradient relative overflow-hidden">
-        <GrainTexture />
+      <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${isKSG ? 'bg-ksg-gradient' : 'bg-md-gradient'}`}>
+        {isKSG ? <GrainTexture /> : <CircularReflections />}
         <div className="text-center relative z-10">
-          <p className="text-ksg-lilac">No interaction data available</p>
+          <p className={isKSG ? 'text-ksg-lilac' : 'text-md-charcoal'}>No interaction data available</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-6 bg-ksg-gradient relative overflow-hidden">
-      <GrainTexture />
-      <MountFuji className="z-0" />
+    <div className={`min-h-screen p-6 relative overflow-hidden ${isKSG ? 'bg-ksg-gradient' : 'bg-md-gradient'}`}>
+      {isKSG ? <GrainTexture /> : <CircularReflections />}
+      {isKSG && <MountFuji className="z-0" />}
       {/* Navigation Header - Darker Anchor */}
       <div className="mb-8 relative z-10">
-        <div className="backdrop-blur-strong bg-ksg-anchor-header rounded-3xl p-6 shadow-ksg-depth border border-ksg-slate/40">
+        <div className={`backdrop-blur-strong rounded-3xl p-6 border ${
+          isKSG
+            ? 'bg-ksg-anchor-header shadow-ksg-depth border-ksg-slate/40'
+            : 'bg-md-anchor-header shadow-md-holographic border-md-grey-metallic'
+        }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate('/student-dashboard')}
-                className="flex items-center justify-center w-12 h-12 rounded-2xl transition-all transform hover:scale-110 hover:rotate-3 bg-ksg-ground/80 backdrop-blur-glass border border-ksg-lilac/30 hover:shadow-ksg-hover hover:border-ksg-magenta/70 shadow-ksg-inner"
+                className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all transform hover:scale-110 hover:rotate-3 backdrop-blur-glass border ${
+                  isKSG
+                    ? 'bg-ksg-ground/80 border-ksg-lilac/30 hover:shadow-ksg-hover hover:border-ksg-magenta/70 shadow-ksg-inner'
+                    : 'bg-white/40 border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon shadow-md-inner'
+                }`}
               >
-                <ArrowLeft className="w-5 h-5 text-ksg-lilac" />
+                <ArrowLeft className={`w-5 h-5 ${isKSG ? 'text-ksg-lilac' : 'text-md-charcoal'}`} />
               </button>
               <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(211,169,248,0.5)]" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700 }}>
                 Interaction Timeline
@@ -127,7 +138,11 @@ const InteractionTimeline = ({ currentUser = null }) => {
             <div className="flex items-center space-x-3">
               <Link
                 to="/student-dashboard"
-                className="inline-flex items-center px-8 py-4 rounded-2xl transition-all transform hover:scale-105 shadow-ksg-glow bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal hover:shadow-ksg-hover font-bold tracking-relaxed"
+                className={`inline-flex items-center px-8 py-4 rounded-2xl transition-all transform hover:scale-105 font-bold tracking-relaxed ${
+                  isKSG
+                    ? 'shadow-ksg-glow bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal hover:shadow-ksg-hover'
+                    : 'shadow-md-holographic bg-gradient-to-r from-md-lavender to-md-lavender-light text-md-charcoal hover:shadow-md-hover'
+                }`}
               >
                 <BarChart3 className="w-5 h-5 mr-2" />
                 View Dashboard
@@ -135,7 +150,11 @@ const InteractionTimeline = ({ currentUser = null }) => {
               <button
                 onClick={fetchInteractions}
                 disabled={loading}
-                className="inline-flex items-center justify-center w-12 h-12 rounded-2xl transition-all bg-ksg-ground/80 backdrop-blur-glass border border-ksg-lilac/30 text-ksg-lilac hover:shadow-ksg-hover hover:border-ksg-magenta/70 shadow-ksg-inner"
+                className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl transition-all backdrop-blur-glass border ${
+                  isKSG
+                    ? 'bg-ksg-ground/80 border-ksg-lilac/30 text-ksg-lilac hover:shadow-ksg-hover hover:border-ksg-magenta/70 shadow-ksg-inner'
+                    : 'bg-white/40 border-md-grey-metallic text-md-charcoal hover:shadow-md-hover hover:border-md-lavender-neon shadow-md-inner'
+                }`}
               >
                 <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
               </button>
@@ -147,40 +166,64 @@ const InteractionTimeline = ({ currentUser = null }) => {
       {/* Statistics Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 relative z-10">
         <div className="group transform hover:scale-105 hover:-rotate-1 transition-all duration-300">
-          <div className="backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 p-6 hover:shadow-ksg-hover hover:border-ksg-teal/50">
+          <div className={`backdrop-blur-strong rounded-3xl p-6 border ${
+            isKSG
+              ? 'bg-ksg-card-deep shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover hover:border-ksg-teal/50'
+              : 'bg-md-card-deep shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon'
+          }`}>
             <div className="flex items-center">
-              <div className="p-4 rounded-2xl mr-4 bg-gradient-to-br from-ksg-teal to-ksg-magenta shadow-lg" style={{ filter: 'drop-shadow(0 4px 8px rgba(255, 156, 238, 0.4))' }}>
+              <div className={`p-4 rounded-2xl mr-4 shadow-lg ${
+                isKSG
+                  ? 'bg-gradient-to-br from-ksg-teal to-ksg-magenta'
+                  : 'bg-gradient-to-br from-md-lavender to-md-lavender-light'
+              }`} style={{ filter: isKSG ? 'drop-shadow(0 4px 8px rgba(255, 156, 238, 0.4))' : 'drop-shadow(0 4px 8px rgba(181, 138, 255, 0.4))' }}>
                 <MessageCircle className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-4xl font-bold text-white drop-shadow-lg tracking-tight" style={{ fontWeight: 800 }}>{data.stats.totalInteractions}</p>
-                <p className="text-sm text-ksg-neutral font-medium tracking-relaxed" style={{ fontWeight: 500 }}>Total Interactions</p>
+                <p className="text-4xl font-bold tracking-tight text-white drop-shadow-lg" style={{ fontWeight: isKSG ? 800 : 600 }}>{data.stats.totalInteractions}</p>
+                <p className="text-sm font-medium tracking-relaxed text-ksg-neutral" style={{ fontWeight: 500 }}>Total Interactions</p>
               </div>
             </div>
           </div>
         </div>
         <div className="group transform hover:scale-105 hover:rotate-1 transition-all duration-300">
-          <div className="backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 p-6 hover:shadow-ksg-hover hover:border-ksg-coral/50">
+          <div className={`backdrop-blur-strong rounded-3xl p-6 border ${
+            isKSG
+              ? 'bg-ksg-card-deep shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover hover:border-ksg-coral/50'
+              : 'bg-md-card-deep shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon'
+          }`}>
             <div className="flex items-center">
-              <div className="p-4 rounded-2xl mr-4 bg-gradient-to-br from-ksg-coral to-ksg-orange shadow-lg" style={{ filter: 'drop-shadow(0 4px 8px rgba(255, 198, 168, 0.4))' }}>
+              <div className={`p-4 rounded-2xl mr-4 shadow-lg ${
+                isKSG
+                  ? 'bg-gradient-to-br from-ksg-coral to-ksg-orange'
+                  : 'bg-gradient-to-br from-md-lavender-light to-md-cyan-soft'
+              }`} style={{ filter: isKSG ? 'drop-shadow(0 4px 8px rgba(255, 198, 168, 0.4))' : 'drop-shadow(0 4px 8px rgba(224, 246, 255, 0.4))' }}>
                 <Clock className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-4xl font-bold text-white drop-shadow-lg tracking-tight" style={{ fontWeight: 800 }}>{formatDuration(Math.round(data.stats.averageDuration))}</p>
-                <p className="text-sm text-ksg-neutral font-medium tracking-relaxed" style={{ fontWeight: 500 }}>Average Duration</p>
+                <p className="text-4xl font-bold tracking-tight text-white drop-shadow-lg" style={{ fontWeight: isKSG ? 800 : 600 }}>{formatDuration(Math.round(data.stats.averageDuration))}</p>
+                <p className="text-sm font-medium tracking-relaxed text-ksg-neutral" style={{ fontWeight: 500 }}>Average Duration</p>
               </div>
             </div>
           </div>
         </div>
         <div className="group transform hover:scale-105 hover:-rotate-1 transition-all duration-300">
-          <div className="backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 p-6 hover:shadow-ksg-hover hover:border-ksg-lilac/50">
+          <div className={`backdrop-blur-strong rounded-3xl p-6 border ${
+            isKSG
+              ? 'bg-ksg-card-deep shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover hover:border-ksg-lilac/50'
+              : 'bg-md-card-deep shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon'
+          }`}>
             <div className="flex items-center">
-              <div className="p-4 rounded-2xl mr-4 bg-gradient-to-br from-ksg-lilac to-ksg-magenta shadow-lg" style={{ filter: 'drop-shadow(0 4px 8px rgba(211, 169, 248, 0.4))' }}>
+              <div className={`p-4 rounded-2xl mr-4 shadow-lg ${
+                isKSG
+                  ? 'bg-gradient-to-br from-ksg-lilac to-ksg-magenta'
+                  : 'bg-gradient-to-br from-md-peach-soft to-md-gold-glow'
+              }`} style={{ filter: isKSG ? 'drop-shadow(0 4px 8px rgba(211, 169, 248, 0.4))' : 'drop-shadow(0 4px 8px rgba(255, 216, 154, 0.4))' }}>
                 <Users className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-4xl font-bold text-white drop-shadow-lg tracking-tight" style={{ fontWeight: 800 }}>{data.stats.uniquePartners}</p>
-                <p className="text-sm text-ksg-neutral font-medium tracking-relaxed" style={{ fontWeight: 500 }}>Unique Partners</p>
+                <p className="text-4xl font-bold tracking-tight text-white drop-shadow-lg" style={{ fontWeight: isKSG ? 800 : 600 }}>{data.stats.uniquePartners}</p>
+                <p className="text-sm font-medium tracking-relaxed text-ksg-neutral" style={{ fontWeight: 500 }}>Unique Partners</p>
               </div>
             </div>
           </div>
@@ -189,25 +232,33 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
       {/* Filters */}
       <div className="group mb-6 relative z-10">
-        <div className="backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 p-1 hover:shadow-ksg-hover transition-all duration-500">
-          <div className="rounded-3xl p-6 bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40">
+        <div className={`backdrop-blur-strong rounded-3xl p-1 border transition-all duration-500 ${
+          isKSG
+            ? 'bg-ksg-card-deep shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover'
+            : 'bg-md-card-deep shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover'
+        }`}>
+          <div className={`rounded-3xl p-6 ${
+            isKSG
+              ? 'bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40'
+              : 'bg-gradient-to-br from-white/20 via-md-grey-metallic to-white/20'
+          }`}>
             <div className="flex items-center space-x-2 mb-6">
               <Filter className="w-5 h-5 text-ksg-lilac" />
-              <h3 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700 }}>Filters</h3>
+              <h3 className="text-2xl font-bold tracking-tight text-white" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700 }}>Filters</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold mb-2 text-ksg-neutral-light tracking-relaxed" style={{ fontWeight: 600 }}>Search Partner/Session</label>
+                <label className="block text-sm font-semibold mb-2 tracking-relaxed text-ksg-neutral-light" style={{ fontWeight: 600 }}>Search Partner/Session</label>
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Enter partner ID or session..."
-                  className="w-full px-4 py-3 rounded-2xl focus:ring-2 focus:ring-ksg-magenta focus:outline-none transition-all bg-ksg-ground/60 border border-ksg-slate/40 text-white placeholder-ksg-neutral font-medium"
+                  className="w-full px-4 py-3 rounded-2xl focus:ring-2 focus:ring-ksg-magenta focus:outline-none transition-all border bg-ksg-ground/60 border-ksg-slate/40 text-white placeholder-ksg-neutral font-medium"
                 />
               </div>
               <div className="flex items-end">
-                <p className="text-sm text-ksg-neutral font-medium tracking-relaxed" style={{ fontWeight: 500 }}>
+                <p className="text-sm font-medium tracking-relaxed text-ksg-neutral" style={{ fontWeight: 500 }}>
                   Showing {filteredInteractions.length} of {data.stats.totalInteractions} interactions
                 </p>
               </div>
@@ -218,40 +269,60 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
       {/* Interactions Table */}
       <div className="group relative z-10">
-        <div className="backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 p-1 hover:shadow-ksg-hover transition-all duration-500">
-          <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40">
+        <div className={`backdrop-blur-strong rounded-3xl p-1 border transition-all duration-500 ${
+          isKSG
+            ? 'bg-ksg-card-deep shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover'
+            : 'bg-md-card-deep shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover'
+        }`}>
+          <div className={`rounded-3xl overflow-hidden ${
+            isKSG
+              ? 'bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40'
+              : 'bg-gradient-to-br from-white/20 via-md-grey-metallic to-white/20'
+          }`}>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-ksg-charcoal/80 border-b-2 border-ksg-slate/40">
-                    <th className="px-6 py-4 text-left text-sm font-bold text-white tracking-wide">Time</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-white tracking-wide">Partner</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-white tracking-wide">Duration</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-white tracking-wide">Session</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold text-white tracking-wide">Details</th>
+                  <tr className={`border-b-2 ${
+                    isKSG
+                      ? 'bg-ksg-charcoal/80 border-ksg-slate/40'
+                      : 'bg-ksg-charcoal/80 border-ksg-slate/40'
+                  }`}>
+                    <th className="px-6 py-4 text-left text-sm font-bold tracking-wide text-white">Time</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold tracking-wide text-white">Partner</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold tracking-wide text-white">Duration</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold tracking-wide text-white">Session</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold tracking-wide text-white">Details</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-ksg-slate/20">
+                <tbody className={`divide-y ${isKSG ? 'divide-ksg-slate/20' : 'divide-md-grey-metallic'}`}>
                   {filteredInteractions.map((interaction, index) => (
-                    <tr key={interaction.id} className="transition-all hover:bg-ksg-ground/40" style={{
-                      background: index % 2 === 0 ? 'rgba(45, 40, 69, 0.2)' : 'rgba(74, 69, 101, 0.15)'
+                    <tr key={interaction.id} className={`transition-all ${
+                      isKSG ? 'hover:bg-ksg-ground/40' : 'hover:bg-ksg-ground/40'
+                    }`} style={{
+                      background: isKSG
+                        ? (index % 2 === 0 ? 'rgba(45, 40, 69, 0.2)' : 'rgba(74, 69, 101, 0.15)')
+                        : (index % 2 === 0 ? 'rgba(45, 40, 69, 0.2)' : 'rgba(74, 69, 101, 0.15)')
                     }}>
                       <td className="px-6 py-4">
                         <div>
                           <p className="text-sm font-semibold text-white">
                         {new Date(interaction.startTime).toLocaleDateString()}
                       </p>
-                      <p className="text-xs text-ksg-neutral font-medium">
+                      <p className="text-xs font-medium text-ksg-neutral">
                         {new Date(interaction.startTime).toLocaleTimeString()} - {new Date(interaction.endTime).toLocaleTimeString()}
                       </p>
-                      <p className="text-xs text-ksg-magenta font-medium">
+                      <p className="text-xs font-medium text-ksg-magenta">
                         {formatRelativeTime(interaction.startTime)}
                       </p>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-md bg-gradient-to-br from-ksg-teal to-ksg-magenta" style={{ filter: 'drop-shadow(0 2px 6px rgba(255, 156, 238, 0.3))' }}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
+                        isKSG
+                          ? 'bg-gradient-to-br from-ksg-teal to-ksg-magenta'
+                          : 'bg-gradient-to-br from-md-lavender to-md-lavender-light'
+                      }`} style={{ filter: isKSG ? 'drop-shadow(0 2px 6px rgba(255, 156, 238, 0.3))' : 'drop-shadow(0 2px 6px rgba(181, 138, 255, 0.3))' }}>
                         <span className="text-xs font-bold text-white">
                           {interaction.studentId2.slice(-2)}
                         </span>
@@ -270,7 +341,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <code className="text-xs font-mono px-3 py-1 rounded-lg text-ksg-neutral-light bg-ksg-charcoal/60 border border-ksg-slate/30 font-semibold">
+                    <code className="text-xs font-mono px-3 py-1 rounded-lg font-semibold border text-ksg-neutral-light bg-ksg-charcoal/60 border-ksg-slate/30">
                       {interaction.sessionId.slice(-8)}
                     </code>
                   </td>
@@ -282,7 +353,7 @@ const InteractionTimeline = ({ currentUser = null }) => {
                           {interaction.avgDistance.toFixed(1)}m
                         </span>
                       </div>
-                      <p className="text-xs text-ksg-neutral font-medium">
+                      <p className="text-xs font-medium text-ksg-neutral">
                         Confidence: {Math.round(interaction.confidence * 100)}%
                       </p>
                     </div>
@@ -299,17 +370,17 @@ const InteractionTimeline = ({ currentUser = null }) => {
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className="px-6 py-3 text-sm font-bold rounded-2xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal border border-ksg-coral/30 disabled:from-ksg-ground/60 disabled:to-ksg-ground/60 disabled:text-ksg-neutral hover:scale-105 hover:shadow-ksg-glow tracking-relaxed"
+              className="px-6 py-3 text-sm font-bold rounded-2xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed border tracking-relaxed bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal border-ksg-coral/30 disabled:from-ksg-ground/60 disabled:to-ksg-ground/60 disabled:text-ksg-neutral hover:scale-105 hover:shadow-ksg-glow"
             >
               Previous
             </button>
-            <span className="px-5 py-3 text-sm font-bold text-white bg-ksg-ground/80 backdrop-blur-sm rounded-2xl border border-ksg-slate/40 shadow-ksg-inner">
+            <span className="px-5 py-3 text-sm font-bold backdrop-blur-sm rounded-2xl border text-white bg-ksg-ground/80 border-ksg-slate/40 shadow-ksg-inner">
               Page {page}
             </span>
             <button
               disabled={!data.pagination.hasMore}
               onClick={() => setPage(page + 1)}
-              className="px-6 py-3 text-sm font-bold rounded-2xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal border border-ksg-coral/30 disabled:from-ksg-ground/60 disabled:to-ksg-ground/60 disabled:text-ksg-neutral hover:scale-105 hover:shadow-ksg-glow tracking-relaxed"
+              className="px-6 py-3 text-sm font-bold rounded-2xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed border tracking-relaxed bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal border-ksg-coral/30 disabled:from-ksg-ground/60 disabled:to-ksg-ground/60 disabled:text-ksg-neutral hover:scale-105 hover:shadow-ksg-glow"
             >
               Next
             </button>
@@ -321,8 +392,8 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
       {/* Footer Anchor */}
       <div className="mt-8 relative z-10">
-        <div className="backdrop-blur-strong bg-ksg-anchor-header rounded-3xl p-4 shadow-ksg-depth border border-ksg-slate/40 text-center">
-          <p className="text-sm font-medium text-ksg-neutral-light tracking-relaxed" style={{ fontWeight: 500 }}>
+        <div className="backdrop-blur-strong rounded-3xl p-4 border text-center bg-ksg-anchor-header shadow-ksg-depth border-ksg-slate/40">
+          <p className="text-sm font-medium tracking-relaxed text-ksg-neutral-light" style={{ fontWeight: 500 }}>
             Data from {new Date(data.stats.dateRange.start).toLocaleDateString()} to {new Date(data.stats.dateRange.end).toLocaleDateString()}
           </p>
         </div>

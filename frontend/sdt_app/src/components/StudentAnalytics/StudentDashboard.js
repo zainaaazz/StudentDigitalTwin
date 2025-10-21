@@ -120,7 +120,7 @@ const StudentDashboard = ({ currentUser = null }) => {
         <div className={`backdrop-blur-glass p-6 ${
           isKSG
             ? 'bg-ksg-anchor-header rounded-3xl shadow-ksg-depth border border-ksg-slate/40'
-            : 'bg-md-card-glass rounded-xl shadow-md-reflection border border-md-metallic'
+            : 'bg-md-anchor-header rounded-3xl shadow-md-holographic border border-md-grey-metallic'
         }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -132,13 +132,13 @@ const StudentDashboard = ({ currentUser = null }) => {
                     : 'bg-md-glass-transparent backdrop-blur-glass border border-md-lavender/40 hover:shadow-md-hover'
                 }`}
               >
-                <ArrowLeft className={`w-5 h-5 ${isKSG ? 'text-ksg-lilac' : 'text-md-charcoal'}`} />
+                <ArrowLeft className={`w-5 h-5 ${isKSG ? 'text-ksg-lilac' : 'text-md-lavender-neon'}`} />
               </button>
               <h1
-                className={`text-4xl font-bold tracking-tight ${isKSG ? 'text-white' : 'text-md-charcoal'}`}
+                className={`text-4xl font-bold tracking-tight ${textStyles.heading}`}
                 style={{
-                  fontFamily: isKSG ? 'Poppins, sans-serif' : 'sans-serif',
-                  fontWeight: isKSG ? 700 : 400,
+                  fontFamily: textStyles.headingFont,
+                  fontWeight: isKSG ? 700 : 600,
                   letterSpacing: isMiniDisc ? '0.05em' : '0.025em',
                   textShadow: isKSG ? '0 2px 10px rgba(211,169,248,0.5)' : 'none'
                 }}
@@ -153,7 +153,7 @@ const StudentDashboard = ({ currentUser = null }) => {
                 className={`inline-flex items-center px-8 py-4 rounded-2xl transition-all transform hover:scale-105 font-bold ${
                   isKSG
                     ? 'shadow-ksg-glow bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal hover:shadow-ksg-hover tracking-relaxed'
-                    : 'bg-md-card-glass backdrop-blur-glass text-md-charcoal hover:shadow-md-hover border border-md-lavender/30'
+                    : 'bg-md-glass-transparent backdrop-blur-glass text-md-charcoal hover:shadow-md-hover border border-md-lavender/30'
                 }`}
                 style={{
                   fontWeight: isKSG ? 600 : 500,
@@ -489,7 +489,7 @@ const StudentDashboard = ({ currentUser = null }) => {
         <div className={`backdrop-blur-glass p-4 text-center ${
           isKSG
             ? 'bg-ksg-anchor-header rounded-3xl shadow-ksg-depth border border-ksg-slate/40'
-            : 'bg-md-card-glass rounded-xl shadow-md-reflection border border-md-metallic'
+            : 'bg-md-anchor-header rounded-3xl shadow-md-holographic border border-md-grey-metallic'
         }`}>
           <p
             className={`text-sm font-medium ${textStyles.subheading}`}

@@ -11,31 +11,26 @@ const StatCard = ({ icon: Icon, value, label, tooltip, index = 0, rotateClass = 
   return (
     <div className={`group transform hover:scale-105 ${rotateClass} transition-all duration-300`}>
       <div
-        className={`p-6 ${
+        className={`p-6 backdrop-blur-strong rounded-3xl shadow-ksg-depth border hover:shadow-ksg-hover ${
           isKSG
-            ? `backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 hover:shadow-ksg-hover hover:border-${colors.border}`
-            : `backdrop-blur-glass bg-md-card-glass rounded-xl shadow-md-holographic border border-md-grey-metallic hover:shadow-md-hover hover:border-${colors.border}`
+            ? `bg-ksg-card-deep border-ksg-slate/30 hover:border-${colors.border}`
+            : `bg-md-card-deep border-md-grey-metallic hover:border-${colors.border}`
         }`}
-        style={!isKSG ? {
-          boxShadow: '0px 4px 12px rgba(180, 160, 255, 0.25), inset 0 1px 3px rgba(255, 255, 255, 0.15)'
-        } : {}}
       >
         <div className="flex items-center">
           <div
             className={`p-4 rounded-2xl mr-4 bg-gradient-to-br ${colors.icon} shadow-lg`}
             style={{
-              filter: isKSG ? `drop-shadow(0 4px 8px ${colors.from}40)` : 'none',
-              ...((!isKSG) && { boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.2)' })
+              filter: `drop-shadow(0 4px 8px ${colors.from}40)`
             }}
           >
             <Icon className={`w-8 h-8 ${isKSG ? 'text-white' : 'text-md-charcoal'}`} />
           </div>
           <div className="flex-1">
             <p
-              className={`text-4xl font-bold ${textStyles.heading}`}
+              className={`text-4xl font-bold ${textStyles.heading} drop-shadow-lg`}
               style={{
-                fontWeight: isKSG ? 800 : 500,
-                textShadow: isKSG ? `0 2px 8px ${colors.from}60` : 'none'
+                fontWeight: isKSG ? 800 : 600
               }}
             >
               {value}

@@ -23,7 +23,12 @@ export const ThemeProvider = ({ children }) => {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'ksg' ? 'minidisc' : 'ksg');
+    setTheme(prevTheme => {
+      if (prevTheme === 'ksg') return 'ksg-mirror';
+      if (prevTheme === 'ksg-mirror') return 'professional';
+      if (prevTheme === 'professional') return 'minidisc';
+      return 'ksg';
+    });
   };
 
   const value = {
@@ -31,6 +36,8 @@ export const ThemeProvider = ({ children }) => {
     setTheme,
     toggleTheme,
     isKSG: theme === 'ksg',
+    isKSGMirror: theme === 'ksg-mirror',
+    isProfessional: theme === 'professional',
     isMiniDisc: theme === 'minidisc',
   };
 

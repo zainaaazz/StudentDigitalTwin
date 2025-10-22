@@ -10,6 +10,8 @@ import {
 } from 'recharts';
 import Layout from '../layout/Layout';
 import { apiService } from '../../services/api';
+import { useTheme } from '../../contexts/ThemeContext';
+import { getCardStyles, getTextStyles, getChartStyles } from '../../utils/themeStyles';
 
 const WEEK_LENGTH = 5;
 const EMPTY_VALUE = 'N/A';
@@ -124,6 +126,12 @@ function summariseWeek(rows) {
 }
 
 const AcademicsPage = () => {
+  const { isKSG, isKSGMirror, isProfessional } = useTheme();
+  const isKSGVariant = isKSG || isKSGMirror;
+  const cardStyles = useMemo(() => getCardStyles(isKSGVariant, isProfessional), [isKSGVariant, isProfessional]);
+  const textStyles = useMemo(() => getTextStyles(isKSGVariant, isProfessional), [isKSGVariant, isProfessional]);
+  const chartStyles = useMemo(() => getChartStyles(isKSGVariant, isProfessional), [isKSGVariant, isProfessional]);
+
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -285,12 +293,15 @@ const AcademicsPage = () => {
     }
     const point = payload[0].payload;
     return (
-      <div className="rounded-md border border-zinc-700 bg-zinc-900/90 px-3 py-2 text-xs text-slate-200 shadow-lg">
+      <div className={isProfessional
+        ? 'rounded-md border border-gray-200 bg-white px-3 py-2 text-xs text-pro-text shadow-lg'
+        : 'rounded-md border border-zinc-700 bg-zinc-900/90 px-3 py-2 text-xs text-slate-200 shadow-lg'
+      }>
         <p className="font-semibold" style={{ color: point.color }}>
           {point.label}
         </p>
-        <p className="text-slate-300">{point.dayLabel}</p>
-        <p className="text-slate-400">
+        <p className={isProfessional ? 'text-pro-text' : 'text-slate-300'}>{point.dayLabel}</p>
+        <p className={isProfessional ? 'text-pro-text-muted' : 'text-slate-400'}>
           Confidence{' '}
           {point.confidencePercent !== null
             ? `${point.confidencePercent.toFixed(1)}%`
@@ -320,22 +331,37 @@ const AcademicsPage = () => {
     <Layout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-100">
+          <h1 className={isProfessional
+            ? 'text-3xl font-bold text-pro-text'
+            : 'text-3xl font-bold text-slate-100'
+          }>
             Weekly Prediction Tracker
           </h1>
-          <p className="mt-2 text-sm text-slate-300">
+          <p className={isProfessional
+            ? 'mt-2 text-sm text-pro-text-muted'
+            : 'mt-2 text-sm text-slate-300'
+          }>
             Follow how your predicted outcome changes across the term. Each week
             combines five study days so you can focus on the bigger picture.
           </p>
         </div>
 
-        <div className="rounded-xl border border-zinc-700 bg-zinc-900/60 p-6 space-y-6">
+        <div className={isProfessional
+          ? 'bg-white rounded-lg border border-gray-200 shadow-pro-card p-6 space-y-6'
+          : 'rounded-xl border border-zinc-700 bg-zinc-900/60 p-6 space-y-6'
+        }>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <label className="text-sm font-semibold text-slate-200">
+              <label className={isProfessional
+                ? 'text-sm font-semibold text-pro-text'
+                : 'text-sm font-semibold text-slate-200'
+              }>
                 Week in focus
               </label>
-              <p className="text-xs text-slate-400">
+              <p className={isProfessional
+                ? 'text-xs text-pro-text-muted'
+                : 'text-xs text-slate-400'
+              }>
                 Move between weeks to see how the daily predictions are trending.
               </p>
             </div>
@@ -348,14 +374,20 @@ const AcademicsPage = () => {
                   !weeks.length ||
                   weeks[0].weekNumber === selectedWeek
                 }
-                className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-slate-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className={isProfessional
+                  ? 'rounded-lg border border-gray-300 px-3 py-2 text-sm text-pro-text hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
+                  : 'rounded-lg border border-zinc-700 px-3 py-2 text-sm text-slate-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50'
+                }
               >
                 Prev
               </button>
               <select
                 value={selectedWeek ?? ''}
                 onChange={(event) => setSelectedWeek(Number(event.target.value))}
-                className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className={isProfessional
+                  ? 'rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-pro-text focus:outline-none focus:ring-2 focus:ring-pro-primary'
+                  : 'rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-400'
+                }
               >
                 {weeks.map((week) => (
                   <option key={week.weekNumber} value={week.weekNumber}>
@@ -371,57 +403,102 @@ const AcademicsPage = () => {
                   !weeks.length ||
                   weeks[weeks.length - 1].weekNumber === selectedWeek
                 }
-                className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-slate-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className={isProfessional
+                  ? 'rounded-lg border border-gray-300 px-3 py-2 text-sm text-pro-text hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
+                  : 'rounded-lg border border-zinc-700 px-3 py-2 text-sm text-slate-100 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50'
+                }
               >
                 Next
               </button>
             </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-700 bg-zinc-900/70 p-6">
+          <div className={isProfessional
+            ? 'bg-gray-50 rounded-lg border border-gray-200 p-6'
+            : 'rounded-xl border border-zinc-700 bg-zinc-900/70 p-6'
+          }>
             {loading ? (
-              <div className="flex flex-col items-center gap-3 py-12 text-slate-300">
-                <div className="h-10 w-10 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
+              <div className={isProfessional
+                ? 'flex flex-col items-center gap-3 py-12 text-pro-text-muted'
+                : 'flex flex-col items-center gap-3 py-12 text-slate-300'
+              }>
+                <div className={isProfessional
+                  ? 'h-10 w-10 animate-spin rounded-full border-2 border-pro-primary border-t-transparent'
+                  : 'h-10 w-10 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent'
+                } />
                 <p>Loading predictions...</p>
               </div>
             ) : error ? (
-              <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200">
+              <div className={isProfessional
+                ? 'rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700'
+                : 'rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200'
+              }>
                 {error}
               </div>
             ) : !currentWeek ? (
-              <div className="rounded-lg border border-zinc-700 bg-zinc-900/80 p-4 text-sm text-slate-300">
+              <div className={isProfessional
+                ? 'rounded-lg border border-gray-200 bg-white p-4 text-sm text-pro-text-muted'
+                : 'rounded-lg border border-zinc-700 bg-zinc-900/80 p-4 text-sm text-slate-300'
+              }>
                 We do not have weekly predictions to show just yet. Check back soon.
               </div>
             ) : (
               <div className="space-y-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <h2 className="text-2xl font-semibold text-slate-100">
+                    <h2 className={isProfessional
+                      ? 'text-2xl font-semibold text-pro-text'
+                      : 'text-2xl font-semibold text-slate-100'
+                    }>
                       Week {currentWeek.weekNumber}{' '}
-                      <span className="text-lg text-slate-300">
+                      <span className={isProfessional
+                        ? 'text-lg text-pro-text-muted'
+                        : 'text-lg text-slate-300'
+                      }>
                         (days {currentWeek.range.start}-{currentWeek.range.end})
                       </span>
                     </h2>
-                    <p className="mt-2 text-sm text-slate-400">
+                    <p className={isProfessional
+                      ? 'mt-2 text-sm text-pro-text-muted'
+                      : 'mt-2 text-sm text-slate-400'
+                    }>
                       Predictions update daily, showing whether you are on track to
                       pass, excel, or if extra attention is needed.
                     </p>
                   </div>
                   {currentWeek.summary && (
-                    <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm">
-                      <p className="text-xs uppercase tracking-wide text-emerald-200/80">
+                    <div className={isProfessional
+                      ? 'rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm'
+                      : 'rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm'
+                    }>
+                      <p className={isProfessional
+                        ? 'text-xs uppercase tracking-wide text-green-600'
+                        : 'text-xs uppercase tracking-wide text-emerald-200/80'
+                      }>
                         Week outlook
                       </p>
-                      <p className="text-lg font-semibold text-emerald-200">
+                      <p className={isProfessional
+                        ? 'text-lg font-semibold text-green-700'
+                        : 'text-lg font-semibold text-emerald-200'
+                      }>
                         {currentWeek.summary.label || EMPTY_VALUE}
                       </p>
                     </div>
                   )}
                 </div>
 
-                <div className="overflow-x-auto rounded-lg border border-zinc-800">
-                  <table className="min-w-full divide-y divide-zinc-800 text-sm">
-                    <thead className="bg-zinc-900/80 text-slate-300">
+                <div className={isProfessional
+                  ? 'overflow-x-auto rounded-lg border border-gray-200'
+                  : 'overflow-x-auto rounded-lg border border-zinc-800'
+                }>
+                  <table className={isProfessional
+                    ? 'min-w-full divide-y divide-gray-200 text-sm'
+                    : 'min-w-full divide-y divide-zinc-800 text-sm'
+                  }>
+                    <thead className={isProfessional
+                      ? 'bg-gray-50 text-pro-text'
+                      : 'bg-zinc-900/80 text-slate-300'
+                    }>
                       <tr>
                         <th className="px-4 py-3 text-left font-medium uppercase tracking-wide">
                           Day
@@ -434,14 +511,23 @@ const AcademicsPage = () => {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800 text-slate-100">
+                    <tbody className={isProfessional
+                      ? 'divide-y divide-gray-200 text-pro-text'
+                      : 'divide-y divide-zinc-800 text-slate-100'
+                    }>
                       {currentWeek.rows.map((row) => {
                         const dayNumber = Number(row.day);
                         const label = row.pred_label || EMPTY_VALUE;
                         const { border, background, text } = getOutcomeColors(label);
                         return (
-                          <tr key={`day-${dayNumber}`} className="hover:bg-zinc-800/40">
-                            <td className="px-4 py-3 font-medium text-slate-200">Day {dayNumber}</td>
+                          <tr key={`day-${dayNumber}`} className={isProfessional
+                            ? 'hover:bg-gray-50'
+                            : 'hover:bg-zinc-800/40'
+                          }>
+                            <td className={isProfessional
+                              ? 'px-4 py-3 font-medium text-pro-text'
+                              : 'px-4 py-3 font-medium text-slate-200'
+                            }>Day {dayNumber}</td>
                             <td className="px-4 py-3">
                               <span
                                 className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium"
@@ -466,9 +552,15 @@ const AcademicsPage = () => {
                   </table>
                 </div>
 
-                <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-4">
+                <div className={isProfessional
+                  ? 'rounded-lg border border-gray-200 bg-white p-4'
+                  : 'rounded-lg border border-zinc-800 bg-zinc-900/80 p-4'
+                }>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-slate-200">
+                    <h3 className={isProfessional
+                      ? 'text-sm font-semibold text-pro-text'
+                      : 'text-sm font-semibold text-slate-200'
+                    }>
                       Confidence trend this week
                     </h3>
                   </div>
@@ -476,17 +568,17 @@ const AcademicsPage = () => {
                     <div className="mt-4 h-60">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={chartData} margin={{ top: 10, right: 16, left: -10, bottom: 0 }}>
-                          <CartesianGrid stroke="rgba(148, 163, 184, 0.15)" strokeDasharray="4 4" />
+                          <CartesianGrid stroke={chartStyles.gridColor} strokeDasharray="4 4" />
                           <XAxis
                             dataKey="dayLabel"
-                            tick={{ fill: '#94a3b8', fontSize: 12 }}
-                            axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
-                            tickLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                            tick={{ fill: chartStyles.axisColor, fontSize: 12 }}
+                            axisLine={{ stroke: chartStyles.axisColor }}
+                            tickLine={{ stroke: chartStyles.axisColor }}
                           />
                           <YAxis
-                            tick={{ fill: '#94a3b8', fontSize: 12 }}
-                            axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
-                            tickLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
+                            tick={{ fill: chartStyles.axisColor, fontSize: 12 }}
+                            axisLine={{ stroke: chartStyles.axisColor }}
+                            tickLine={{ stroke: chartStyles.axisColor }}
                             domain={[0, 100]}
                             tickFormatter={(value) => `${value}%`}
                           />
@@ -507,7 +599,7 @@ const AcademicsPage = () => {
                                   cy={cy}
                                   r={5}
                                   fill={payload.color}
-                                  stroke="#1f2937"
+                                  stroke={isProfessional ? '#ffffff' : '#1f2937'}
                                   strokeWidth={1.5}
                                 />
                               );
@@ -524,7 +616,7 @@ const AcademicsPage = () => {
                                     cy={cy}
                                     r={5}
                                     fill={payload.color}
-                                    stroke="#1f2937"
+                                    stroke={isProfessional ? '#ffffff' : '#1f2937'}
                                     strokeWidth={1.5}
                                   />
                                 </g>
@@ -535,18 +627,30 @@ const AcademicsPage = () => {
                       </ResponsiveContainer>
                     </div>
                   ) : (
-                    <p className="mt-4 text-xs text-slate-400">
+                    <p className={isProfessional
+                      ? 'mt-4 text-xs text-pro-text-muted'
+                      : 'mt-4 text-xs text-slate-400'
+                    }>
                       Confidence information is not available for this week.
                     </p>
                   )}
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-4">
-                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                  <div className={isProfessional
+                    ? 'rounded-lg border border-gray-200 bg-white p-4'
+                    : 'rounded-lg border border-zinc-800 bg-zinc-900/80 p-4'
+                  }>
+                    <p className={isProfessional
+                      ? 'text-xs uppercase tracking-wide text-pro-text-muted'
+                      : 'text-xs uppercase tracking-wide text-slate-400'
+                    }>
                       Week highlights
                     </p>
-                    <ul className="mt-3 space-y-2 text-sm text-slate-300">
+                    <ul className={isProfessional
+                      ? 'mt-3 space-y-2 text-sm text-pro-text'
+                      : 'mt-3 space-y-2 text-sm text-slate-300'
+                    }>
                       <li>- {currentWeek.rows.length} daily predictions were generated.</li>
                       <li>
                         - {currentWeek.summary?.label || EMPTY_VALUE} is the most common outcome
@@ -557,7 +661,10 @@ const AcademicsPage = () => {
                       </li>
                     </ul>
                   </div>
-                  <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-4 text-sm text-slate-300">
+                  <div className={isProfessional
+                    ? 'rounded-lg border border-gray-200 bg-white p-4 text-sm text-pro-text'
+                    : 'rounded-lg border border-zinc-800 bg-zinc-900/80 p-4 text-sm text-slate-300'
+                  }>
                     <p>
                       As new results are added, this view refreshes automatically. Use
                       the combined weekly outlook and the daily breakdown to decide

@@ -1,73 +1,36 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Flame, Scale, TrendingUp, Target, Lightbulb } from 'lucide-react';
+import { Flame, Scale, TrendingUp, Target, Lightbulb, CheckCircle } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analytics }) => {
+  const { isKSG, isKSGMirror, isProfessional } = useTheme();
+  const isKSGVariant = isKSG || isKSGMirror;
+
   const riskLevel = analyticsEngine?.calculateRiskLevel(studentId) ?? 'normal';
   const recommendations = analyticsEngine?.getRecommendations(studentId) ?? [];
 
   if (!recommendations.length && (riskLevel === 'normal' || riskLevel === 'low')) {
     return (
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary-bg-start/30 to-primary-bg-end/30 rounded-xl p-6 border border-card-accent-end/50">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-card-accent-end/50 rounded-full blur-3xl opacity-30" />
-        <div className="relative flex items-center gap-4">
-          <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-card-accent-start to-card-accent-end shadow-lg">
-              <svg className="w-7 h-7 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-primary-text mb-1">Great Learning Balance</h3>
-            <p className="text-sm text-body-text">Your learning activity looks healthy and consistent. Keep up the excellent work!</p>
-          </div>
+      <div className="flex items-start gap-3 p-4 rounded-lg bg-green-100 border border-green-300">
+        <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+        <div>
+          <h4 className={`font-semibold mb-1 ${isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-md-charcoal'}`}>
+            Great Learning Balance
+          </h4>
+          <p className={`text-sm ${isKSGVariant ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text-muted' : 'text-md-grey'}`}>
+            Your learning activity looks healthy and consistent. Keep up the excellent work!
+          </p>
         </div>
       </div>
     );
   }
 
   const riskConfigMap = {
-    high: { 
-      label: 'High Attention', 
-      gradient: 'from-red-500 to-rose-600',
-      bgGradient: 'from-red-950/30 to-rose-950/30',
-      textColor: 'text-red-300',
-      badgeBg: 'bg-red-900/70 border-red-600', 
-      badgeText: 'text-red-200',
-      dotColor: 'bg-red-400',
-      borderColor: 'border-red-800/50'
-    },
-    medium: { 
-      label: 'Moderate Attention', 
-      gradient: 'from-good-status-dot to-academic-icon-end',
-      bgGradient: 'from-good-status-dot/30 to-academic-icon-end/30',
-      textColor: 'text-good-text-label',
-      badgeBg: 'bg-good-status-dot/70 border-good-status-dot', 
-      badgeText: 'text-good-text-label',
-      dotColor: 'bg-good-status-dot',
-      borderColor: 'border-good-status-dot/50'
-    },
-    low: { 
-      label: 'Minor Adjustments', 
-      gradient: 'from-card-accent-start to-card-accent-end',
-      bgGradient: 'from-primary-bg-start/30 to-primary-bg-end/30',
-      textColor: 'text-primary-text',
-      badgeBg: 'bg-card-bg/70 border-card-accent-end', 
-      badgeText: 'text-secondary-text',
-      dotColor: 'bg-card-accent-end',
-      borderColor: 'border-card-accent-end/50'
-    },
-    normal: { 
-      label: 'Monitoring Recommended', 
-      gradient: 'from-card-accent-start to-card-accent-end',
-      bgGradient: 'from-primary-bg-start/30 to-primary-bg-end/30',
-      textColor: 'text-primary-text',
-      badgeBg: 'bg-card-bg/70 border-card-accent-end', 
-      badgeText: 'text-secondary-text',
-      dotColor: 'bg-card-accent-end',
-      borderColor: 'border-card-accent-end/50'
-    }
+    high: { label: 'High Attention', color: 'red', textColor: 'text-red-700', bgColor: 'bg-red-100', borderColor: 'border-red-300' },
+    medium: { label: 'Moderate Attention', color: 'yellow', textColor: 'text-yellow-700', bgColor: 'bg-yellow-100', borderColor: 'border-yellow-300' },
+    low: { label: 'Minor Adjustments', color: 'blue', textColor: 'text-blue-700', bgColor: 'bg-blue-100', borderColor: 'border-blue-300' },
+    normal: { label: 'Good Status', color: 'green', textColor: 'text-green-700', bgColor: 'bg-green-100', borderColor: 'border-green-300' }
   };
   const riskConfig = riskConfigMap[riskLevel] || riskConfigMap.normal;
 
@@ -80,56 +43,11 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
 
   const typeConfig = (type) => {
     switch (type) {
-      case 'burnout': 
-        return { 
-          icon: Flame, 
-          title: 'Burnout Prevention', 
-          gradient: 'from-red-500 to-rose-600',
-          bgColor: 'bg-gradient-to-br from-red-950/30 to-rose-950/30',
-          textColor: 'text-red-300',
-          iconBg: 'bg-red-900/70',
-          borderColor: 'border-red-800/50'
-        };
-      case 'balance': 
-        return { 
-          icon: Scale, 
-          title: 'Learning Balance', 
-          gradient: 'from-good-status-dot to-academic-icon-end',
-          bgColor: 'bg-gradient-to-br from-good-status-dot/30 to-academic-icon-end/30',
-          textColor: 'text-good-text-label',
-          iconBg: 'bg-good-status-dot/70',
-          borderColor: 'border-good-status-dot/50'
-        };
-      case 'engagement': 
-        return { 
-          icon: TrendingUp, 
-          title: 'Increase Engagement', 
-          gradient: 'from-interactivity-icon-start to-interactivity-icon-end',
-          bgColor: 'bg-gradient-to-br from-interactivity-icon-start/30 to-interactivity-icon-end/30',
-          textColor: 'text-primary-text',
-          iconBg: 'bg-interactivity-icon-start/70',
-          borderColor: 'border-interactivity-icon-end/50'
-        };
-      case 'improvement': 
-        return { 
-          icon: Target, 
-          title: 'Performance Enhancement', 
-          gradient: 'from-good-status-dot to-academic-icon-end',
-          bgColor: 'bg-gradient-to-br from-good-status-dot/30 to-academic-icon-end/30',
-          textColor: 'text-good-text-label',
-          iconBg: 'bg-good-status-dot/70',
-          borderColor: 'border-good-status-dot/50'
-        };
-      default: 
-        return { 
-          icon: Lightbulb, 
-          title: 'General Recommendations', 
-          gradient: 'from-card-accent-start to-card-accent-end',
-          bgColor: 'bg-gradient-to-br from-primary-bg-start/30 to-primary-bg-end/30',
-          textColor: 'text-primary-text',
-          iconBg: 'bg-card-bg/70',
-          borderColor: 'border-card-accent-end/50'
-        };
+      case 'burnout': return { icon: Flame, title: 'Burnout Prevention', color: 'red' };
+      case 'balance': return { icon: Scale, title: 'Learning Balance', color: 'green' };
+      case 'engagement': return { icon: TrendingUp, title: 'Increase Engagement', color: 'blue' };
+      case 'improvement': return { icon: Target, title: 'Performance Enhancement', color: 'purple' };
+      default: return { icon: Lightbulb, title: 'General Recommendations', color: 'gray' };
     }
   };
 
@@ -152,86 +70,63 @@ const StudentLearningAssessment = ({ studentId, analyticsEngine, userRole, analy
     return `Healthy learning pattern with ${avgDaily} daily interactions across ${activeDays} active days.`;
   };
 
-  const priorityConfig = (p) => {
-    if (p === 'high') return { dot: 'bg-red-400', ring: 'ring-red-600/60' };
-    if (p === 'medium') return { dot: 'bg-good-status-dot', ring: 'ring-good-status-dot/60' };
-    return { dot: 'bg-card-accent-end', ring: 'ring-card-accent-end/60' };
-  };
-
   return (
-    <div className={`relative overflow-hidden bg-gradient-to-br ${riskConfig.bgGradient} rounded-xl shadow-lg border ${riskConfig.borderColor}`}>
-      <div className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-br ${riskConfig.gradient} rounded-full blur-3xl opacity-20`} />
-      
-      <div className="relative p-6">
-        <div className="flex items-start gap-4 mb-6">
-          <div className="flex-shrink-0">
-            <div className={`w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br ${riskConfig.gradient} shadow-lg`}>
-              <svg className="w-7 h-7 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-primary-text mb-1">
-              {userRole === 'student' ? 'Your Learning Assessment' : 'Student Learning Assessment'}
-            </h3>
-            <p className="text-sm text-body-text">
-              <span className="font-semibold">{riskConfig.label}</span> — {summaryMessage()}
-            </p>
-          </div>
-
-          <div className="flex-shrink-0">
-            <div className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl ${riskConfig.badgeBg} shadow-lg border-2`}>
-              <span className={`w-3 h-3 rounded-full ${riskConfig.dotColor} animate-pulse shadow-lg`} />
-              <span className={`text-base font-bold ${riskConfig.badgeText} capitalize tracking-wide`}>{riskLevel}</span>
-            </div>
-          </div>
+    <div className="space-y-4">
+      {/* Summary Header */}
+      <div className={`flex items-start gap-3 p-4 rounded-lg ${riskConfig.bgColor} border ${riskConfig.borderColor}`}>
+        <div className="flex-shrink-0">
+          <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-semibold text-sm ${riskConfig.textColor} capitalize`}>
+            <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
+            {riskConfig.label}
+          </span>
         </div>
-
-        <div className="space-y-4">
-          {Object.entries(grouped).map(([type, recs]) => {
-            const cfg = typeConfig(type);
-            const order = { high: 0, medium: 1, low: 2 };
-            recs.sort((a, b) => (order[a.priority] ?? 3) - (order[b.priority] ?? 3));
-            
-            return (
-              <div key={type} className={`${cfg.bgColor} rounded-xl p-4 border ${cfg.borderColor} shadow-sm`}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${cfg.iconBg} shadow-sm`}>
-                    <cfg.icon className={`w-5 h-5 text-white`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-base font-bold ${cfg.textColor}`}>{cfg.title}</div>
-                    <div className="text-xs text-secondary-text">{recs.length} recommendation{recs.length !== 1 ? 's' : ''}</div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {recs.map((rec, i) => {
-                    const pConfig = priorityConfig(rec.priority);
-                    return (
-                      <div key={i} className="flex items-start gap-3 bg-primary-bg-start/70 backdrop-blur-sm rounded-lg p-3 border border-card-accent-end/50">
-                        <div className="mt-0.5">
-                          <span className={`inline-block w-2.5 h-2.5 rounded-full ${pConfig.dot} ring-2 ${pConfig.ring} shadow-lg`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-body-text leading-relaxed">{rec.message}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className={`text-xs font-semibold ${cfg.textColor} uppercase tracking-wide`}>
-                              {rec.priority} priority
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+        <div className="flex-1">
+          <p className={`text-sm ${isKSGVariant ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text-muted' : 'text-md-grey'}`}>
+            {summaryMessage()}
+          </p>
         </div>
       </div>
+
+      {/* Recommendations */}
+      {Object.entries(grouped).map(([type, recs]) => {
+        const cfg = typeConfig(type);
+        const order = { high: 0, medium: 1, low: 2 };
+        recs.sort((a, b) => (order[a.priority] ?? 3) - (order[b.priority] ?? 3));
+        const IconComponent = cfg.icon;
+
+        return (
+          <div key={type}>
+            <div className="flex items-center gap-2 mb-2">
+              <IconComponent className={`w-4 h-4 text-${cfg.color}-500`} />
+              <h4 className={`font-semibold text-sm ${isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-md-charcoal'}`}>
+                {cfg.title}
+              </h4>
+              <span className={`text-xs ${isKSGVariant ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text-muted' : 'text-md-grey'}`}>
+                ({recs.length})
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              {recs.map((rec, i) => (
+                <div key={i} className={`flex items-start gap-2 p-3 rounded-lg ${
+                  rec.priority === 'high' ? 'bg-red-100 border border-red-300' :
+                  rec.priority === 'medium' ? 'bg-yellow-100 border border-yellow-300' :
+                  'bg-gray-100 border border-gray-300'
+                }`}>
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${
+                    rec.priority === 'high' ? 'bg-red-600' :
+                    rec.priority === 'medium' ? 'bg-yellow-600' :
+                    'bg-gray-600'
+                  }`} />
+                  <p className={`text-sm ${isKSGVariant ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text' : 'text-md-grey'}`}>
+                    {rec.message}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

@@ -1,6 +1,9 @@
 import React, { useMemo } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
+  const { isKSG, isKSGMirror, isProfessional } = useTheme();
+  const isKSGVariant = isKSG || isKSGMirror;
   const studentNames = {
     '38925958': 'mike',
     '41425626': 'zai', 
@@ -105,16 +108,29 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
     return null;
   }
 
+  const getBgClass = () => {
+    if (isKSGVariant) return 'bg-ksg-card-deep/80 border-ksg-slate/30';
+    if (isProfessional) return 'bg-white border-gray-200';
+    return 'bg-md-card-deep/80 border-md-grey-metallic';
+  };
+
+  const getTextColor = () => {
+    if (isKSGVariant) return 'text-white';
+    if (isProfessional) return 'text-pro-text';
+    return 'text-md-charcoal';
+  };
+
+  const getSubtextColor = () => {
+    if (isKSGVariant) return 'text-ksg-neutral';
+    if (isProfessional) return 'text-pro-text-muted';
+    return 'text-md-grey';
+  };
+
   return (
-    <div className={`relative overflow-hidden bg-gradient-to-br ${config.bgGradient} rounded-2xl p-6 border ${config.borderColor} shadow-xl`}>
-      <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-br ${config.gradient} rounded-full blur-3xl opacity-20`} />
-      <div className={`absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr ${config.gradient} rounded-full blur-2xl opacity-15`} />
-      
+    <div className={`relative overflow-hidden rounded-2xl p-6 border shadow-xl ${getBgClass()}`}>
       <div className="relative flex flex-col sm:flex-row items-center gap-6">
         <div className="flex-shrink-0">
           <div className="relative group">
-            <div className={`absolute -inset-2 bg-gradient-to-br ${config.gradient} rounded-full blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300`} />
-            
             <div className={`relative w-36 h-36 rounded-full overflow-hidden ring-4 ${config.ringColor} shadow-2xl`}>
               <img
                 src={imageUrl}
@@ -125,8 +141,8 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
                 }}
               />
             </div>
-            
-            <div className={`absolute -bottom-3 -right-3 w-14 h-14 rounded-full bg-gradient-to-br ${config.gradient} border-4 border-primary-bg-end flex items-center justify-center shadow-xl`}>
+
+            <div className={`absolute -bottom-3 -right-3 w-14 h-14 rounded-full bg-gradient-to-br ${config.gradient} border-4 ${getBgClass()} flex items-center justify-center shadow-xl`}>
               <span className="text-2xl">{config.icon}</span>
             </div>
           </div>
@@ -134,16 +150,16 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
 
         <div className="flex-1 text-center sm:text-left">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 mb-4">
-            <h3 className={`text-3xl font-black capitalize ${config.textColor}`}>
+            <h3 className={`text-3xl font-black capitalize ${getTextColor()}`}>
               {studentName}
             </h3>
-            <span className={`inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold ${config.badgeBg} border shadow-lg`}>
+            <span className={`inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold ${config.badgeBg} border shadow-lg ${config.badgeText}`}>
               <span className="mr-2 text-lg">{config.icon}</span>
               {config.title}
             </span>
           </div>
-          
-          <p className="text-body-text text-base font-semibold leading-relaxed mb-4">
+
+          <p className={`text-base font-semibold leading-relaxed mb-4 ${getSubtextColor()}`}>
             {config.description}
           </p>
 
@@ -154,10 +170,10 @@ const StudentBehaviorIndicator = ({ analytics, selectedStudent, userRole }) => {
                 const statusColors = {
                   above: 'bg-good-status-dot/50 text-good-text-label border-good-status-dot',
                   below: 'bg-red-950/50 text-red-400 border-red-800',
-                  average: 'bg-card-bg text-secondary-text border-card-accent-end'
+                  average: `${getBgClass()} ${getSubtextColor()} border-${isKSGVariant ? 'ksg-slate/30' : isProfessional ? 'pro-border' : 'md-grey-metallic'}`
                 };
                 return (
-                  <span key={idx} className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border shadow-md ${statusColors[metric.status] || 'bg-primary-bg-start text-secondary-text border-card-accent-end'}`}>
+                  <span key={idx} className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border shadow-md ${statusColors[metric.status] || statusColors.average}`}>
                     {key.replace(/([A-Z])/g, ' $1').trim()}: {metric.status}
                   </span>
                 );

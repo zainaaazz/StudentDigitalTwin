@@ -4,6 +4,8 @@ import { useStudentData } from '../../hooks/useStudentData';
 import { useInteractionSimulator } from '../../hooks/useInteractionSimulator';
 import PottedPlantVisualization from '../StudentAnalytics/PottedPlantVisualization';
 import { TrendingUp, Zap, Award, Target } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
+import { getCardStyles, getTextStyles } from '../../utils/themeStyles';
 
 /**
  * StudentProfile with Color-Coded Performance
@@ -85,6 +87,13 @@ const STUDENT_PROFILES = {
 };
 
 const StudentProfile = () => {
+  // --- Theme context ---
+  const { isKSG, isKSGMirror, isProfessional } = useTheme();
+  const isKSGVariant = isKSG || isKSGMirror;
+  const cardStyles = useMemo(() => getCardStyles(isKSGVariant, isProfessional), [isKSGVariant, isProfessional]);
+  const textStyles = useMemo(() => getTextStyles(isKSGVariant, isProfessional), [isKSGVariant, isProfessional]);
+
+  // --- keep original hook usage and id handling ---
   const { currentStudentId } = useStudentData();
   const { getDashboardData } = useInteractionSimulator(currentStudentId);
   const [dashboardData, setDashboardData] = useState(null);
@@ -338,6 +347,45 @@ const StudentProfile = () => {
   const renderTile = (tile) => {
     const Icon = tile.icon;
 
+    // Theme-aware tile styling
+    const tileContainerClass = isKSGVariant
+      ? `bg-gradient-to-br ${tile.bgGradient}`
+      : isProfessional
+      ? 'bg-white'
+      : `bg-gradient-to-br ${tile.bgGradient}`;
+
+    const tileBorderClass = isKSGVariant
+      ? `border ${tile.borderColor}`
+      : isProfessional
+      ? 'border border-gray-200'
+      : `border ${tile.borderColor}`;
+
+    const tileShadowClass = isKSGVariant
+      ? 'shadow-lg hover:shadow-xl hover:shadow-card-accent-end/30'
+      : isProfessional
+      ? 'shadow-pro-card hover:shadow-pro-float'
+      : 'shadow-lg hover:shadow-xl hover:shadow-card-accent-end/30';
+
+    const tileRoundingClass = isProfessional ? 'rounded-lg' : 'rounded-xl';
+
+    const textColorClass = isKSGVariant
+      ? tile.textColor
+      : isProfessional
+      ? 'text-pro-text'
+      : tile.textColor;
+
+    const statusDotClass = isKSGVariant
+      ? 'bg-good-status-dot'
+      : isProfessional
+      ? 'bg-pro-success'
+      : 'bg-good-status-dot';
+
+    const statusTextClass = isKSGVariant
+      ? 'text-good-text-label'
+      : isProfessional
+      ? 'text-pro-success'
+      : 'text-good-text-label';
+
     return (
       <div
         key={tile.id}
@@ -349,14 +397,14 @@ const StudentProfile = () => {
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') showImage(tile.mediaSuffix); }}
         aria-label={`${tile.label} preview`}
       >
-        <div className={`relative bg-gradient-to-br ${tile.bgGradient} rounded-xl p-4 border ${tile.borderColor} shadow-lg hover:shadow-xl hover:shadow-card-accent-end/30 transition-all duration-300 h-full flex flex-col justify-center`}>
+        <div className={`relative ${tileContainerClass} ${tileRoundingClass} p-4 ${tileBorderClass} ${tileShadowClass} transition-all duration-300 h-full flex flex-col justify-center`}>
           <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${tile.gradient} rounded-full blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300`} />
           <div className="relative flex items-center gap-3">
             <div className={`w-10 h-10 flex items-center justify-center rounded-lg bg-gradient-to-br ${tile.gradient} shadow-md`}>
               <Icon className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className={`text-sm font-bold ${tile.textColor} mb-0.5`}>{tile.label}</div>
+              <div className={`text-sm font-bold ${textColorClass} mb-0.5`}>{tile.label}</div>
               <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full ${tile.dotColor} animate-pulse shadow-lg`} />
                 <span className={`text-xs ${tile.statusColor} font-semibold`}>{tile.status}</span>
@@ -370,17 +418,84 @@ const StudentProfile = () => {
 
   return (
     <Layout>
-      <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6">
-        <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
-          <div className="relative">
-            <h1 className="text-3xl font-bold text-title-text mb-2">Welcome {displayName}</h1>
-            <p className="text-sm text-secondary-text">Your Digital Twin Learning Profile</p>
+      {/* Header Section */}
+      <div className={isKSGVariant
+        ? 'bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6'
+        : isProfessional
+        ? 'bg-white rounded-lg shadow-pro-card border border-gray-200 p-6 mt-6'
+        : 'bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6'
+      }>
+        {!isProfessional && (
+          <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+            <div className="relative">
+              <h1 className="text-3xl font-bold text-title-text mb-2">Welcome {displayName}</h1>
+              <p className="text-sm text-secondary-text">Your Digital Twin Learning Profile</p>
+            </div>
           </div>
-        </div>
+        )}
+        {isProfessional && (
+          <div className="relative">
+            <h1 className="text-3xl font-bold text-pro-text mb-2">Welcome {displayName}</h1>
+            <p className="text-sm text-pro-text-muted">Your Digital Twin Learning Profile</p>
+          </div>
+        )}
       </div>
 
-      <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6">
-        <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+      {/* Main Grid Container */}
+      <div className={isKSGVariant
+        ? 'bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6'
+        : isProfessional
+        ? 'bg-white rounded-lg shadow-pro-card border border-gray-200 p-6 mt-6'
+        : 'bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6'
+      }>
+        {!isProfessional && (
+          <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+              {/* Left Column - First Two Tiles */}
+              <div className="space-y-6 flex flex-col">
+                {tiles.slice(0, 2).map((tile) => (
+                  <div key={tile.id} className="flex-1">
+                    {renderTile(tile)}
+                  </div>
+                ))}
+              </div>
+
+              {/* Center - Video/Image Display */}
+              <div
+                className="relative aspect-[3/4] flex items-center justify-center p-4 bg-avatar-frame rounded-lg"
+                onMouseEnter={handleCenterMouseEnter}
+              >
+                <video
+                  id="heroVideo"
+                  ref={heroVideoRef}
+                  className="w-full h-full object-cover rounded-lg"
+                  playsInline
+                  muted
+                  preload="auto"
+                  style={{ display: activeImageSrc ? 'none' : 'block' }}
+                  poster={buildMediaUrl(straightPoster) || undefined}
+                />
+                {activeImageSrc && (
+                  <img
+                    src={activeImageSrc}
+                    alt="Preview"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                )}
+              </div>
+
+              {/* Right Column - Last Two Tiles */}
+              <div className="space-y-6 flex flex-col">
+                {tiles.slice(2).map((tile) => (
+                  <div key={tile.id} className="flex-1">
+                    {renderTile(tile)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {isProfessional && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
             {/* Left Column - First Two Tiles */}
             <div className="space-y-6 flex flex-col">
@@ -392,8 +507,8 @@ const StudentProfile = () => {
             </div>
 
             {/* Center - Video/Image Display */}
-            <div 
-              className="relative aspect-[3/4] flex items-center justify-center p-4 bg-avatar-frame rounded-lg"
+            <div
+              className="relative aspect-[3/4] flex items-center justify-center p-4 bg-gray-100 rounded-lg border border-gray-200"
               onMouseEnter={handleCenterMouseEnter}
             >
               <video
@@ -424,17 +539,30 @@ const StudentProfile = () => {
               ))}
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {dashboardData?.recentInteractions && (
-        <div className="bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6">
-          <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+        <div className={isKSGVariant
+          ? 'bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6'
+          : isProfessional
+          ? 'bg-white rounded-lg shadow-pro-card border border-gray-200 p-6 mt-6'
+          : 'bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-2xl shadow-2xl shadow-indigo-500/30 p-1 mt-6'
+        }>
+          {!isProfessional && (
+            <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
+              <PottedPlantVisualization
+                stats={dashboardData.recentInteractions}
+                showHeading={true}
+              />
+            </div>
+          )}
+          {isProfessional && (
             <PottedPlantVisualization
               stats={dashboardData.recentInteractions}
               showHeading={true}
             />
-          </div>
+          )}
         </div>
       )}
     </Layout>

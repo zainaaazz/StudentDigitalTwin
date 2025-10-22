@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { logout } from '../../utils/auth';
 import { LogOut } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const NavItem = ({ to, label, icon = null, disabled = false, onClick = null }) => {
   const location = useLocation();
@@ -49,9 +50,17 @@ const NavItem = ({ to, label, icon = null, disabled = false, onClick = null }) =
 
 const Layout = ({ children, className = '' }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isProfessional } = useTheme();
+
+  const getSidebarClasses = () => {
+    if (isProfessional) {
+      return 'bg-pro-sidebar-gradient shadow-pro-float';
+    }
+    return ''; // Use inline style for other themes
+  };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-primary-bg-start to-primary-bg-end ${className}`}>
+    <div className={`min-h-screen bg-white ${className}`}>
       {/* Mobile menu button - positioned absolutely */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -71,8 +80,8 @@ const Layout = ({ children, className = '' }) => {
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setMobileMenuOpen(false)}>
           <div
-            className="absolute top-0 left-0 h-full w-64 text-white p-6 shadow-xl flex flex-col justify-between"
-            style={{ backgroundColor: '#8b57d4' }}
+            className={`absolute top-0 left-0 h-full w-64 text-white p-6 shadow-xl flex flex-col justify-between ${getSidebarClasses()}`}
+            style={isProfessional ? {} : { backgroundColor: '#8b57d4' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div>
@@ -102,7 +111,7 @@ const Layout = ({ children, className = '' }) => {
 
       <div className="flex min-h-screen">
         {/* Sidebar - Desktop */}
-        <aside className="w-52 lg:w-64 text-white p-4 lg:p-6 hidden md:flex md:flex-col justify-between" style={{ backgroundColor: '#8b57d4' }}>
+        <aside className={`w-52 lg:w-64 text-white p-4 lg:p-6 hidden md:flex md:flex-col justify-between ${getSidebarClasses()}`} style={isProfessional ? {} : { backgroundColor: '#8b57d4' }}>
           <div>
             <div className="mb-4 lg:mb-6 px-1 mt-2 lg:mt-4">
               <h2 className="text-lg lg:text-2xl font-bold leading-tight">Student Digital Twin Navigation</h2>
@@ -125,7 +134,7 @@ const Layout = ({ children, className = '' }) => {
         </aside>
 
         {/* Content */}
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 bg-card-bg text-body">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 bg-white text-body overflow-x-hidden">
           {children}
         </main>
       </div>

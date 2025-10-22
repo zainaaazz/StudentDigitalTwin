@@ -1,35 +1,39 @@
-// Theme-aware style utilities for KSG and MiniDisc themes
+// Theme-aware style utilities for KSG, MiniDisc, and Professional themes
 
-export const getCardStyles = (isKSG) => ({
+export const getCardStyles = (isKSG, isProfessional = false) => ({
   container: isKSG
     ? 'backdrop-blur-strong bg-ksg-card-deep rounded-3xl shadow-ksg-depth border border-ksg-slate/30 hover:shadow-ksg-hover'
+    : isProfessional
+    ? 'bg-white rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300'
     : 'backdrop-blur-strong bg-md-card-deep rounded-3xl shadow-md-holographic border border-md-grey-metallic hover:shadow-md-hover',
   innerGradient: isKSG
     ? 'bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40'
+    : isProfessional
+    ? 'bg-white'
     : 'bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40',
 });
 
-export const getTextStyles = (isKSG) => ({
-  heading: isKSG ? 'text-white' : 'text-md-charcoal',
-  subheading: isKSG ? 'text-ksg-neutral-light' : 'text-md-grey',
-  body: isKSG ? 'text-ksg-neutral' : 'text-md-text-soft',
-  headingFont: isKSG ? 'Poppins, sans-serif' : 'sans-serif',
-  headingWeight: isKSG ? 700 : 600,
-  bodyWeight: 500,
+export const getTextStyles = (isKSG, isProfessional = false) => ({
+  heading: isKSG ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-md-charcoal',
+  subheading: isKSG ? 'text-ksg-neutral-light' : isProfessional ? 'text-pro-text-muted' : 'text-md-grey',
+  body: isKSG ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text' : 'text-md-text-soft',
+  headingFont: isKSG || isProfessional ? 'Poppins, sans-serif' : 'sans-serif',
+  headingWeight: isKSG ? 700 : isProfessional ? 600 : 600,
+  bodyWeight: isProfessional ? 400 : 500,
   letterSpacing: '0.025em',
 });
 
-export const getChartStyles = (isKSG) => ({
-  grid: 'rgba(184, 181, 201, 0.15)',
-  axis: '#B8B5C9',
-  tooltipBg: 'rgba(45, 40, 69, 0.95)',
-  tooltipBorder: '#D3A9F8',
-  tooltipColor: '#E8E6F0',
-  tooltipShadow: '0 8px 20px rgba(211, 169, 248, 0.4)',
+export const getChartStyles = (isKSG, isProfessional = false) => ({
+  grid: isProfessional ? '#ECEEF3' : 'rgba(184, 181, 201, 0.15)',
+  axis: isProfessional ? '#6B7280' : '#B8B5C9',
+  tooltipBg: isProfessional ? '#FFFFFF' : 'rgba(45, 40, 69, 0.95)',
+  tooltipBorder: isProfessional ? '#ECEEF3' : '#D3A9F8',
+  tooltipColor: isProfessional ? '#1F2430' : '#E8E6F0',
+  tooltipShadow: isProfessional ? '0 6px 14px rgba(31, 36, 48, 0.06)' : '0 8px 20px rgba(211, 169, 248, 0.4)',
   chartBg: 'transparent',
 });
 
-export const getStatCardColors = (index, isKSG) => {
+export const getStatCardColors = (index, isKSG, isProfessional = false) => {
   if (isKSG) {
     const ksgColors = [
       { from: '#B5EAEA', to: '#FF9CEE', border: 'ksg-teal/50', icon: 'from-ksg-teal to-ksg-magenta' },
@@ -38,6 +42,14 @@ export const getStatCardColors = (index, isKSG) => {
       { from: '#7FD2FF', to: '#A0C4FF', border: 'ksg-cyan/50', icon: 'from-ksg-sky to-ksg-cyan' },
     ];
     return ksgColors[index % ksgColors.length];
+  } else if (isProfessional) {
+    const proColors = [
+      { from: '#6C5CE7', to: '#5A49E0', border: 'pro-primary/30', icon: 'from-pro-primary to-pro-primary-strong' },
+      { from: '#FFB020', to: '#FFA500', border: 'pro-accent/30', icon: 'from-pro-accent to-yellow-500' },
+      { from: '#3AA3FF', to: '#2E86C1', border: 'pro-info/30', icon: 'from-pro-info to-blue-600' },
+      { from: '#2ECC71', to: '#27AE60', border: 'pro-success/30', icon: 'from-pro-success to-green-600' },
+    ];
+    return proColors[index % proColors.length];
   } else {
     const mdColors = [
       { from: '#C4A5F3', to: '#F3D0FF', border: 'md-lavender/40', icon: 'from-md-lavender to-md-lilac-soft' },
@@ -49,7 +61,7 @@ export const getStatCardColors = (index, isKSG) => {
   }
 };
 
-export const getProgressBarStyles = (isKSG, colorIndex = 0) => {
+export const getProgressBarStyles = (isKSG, colorIndex = 0, isProfessional = false) => {
   if (isKSG) {
     const gradients = [
       'from-ksg-teal to-ksg-magenta',
@@ -60,6 +72,12 @@ export const getProgressBarStyles = (isKSG, colorIndex = 0) => {
     return {
       bg: 'bg-ksg-charcoal/60 shadow-ksg-inner',
       fill: `bg-gradient-to-r ${gradients[colorIndex % gradients.length]} shadow-lg`,
+    };
+  } else if (isProfessional) {
+    const colors = ['bg-pro-primary', 'bg-pro-info', 'bg-pro-accent', 'bg-pro-success'];
+    return {
+      bg: 'bg-pro-surface-subtle border border-pro-border',
+      fill: `${colors[colorIndex % colors.length]} shadow-sm`,
     };
   } else {
     return {

@@ -4,16 +4,19 @@ import { getStatCardColors, getTextStyles } from '../../utils/themeStyles';
 import { InfoIcon } from '../UI/Tooltip';
 
 const StatCard = ({ icon: Icon, value, label, tooltip, index = 0, rotateClass = "" }) => {
-  const { isKSG } = useTheme();
-  const colors = getStatCardColors(index, isKSG);
-  const textStyles = getTextStyles(isKSG);
+  const { isKSG, isKSGMirror, isProfessional } = useTheme();
+  const isKSGVariant = isKSG || isKSGMirror;
+  const colors = getStatCardColors(index, isKSGVariant, isProfessional);
+  const textStyles = getTextStyles(isKSGVariant, isProfessional);
 
   return (
-    <div className={`group transform hover:scale-105 ${rotateClass} transition-all duration-300`}>
+    <div className={`group transform ${isProfessional ? 'hover:-translate-y-1' : 'hover:scale-105'} ${rotateClass} transition-all duration-300`}>
       <div
         className={`p-6 backdrop-blur-strong rounded-3xl shadow-ksg-depth border hover:shadow-ksg-hover ${
-          isKSG
+          isKSGVariant
             ? `bg-ksg-card-deep border-ksg-slate/30 hover:border-${colors.border}`
+            : isProfessional
+            ? `bg-pro-surface-subtle border-pro-border hover:border-${colors.border} shadow-pro-float hover:shadow-pro-hover rounded-[14px]`
             : `bg-md-card-deep border-md-grey-metallic hover:border-${colors.border}`
         }`}
       >
@@ -24,13 +27,13 @@ const StatCard = ({ icon: Icon, value, label, tooltip, index = 0, rotateClass = 
               filter: `drop-shadow(0 4px 8px ${colors.from}40)`
             }}
           >
-            <Icon className={`w-8 h-8 ${isKSG ? 'text-white' : 'text-md-charcoal'}`} />
+            <Icon className={`w-8 h-8 ${isKSGVariant || isProfessional ? 'text-white' : 'text-md-charcoal'}`} />
           </div>
           <div className="flex-1">
             <p
               className={`text-4xl font-bold ${textStyles.heading} drop-shadow-lg`}
               style={{
-                fontWeight: isKSG ? 800 : 600
+                fontWeight: isKSGVariant ? 800 : 600
               }}
             >
               {value}

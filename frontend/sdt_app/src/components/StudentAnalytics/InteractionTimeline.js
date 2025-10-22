@@ -11,11 +11,20 @@ import { useTheme } from '../../contexts/ThemeContext';
 const InteractionTimeline = ({ currentUser = null }) => {
   const navigate = useNavigate();
   const { loading: simLoading, getInteractionHistory } = useInteractionSimulator(currentUser?.id);
-  const { isKSG } = useTheme();
+  const { isKSG, isKSGMirror, isProfessional } = useTheme();
+  const isKSGVariant = isKSG || isKSGMirror;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Helper to get the background gradient class
+  const getBgGradient = () => {
+    if (isKSG) return 'bg-ksg-gradient';
+    if (isKSGMirror) return 'bg-ksg-gradient-mirror';
+    if (isProfessional) return 'bg-white';
+    return 'bg-md-gradient';
+  };
 
   useEffect(() => {
     fetchInteractions();
@@ -90,48 +99,65 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${isKSG ? 'bg-ksg-gradient' : 'bg-md-gradient'}`}>
-        {isKSG ? <GrainTexture /> : <CircularReflections />}
-        <div className={`animate-spin rounded-full h-12 w-12 border-b-2 relative z-10 ${isKSG ? 'border-ksg-magenta' : 'border-md-lavender-neon'}`}></div>
+      <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${getBgGradient()}`}>
+        {isKSGVariant && <GrainTexture />}
+        {!isKSGVariant && !isProfessional && <CircularReflections />}
+        <div className={`animate-spin rounded-full h-12 w-12 border-b-2 relative z-10 ${
+          isKSGVariant ? 'border-ksg-magenta' : isProfessional ? 'border-pro-primary' : 'border-md-lavender-neon'
+        }`}></div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${isKSG ? 'bg-ksg-gradient' : 'bg-md-gradient'}`}>
-        {isKSG ? <GrainTexture /> : <CircularReflections />}
+      <div className={`min-h-screen flex items-center justify-center relative overflow-hidden ${getBgGradient()}`}>
+        {isKSGVariant && <GrainTexture />}
+        {!isKSGVariant && !isProfessional && <CircularReflections />}
         <div className="text-center relative z-10">
-          <p className={isKSG ? 'text-ksg-lilac' : 'text-md-charcoal'}>No interaction data available</p>
+          <p className={isKSGVariant ? 'text-ksg-lilac' : isProfessional ? 'text-pro-text' : 'text-md-charcoal'}>No interaction data available</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen p-6 relative overflow-hidden ${isKSG ? 'bg-ksg-gradient' : 'bg-md-gradient'}`}>
-      {isKSG ? <GrainTexture /> : <CircularReflections />}
-      {isKSG && <MountFuji className="z-0" />}
+    <div className={`min-h-screen p-6 relative overflow-hidden ${getBgGradient()}`}>
+      {isKSGVariant && <GrainTexture />}
+      {isKSGVariant && <MountFuji className="z-0" />}
+      {!isKSGVariant && !isProfessional && <CircularReflections />}
       {/* Navigation Header - Darker Anchor */}
       <div className="mb-8 relative z-10">
-        <div className={`backdrop-blur-strong rounded-3xl p-6 border ${
-          isKSG
-            ? 'bg-ksg-anchor-header shadow-ksg-depth border-ksg-slate/40'
-            : 'bg-md-anchor-header shadow-md-holographic border-md-grey-metallic'
+        <div className={`backdrop-blur-glass p-6 border ${
+          isKSGVariant
+            ? 'bg-ksg-anchor-header rounded-3xl shadow-ksg-depth border-ksg-slate/40'
+            : isProfessional
+            ? 'bg-pro-header rounded-[14px] shadow-pro-float border-pro-border/50'
+            : 'bg-md-anchor-header rounded-3xl shadow-md-holographic border-md-grey-metallic'
         }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate('/student-dashboard')}
-                className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all transform hover:scale-110 hover:rotate-3 backdrop-blur-glass border ${
-                  isKSG
-                    ? 'bg-ksg-ground/80 border-ksg-lilac/30 hover:shadow-ksg-hover hover:border-ksg-magenta/70 shadow-ksg-inner'
+                className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all transform hover:scale-110 backdrop-blur-glass border ${
+                  isKSGVariant
+                    ? 'hover:rotate-3 bg-ksg-ground/80 border-ksg-lilac/30 hover:shadow-ksg-hover hover:border-ksg-magenta/70 shadow-ksg-inner'
+                    : isProfessional
+                    ? 'bg-white border-pro-border hover:shadow-pro-hover hover:border-pro-primary'
                     : 'bg-white/40 border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon shadow-md-inner'
                 }`}
               >
-                <ArrowLeft className={`w-5 h-5 ${isKSG ? 'text-ksg-lilac' : 'text-md-charcoal'}`} />
+                <ArrowLeft className={`w-5 h-5 ${
+                  isKSGVariant ? 'text-ksg-lilac' : isProfessional ? 'text-pro-primary' : 'text-md-charcoal'
+                }`} />
               </button>
-              <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(211,169,248,0.5)]" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700 }}>
+              <h1 className={`text-4xl font-bold tracking-tight ${
+                isKSGVariant
+                  ? 'text-white drop-shadow-[0_2px_10px_rgba(211,169,248,0.5)]'
+                  : isProfessional
+                  ? 'text-pro-text'
+                  : 'text-white drop-shadow-[0_2px_10px_rgba(211,169,248,0.5)]'
+              }`} style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700 }}>
                 Interaction Timeline
               </h1>
             </div>
@@ -139,8 +165,10 @@ const InteractionTimeline = ({ currentUser = null }) => {
               <Link
                 to="/student-dashboard"
                 className={`inline-flex items-center px-8 py-4 rounded-2xl transition-all transform hover:scale-105 font-bold tracking-relaxed ${
-                  isKSG
+                  isKSGVariant
                     ? 'shadow-ksg-glow bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal hover:shadow-ksg-hover'
+                    : isProfessional
+                    ? 'bg-pro-sidebar-gradient text-white hover:shadow-pro-hover shadow-pro-card'
                     : 'shadow-md-holographic bg-gradient-to-r from-md-lavender to-md-lavender-light text-md-charcoal hover:shadow-md-hover'
                 }`}
               >
@@ -151,8 +179,10 @@ const InteractionTimeline = ({ currentUser = null }) => {
                 onClick={fetchInteractions}
                 disabled={loading}
                 className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl transition-all backdrop-blur-glass border ${
-                  isKSG
+                  isKSGVariant
                     ? 'bg-ksg-ground/80 border-ksg-lilac/30 text-ksg-lilac hover:shadow-ksg-hover hover:border-ksg-magenta/70 shadow-ksg-inner'
+                    : isProfessional
+                    ? 'bg-white border-pro-border text-pro-primary hover:shadow-pro-hover hover:border-pro-primary'
                     : 'bg-white/40 border-md-grey-metallic text-md-charcoal hover:shadow-md-hover hover:border-md-lavender-neon shadow-md-inner'
                 }`}
               >
@@ -165,65 +195,95 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
       {/* Statistics Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 relative z-10">
-        <div className="group transform hover:scale-105 hover:-rotate-1 transition-all duration-300">
-          <div className={`backdrop-blur-strong rounded-3xl p-6 border ${
-            isKSG
-              ? 'bg-ksg-card-deep shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover hover:border-ksg-teal/50'
-              : 'bg-md-card-deep shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon'
+        <div className={`group transform transition-all duration-300 ${
+          isKSGVariant ? 'hover:scale-105 hover:-rotate-1' : isProfessional ? 'hover:scale-[1.02]' : 'hover:scale-105 hover:-rotate-1'
+        }`}>
+          <div className={`backdrop-blur-strong p-6 border ${
+            isKSGVariant
+              ? 'bg-ksg-card-deep rounded-3xl shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover hover:border-ksg-teal/50'
+              : isProfessional
+              ? 'bg-white rounded-lg shadow-pro-card border-gray-200 hover:shadow-pro-hover hover:border-pro-primary/30'
+              : 'bg-md-card-deep rounded-3xl shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon'
           }`}>
             <div className="flex items-center">
               <div className={`p-4 rounded-2xl mr-4 shadow-lg ${
-                isKSG
+                isKSGVariant
                   ? 'bg-gradient-to-br from-ksg-teal to-ksg-magenta'
+                  : isProfessional
+                  ? 'bg-gradient-to-br from-pro-primary to-pro-primary-strong'
                   : 'bg-gradient-to-br from-md-lavender to-md-lavender-light'
-              }`} style={{ filter: isKSG ? 'drop-shadow(0 4px 8px rgba(255, 156, 238, 0.4))' : 'drop-shadow(0 4px 8px rgba(181, 138, 255, 0.4))' }}>
+              }`} style={{ filter: isKSGVariant ? 'drop-shadow(0 4px 8px rgba(255, 156, 238, 0.4))' : 'drop-shadow(0 4px 8px rgba(181, 138, 255, 0.4))' }}>
                 <MessageCircle className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-4xl font-bold tracking-tight text-white drop-shadow-lg" style={{ fontWeight: isKSG ? 800 : 600 }}>{data.stats.totalInteractions}</p>
-                <p className="text-sm font-medium tracking-relaxed text-ksg-neutral" style={{ fontWeight: 500 }}>Total Interactions</p>
+                <p className={`text-4xl font-bold tracking-tight ${
+                  isKSGVariant ? 'text-white drop-shadow-lg' : isProfessional ? 'text-pro-text' : 'text-white drop-shadow-lg'
+                }`} style={{ fontWeight: isKSGVariant ? 800 : isProfessional ? 700 : 600 }}>{data.stats.totalInteractions}</p>
+                <p className={`text-sm font-medium tracking-relaxed ${
+                  isKSGVariant ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text-muted' : 'text-ksg-neutral'
+                }`} style={{ fontWeight: 500 }}>Total Interactions</p>
               </div>
             </div>
           </div>
         </div>
-        <div className="group transform hover:scale-105 hover:rotate-1 transition-all duration-300">
-          <div className={`backdrop-blur-strong rounded-3xl p-6 border ${
-            isKSG
-              ? 'bg-ksg-card-deep shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover hover:border-ksg-coral/50'
-              : 'bg-md-card-deep shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon'
+        <div className={`group transform transition-all duration-300 ${
+          isKSGVariant ? 'hover:scale-105 hover:rotate-1' : isProfessional ? 'hover:scale-[1.02]' : 'hover:scale-105 hover:rotate-1'
+        }`}>
+          <div className={`backdrop-blur-strong p-6 border ${
+            isKSGVariant
+              ? 'bg-ksg-card-deep rounded-3xl shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover hover:border-ksg-coral/50'
+              : isProfessional
+              ? 'bg-white rounded-lg shadow-pro-card border-gray-200 hover:shadow-pro-hover hover:border-pro-info/30'
+              : 'bg-md-card-deep rounded-3xl shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon'
           }`}>
             <div className="flex items-center">
               <div className={`p-4 rounded-2xl mr-4 shadow-lg ${
-                isKSG
-                  ? 'bg-gradient-to-br from-ksg-coral to-ksg-orange'
-                  : 'bg-gradient-to-br from-md-lavender-light to-md-cyan-soft'
-              }`} style={{ filter: isKSG ? 'drop-shadow(0 4px 8px rgba(255, 198, 168, 0.4))' : 'drop-shadow(0 4px 8px rgba(224, 246, 255, 0.4))' }}>
+                isKSGVariant
+                  ? 'bg-ksg-coral'
+                  : isProfessional
+                  ? 'bg-pro-info'
+                  : 'bg-md-cyan-soft'
+              }`}>
                 <Clock className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-4xl font-bold tracking-tight text-white drop-shadow-lg" style={{ fontWeight: isKSG ? 800 : 600 }}>{formatDuration(Math.round(data.stats.averageDuration))}</p>
-                <p className="text-sm font-medium tracking-relaxed text-ksg-neutral" style={{ fontWeight: 500 }}>Average Duration</p>
+                <p className={`text-4xl font-bold tracking-tight ${
+                  isKSGVariant ? 'text-white drop-shadow-lg' : isProfessional ? 'text-pro-text' : 'text-white drop-shadow-lg'
+                }`} style={{ fontWeight: isKSGVariant ? 800 : isProfessional ? 700 : 600 }}>{formatDuration(Math.round(data.stats.averageDuration))}</p>
+                <p className={`text-sm font-medium tracking-relaxed ${
+                  isKSGVariant ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text-muted' : 'text-ksg-neutral'
+                }`} style={{ fontWeight: 500 }}>Average Duration</p>
               </div>
             </div>
           </div>
         </div>
-        <div className="group transform hover:scale-105 hover:-rotate-1 transition-all duration-300">
-          <div className={`backdrop-blur-strong rounded-3xl p-6 border ${
-            isKSG
-              ? 'bg-ksg-card-deep shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover hover:border-ksg-lilac/50'
-              : 'bg-md-card-deep shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon'
+        <div className={`group transform transition-all duration-300 ${
+          isKSGVariant ? 'hover:scale-105 hover:-rotate-1' : isProfessional ? 'hover:scale-[1.02]' : 'hover:scale-105 hover:-rotate-1'
+        }`}>
+          <div className={`backdrop-blur-strong p-6 border ${
+            isKSGVariant
+              ? 'bg-ksg-card-deep rounded-3xl shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover hover:border-ksg-lilac/50'
+              : isProfessional
+              ? 'bg-white rounded-lg shadow-pro-card border-gray-200 hover:shadow-pro-hover hover:border-pro-success/30'
+              : 'bg-md-card-deep rounded-3xl shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover hover:border-md-lavender-neon'
           }`}>
             <div className="flex items-center">
               <div className={`p-4 rounded-2xl mr-4 shadow-lg ${
-                isKSG
-                  ? 'bg-gradient-to-br from-ksg-lilac to-ksg-magenta'
-                  : 'bg-gradient-to-br from-md-peach-soft to-md-gold-glow'
-              }`} style={{ filter: isKSG ? 'drop-shadow(0 4px 8px rgba(211, 169, 248, 0.4))' : 'drop-shadow(0 4px 8px rgba(255, 216, 154, 0.4))' }}>
+                isKSGVariant
+                  ? 'bg-ksg-lilac'
+                  : isProfessional
+                  ? 'bg-pro-success'
+                  : 'bg-md-peach-soft'
+              }`}>
                 <Users className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-4xl font-bold tracking-tight text-white drop-shadow-lg" style={{ fontWeight: isKSG ? 800 : 600 }}>{data.stats.uniquePartners}</p>
-                <p className="text-sm font-medium tracking-relaxed text-ksg-neutral" style={{ fontWeight: 500 }}>Unique Partners</p>
+                <p className={`text-4xl font-bold tracking-tight ${
+                  isKSGVariant ? 'text-white drop-shadow-lg' : isProfessional ? 'text-pro-text' : 'text-white drop-shadow-lg'
+                }`} style={{ fontWeight: isKSGVariant ? 800 : isProfessional ? 700 : 600 }}>{data.stats.uniquePartners}</p>
+                <p className={`text-sm font-medium tracking-relaxed ${
+                  isKSGVariant ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text-muted' : 'text-ksg-neutral'
+                }`} style={{ fontWeight: 500 }}>Unique Partners</p>
               </div>
             </div>
           </div>
@@ -232,33 +292,51 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
       {/* Filters */}
       <div className="group mb-6 relative z-10">
-        <div className={`backdrop-blur-strong rounded-3xl p-1 border transition-all duration-500 ${
-          isKSG
-            ? 'bg-ksg-card-deep shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover'
-            : 'bg-md-card-deep shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover'
+        <div className={`backdrop-blur-strong p-1 border transition-all duration-500 ${
+          isKSGVariant
+            ? 'bg-ksg-card-deep rounded-3xl shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover'
+            : isProfessional
+            ? 'bg-white rounded-lg shadow-pro-card border-gray-200 hover:shadow-pro-hover'
+            : 'bg-md-card-deep rounded-3xl shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover'
         }`}>
-          <div className={`rounded-3xl p-6 ${
-            isKSG
-              ? 'bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40'
-              : 'bg-gradient-to-br from-white/20 via-md-grey-metallic to-white/20'
+          <div className={`p-6 ${
+            isKSGVariant
+              ? 'rounded-3xl bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40'
+              : isProfessional
+              ? 'rounded-lg'
+              : 'rounded-3xl bg-gradient-to-br from-white/20 via-md-grey-metallic to-white/20'
           }`}>
             <div className="flex items-center space-x-2 mb-6">
-              <Filter className="w-5 h-5 text-ksg-lilac" />
-              <h3 className="text-2xl font-bold tracking-tight text-white" style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700 }}>Filters</h3>
+              <Filter className={`w-5 h-5 ${
+                isKSGVariant ? 'text-ksg-lilac' : isProfessional ? 'text-pro-primary' : 'text-ksg-lilac'
+              }`} />
+              <h3 className={`text-2xl font-bold tracking-tight ${
+                isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-white'
+              }`} style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700 }}>Filters</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold mb-2 tracking-relaxed text-ksg-neutral-light" style={{ fontWeight: 600 }}>Search Partner/Session</label>
+                <label className={`block text-sm font-semibold mb-2 tracking-relaxed ${
+                  isKSGVariant ? 'text-ksg-neutral-light' : isProfessional ? 'text-pro-text-muted' : 'text-ksg-neutral-light'
+                }`} style={{ fontWeight: 600 }}>Search Partner/Session</label>
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Enter partner ID or session..."
-                  className="w-full px-4 py-3 rounded-2xl focus:ring-2 focus:ring-ksg-magenta focus:outline-none transition-all border bg-ksg-ground/60 border-ksg-slate/40 text-white placeholder-ksg-neutral font-medium"
+                  className={`w-full px-4 py-3 rounded-2xl focus:outline-none transition-all border font-medium ${
+                    isKSGVariant
+                      ? 'focus:ring-2 focus:ring-ksg-magenta bg-ksg-ground/60 border-ksg-slate/40 text-white placeholder-ksg-neutral'
+                      : isProfessional
+                      ? 'focus:ring-2 focus:ring-pro-primary bg-white border-gray-300 text-pro-text placeholder-gray-400'
+                      : 'focus:ring-2 focus:ring-ksg-magenta bg-ksg-ground/60 border-ksg-slate/40 text-white placeholder-ksg-neutral'
+                  }`}
                 />
               </div>
               <div className="flex items-end">
-                <p className="text-sm font-medium tracking-relaxed text-ksg-neutral" style={{ fontWeight: 500 }}>
+                <p className={`text-sm font-medium tracking-relaxed ${
+                  isKSGVariant ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text-muted' : 'text-ksg-neutral'
+                }`} style={{ fontWeight: 500 }}>
                   Showing {filteredInteractions.length} of {data.stats.totalInteractions} interactions
                 </p>
               </div>
@@ -269,49 +347,79 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
       {/* Interactions Table */}
       <div className="group relative z-10">
-        <div className={`backdrop-blur-strong rounded-3xl p-1 border transition-all duration-500 ${
-          isKSG
-            ? 'bg-ksg-card-deep shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover'
-            : 'bg-md-card-deep shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover'
+        <div className={`backdrop-blur-strong p-1 border transition-all duration-500 ${
+          isKSGVariant
+            ? 'bg-ksg-card-deep rounded-3xl shadow-ksg-depth border-ksg-slate/30 hover:shadow-ksg-hover'
+            : isProfessional
+            ? 'bg-white rounded-lg shadow-pro-card border-gray-200 hover:shadow-pro-hover'
+            : 'bg-md-card-deep rounded-3xl shadow-md-holographic border-md-grey-metallic hover:shadow-md-hover'
         }`}>
-          <div className={`rounded-3xl overflow-hidden ${
-            isKSG
-              ? 'bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40'
-              : 'bg-gradient-to-br from-white/20 via-md-grey-metallic to-white/20'
+          <div className={`overflow-hidden ${
+            isKSGVariant
+              ? 'rounded-3xl bg-gradient-to-br from-ksg-ground/40 via-ksg-slate/30 to-ksg-ground/40'
+              : isProfessional
+              ? 'rounded-lg'
+              : 'rounded-3xl bg-gradient-to-br from-white/20 via-md-grey-metallic to-white/20'
           }`}>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className={`border-b-2 ${
-                    isKSG
+                    isKSGVariant
                       ? 'bg-ksg-charcoal/80 border-ksg-slate/40'
+                      : isProfessional
+                      ? 'bg-gray-50 border-gray-200'
                       : 'bg-ksg-charcoal/80 border-ksg-slate/40'
                   }`}>
-                    <th className="px-6 py-4 text-left text-sm font-bold tracking-wide text-white">Time</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold tracking-wide text-white">Partner</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold tracking-wide text-white">Duration</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold tracking-wide text-white">Session</th>
-                    <th className="px-6 py-4 text-left text-sm font-bold tracking-wide text-white">Details</th>
+                    <th className={`px-6 py-4 text-left text-sm font-bold tracking-wide ${
+                      isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-white'
+                    }`}>Time</th>
+                    <th className={`px-6 py-4 text-left text-sm font-bold tracking-wide ${
+                      isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-white'
+                    }`}>Partner</th>
+                    <th className={`px-6 py-4 text-left text-sm font-bold tracking-wide ${
+                      isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-white'
+                    }`}>Duration</th>
+                    <th className={`px-6 py-4 text-left text-sm font-bold tracking-wide ${
+                      isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-white'
+                    }`}>Session</th>
+                    <th className={`px-6 py-4 text-left text-sm font-bold tracking-wide ${
+                      isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-white'
+                    }`}>Details</th>
                   </tr>
                 </thead>
-                <tbody className={`divide-y ${isKSG ? 'divide-ksg-slate/20' : 'divide-md-grey-metallic'}`}>
+                <tbody className={`divide-y ${
+                  isKSGVariant ? 'divide-ksg-slate/20' : isProfessional ? 'divide-gray-200' : 'divide-md-grey-metallic'
+                }`}>
                   {filteredInteractions.map((interaction, index) => (
                     <tr key={interaction.id} className={`transition-all ${
-                      isKSG ? 'hover:bg-ksg-ground/40' : 'hover:bg-ksg-ground/40'
+                      isKSGVariant
+                        ? 'hover:bg-ksg-ground/40'
+                        : isProfessional
+                        ? 'hover:bg-gray-50'
+                        : 'hover:bg-ksg-ground/40'
                     }`} style={{
-                      background: isKSG
+                      background: isKSGVariant
                         ? (index % 2 === 0 ? 'rgba(45, 40, 69, 0.2)' : 'rgba(74, 69, 101, 0.15)')
+                        : isProfessional
+                        ? (index % 2 === 0 ? 'transparent' : 'rgba(249, 250, 251, 0.5)')
                         : (index % 2 === 0 ? 'rgba(45, 40, 69, 0.2)' : 'rgba(74, 69, 101, 0.15)')
                     }}>
                       <td className="px-6 py-4">
                         <div>
-                          <p className="text-sm font-semibold text-white">
+                          <p className={`text-sm font-semibold ${
+                            isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-white'
+                          }`}>
                         {new Date(interaction.startTime).toLocaleDateString()}
                       </p>
-                      <p className="text-xs font-medium text-ksg-neutral">
+                      <p className={`text-xs font-medium ${
+                        isKSGVariant ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text-muted' : 'text-ksg-neutral'
+                      }`}>
                         {new Date(interaction.startTime).toLocaleTimeString()} - {new Date(interaction.endTime).toLocaleTimeString()}
                       </p>
-                      <p className="text-xs font-medium text-ksg-magenta">
+                      <p className={`text-xs font-medium ${
+                        isKSGVariant ? 'text-ksg-magenta' : isProfessional ? 'text-pro-primary' : 'text-ksg-magenta'
+                      }`}>
                         {formatRelativeTime(interaction.startTime)}
                       </p>
                     </div>
@@ -319,41 +427,61 @@ const InteractionTimeline = ({ currentUser = null }) => {
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
-                        isKSG
+                        isKSGVariant
                           ? 'bg-gradient-to-br from-ksg-teal to-ksg-magenta'
+                          : isProfessional
+                          ? 'bg-gradient-to-br from-pro-primary to-pro-primary-strong'
                           : 'bg-gradient-to-br from-md-lavender to-md-lavender-light'
-                      }`} style={{ filter: isKSG ? 'drop-shadow(0 2px 6px rgba(255, 156, 238, 0.3))' : 'drop-shadow(0 2px 6px rgba(181, 138, 255, 0.3))' }}>
+                      }`} style={{ filter: isKSGVariant ? 'drop-shadow(0 2px 6px rgba(255, 156, 238, 0.3))' : 'drop-shadow(0 2px 6px rgba(181, 138, 255, 0.3))' }}>
                         <span className="text-xs font-bold text-white">
                           {interaction.studentId2.slice(-2)}
                         </span>
                       </div>
-                      <span className="text-sm font-semibold text-white">
+                      <span className={`text-sm font-semibold ${
+                        isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-white'
+                      }`}>
                         {interaction.partnerName || interaction.studentId2}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-ksg-coral" />
-                      <span className="text-sm font-semibold text-white">
+                      <Clock className={`w-4 h-4 ${
+                        isKSGVariant ? 'text-ksg-coral' : isProfessional ? 'text-pro-info' : 'text-ksg-coral'
+                      }`} />
+                      <span className={`text-sm font-semibold ${
+                        isKSGVariant ? 'text-white' : isProfessional ? 'text-pro-text' : 'text-white'
+                      }`}>
                         {formatDuration(interaction.duration)}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <code className="text-xs font-mono px-3 py-1 rounded-lg font-semibold border text-ksg-neutral-light bg-ksg-charcoal/60 border-ksg-slate/30">
+                    <code className={`text-xs font-mono px-3 py-1 rounded-lg font-semibold border ${
+                      isKSGVariant
+                        ? 'text-ksg-neutral-light bg-ksg-charcoal/60 border-ksg-slate/30'
+                        : isProfessional
+                        ? 'text-pro-text-muted bg-gray-100 border-gray-200'
+                        : 'text-ksg-neutral-light bg-ksg-charcoal/60 border-ksg-slate/30'
+                    }`}>
                       {interaction.sessionId.slice(-8)}
                     </code>
                   </td>
                   <td className="px-6 py-4">
                     <div>
                       <div className="flex items-center space-x-1 mb-1">
-                        <MapPin className="w-3 h-3 text-ksg-sky" />
-                        <span className="text-xs font-semibold text-ksg-neutral-light">
+                        <MapPin className={`w-3 h-3 ${
+                          isKSGVariant ? 'text-ksg-sky' : isProfessional ? 'text-pro-success' : 'text-ksg-sky'
+                        }`} />
+                        <span className={`text-xs font-semibold ${
+                          isKSGVariant ? 'text-ksg-neutral-light' : isProfessional ? 'text-pro-text-muted' : 'text-ksg-neutral-light'
+                        }`}>
                           {interaction.avgDistance.toFixed(1)}m
                         </span>
                       </div>
-                      <p className="text-xs font-medium text-ksg-neutral">
+                      <p className={`text-xs font-medium ${
+                        isKSGVariant ? 'text-ksg-neutral' : isProfessional ? 'text-pro-text-muted' : 'text-ksg-neutral'
+                      }`}>
                         Confidence: {Math.round(interaction.confidence * 100)}%
                       </p>
                     </div>
@@ -365,22 +493,46 @@ const InteractionTimeline = ({ currentUser = null }) => {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-ksg-slate/30 bg-ksg-charcoal/60">
+        <div className={`px-6 py-4 border-t ${
+          isKSGVariant
+            ? 'border-ksg-slate/30 bg-ksg-charcoal/60'
+            : isProfessional
+            ? 'border-gray-200 bg-gray-50'
+            : 'border-ksg-slate/30 bg-ksg-charcoal/60'
+        }`}>
           <div className="flex items-center justify-center space-x-3">
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className="px-6 py-3 text-sm font-bold rounded-2xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed border tracking-relaxed bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal border-ksg-coral/30 disabled:from-ksg-ground/60 disabled:to-ksg-ground/60 disabled:text-ksg-neutral hover:scale-105 hover:shadow-ksg-glow"
+              className={`px-6 py-3 text-sm font-bold rounded-2xl transition-all shadow-md disabled:cursor-not-allowed border tracking-relaxed ${
+                isKSGVariant
+                  ? 'bg-ksg-coral text-white border-ksg-coral disabled:bg-ksg-ground/60 disabled:text-ksg-neutral disabled:opacity-50 hover:scale-105 hover:shadow-ksg-glow'
+                  : isProfessional
+                  ? 'bg-pro-primary text-white border-pro-primary disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300 disabled:opacity-50 hover:shadow-pro-hover hover:bg-pro-primary-strong'
+                  : 'bg-md-lavender text-white border-md-lavender disabled:bg-gray-300 disabled:text-gray-500 disabled:opacity-50 hover:scale-105 hover:shadow-md-glow'
+              }`}
             >
               Previous
             </button>
-            <span className="px-5 py-3 text-sm font-bold backdrop-blur-sm rounded-2xl border text-white bg-ksg-ground/80 border-ksg-slate/40 shadow-ksg-inner">
+            <span className={`px-5 py-3 text-sm font-bold backdrop-blur-sm rounded-2xl border ${
+              isKSGVariant
+                ? 'text-white bg-ksg-ground/80 border-ksg-slate/40 shadow-ksg-inner'
+                : isProfessional
+                ? 'text-pro-text bg-white border-gray-300 shadow-pro-card'
+                : 'text-white bg-ksg-ground/80 border-ksg-slate/40 shadow-ksg-inner'
+            }`}>
               Page {page}
             </span>
             <button
               disabled={!data.pagination.hasMore}
               onClick={() => setPage(page + 1)}
-              className="px-6 py-3 text-sm font-bold rounded-2xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed border tracking-relaxed bg-gradient-to-r from-ksg-coral to-ksg-orange text-ksg-charcoal border-ksg-coral/30 disabled:from-ksg-ground/60 disabled:to-ksg-ground/60 disabled:text-ksg-neutral hover:scale-105 hover:shadow-ksg-glow"
+              className={`px-6 py-3 text-sm font-bold rounded-2xl transition-all shadow-md disabled:cursor-not-allowed border tracking-relaxed ${
+                isKSGVariant
+                  ? 'bg-ksg-coral text-white border-ksg-coral disabled:bg-ksg-ground/60 disabled:text-ksg-neutral disabled:opacity-50 hover:scale-105 hover:shadow-ksg-glow'
+                  : isProfessional
+                  ? 'bg-pro-primary text-white border-pro-primary disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300 disabled:opacity-50 hover:shadow-pro-hover hover:bg-pro-primary-strong'
+                  : 'bg-md-lavender text-white border-md-lavender disabled:bg-gray-300 disabled:text-gray-500 disabled:opacity-50 hover:scale-105 hover:shadow-md-glow'
+              }`}
             >
               Next
             </button>
@@ -392,8 +544,16 @@ const InteractionTimeline = ({ currentUser = null }) => {
 
       {/* Footer Anchor */}
       <div className="mt-8 relative z-10">
-        <div className="backdrop-blur-strong rounded-3xl p-4 border text-center bg-ksg-anchor-header shadow-ksg-depth border-ksg-slate/40">
-          <p className="text-sm font-medium tracking-relaxed text-ksg-neutral-light" style={{ fontWeight: 500 }}>
+        <div className={`backdrop-blur-glass p-4 border text-center ${
+          isKSGVariant
+            ? 'bg-ksg-anchor-header rounded-3xl shadow-ksg-depth border-ksg-slate/40'
+            : isProfessional
+            ? 'bg-pro-header rounded-[14px] shadow-pro-card border-pro-border/50'
+            : 'bg-ksg-anchor-header rounded-3xl shadow-ksg-depth border-ksg-slate/40'
+        }`}>
+          <p className={`text-sm font-medium tracking-relaxed ${
+            isKSGVariant ? 'text-ksg-neutral-light' : isProfessional ? 'text-pro-text-muted' : 'text-ksg-neutral-light'
+          }`} style={{ fontWeight: 500 }}>
             Data from {new Date(data.stats.dateRange.start).toLocaleDateString()} to {new Date(data.stats.dateRange.end).toLocaleDateString()}
           </p>
         </div>

@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
 import { Sprout, Users, Leaf, Flower2, TrendingUp } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const PottedPlantVisualization = ({ stats, showHeading = false }) => {
+  const { isProfessional } = useTheme();
   // Calculate growth stage based on total interactions
   const growthStage = useMemo(() => {
     if (!stats?.totalInteractions) return 0;
@@ -69,29 +71,49 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
   };
 
   return (
-    <div className="w-full rounded-2xl p-1" style={{
+    <div className={
+      isProfessional
+        ? "w-full bg-white border border-gray-200 shadow-pro-card rounded-lg p-6"
+        : "w-full rounded-2xl p-1"
+    } style={!isProfessional ? {
       background: 'linear-gradient(135deg, #00C2FF 0%, #1AE0B6 100%)',
       boxShadow: '0 0 40px rgba(0, 194, 255, 0.3)'
-    }}>
-      <div className="rounded-xl p-6" style={{
+    } : {}}>
+      <div className={!isProfessional ? "rounded-xl p-6" : ""} style={!isProfessional ? {
         background: 'linear-gradient(180deg, #0C1B3B 0%, #122B59 100%)',
-      }}>
+      } : {}}>
         {showHeading && (
-          <div className="text-center mb-8 p-6 rounded-xl" style={{
+          <div className={
+            isProfessional
+              ? "text-center mb-8 p-6 rounded-lg bg-gray-50 border border-gray-200"
+              : "text-center mb-8 p-6 rounded-xl"
+          } style={!isProfessional ? {
             background: 'linear-gradient(135deg, rgba(12, 27, 59, 0.8) 0%, rgba(18, 43, 89, 0.6) 100%)',
             border: '2px solid rgba(0, 194, 255, 0.3)',
             boxShadow: '0 0 30px rgba(0, 194, 255, 0.2), inset 0 0 20px rgba(0, 194, 255, 0.05)'
-          }}>
-            <h2 className="text-4xl font-bold mb-3 flex items-center justify-center gap-3" style={{
+          } : {}}>
+            <h2 className={
+              isProfessional
+                ? "text-4xl font-bold mb-3 flex items-center justify-center gap-3 text-pro-text"
+                : "text-4xl font-bold mb-3 flex items-center justify-center gap-3"
+            } style={!isProfessional ? {
               color: '#80F1FF',
               textShadow: '0 0 20px rgba(0, 194, 255, 0.5)'
-            }}>
-              <Sprout size={36} strokeWidth={2.5} style={{ color: '#1AE0B6' }} />
+            } : {}}>
+              <Sprout size={36} strokeWidth={2.5} className={isProfessional ? "text-pro-success" : ""} style={!isProfessional ? { color: '#1AE0B6' } : {}} />
               Your Social Garden
-              <Sprout size={36} strokeWidth={2.5} style={{ color: '#1AE0B6' }} />
+              <Sprout size={36} strokeWidth={2.5} className={isProfessional ? "text-pro-success" : ""} style={!isProfessional ? { color: '#1AE0B6' } : {}} />
             </h2>
-            <p className="text-lg" style={{
+            <p className={
+              isProfessional
+                ? "text-lg text-pro-text-muted"
+                : "text-lg"
+            } style={!isProfessional ? {
               color: '#AAB3D1',
+              maxWidth: '700px',
+              margin: '0 auto',
+              lineHeight: '1.6'
+            } : {
               maxWidth: '700px',
               margin: '0 auto',
               lineHeight: '1.6'
@@ -103,63 +125,101 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left side - Information block */}
-          <div className="relative rounded-xl overflow-hidden" style={{
+          <div className={
+            isProfessional
+              ? "relative rounded-lg overflow-hidden bg-white border border-gray-200 shadow-sm"
+              : "relative rounded-xl overflow-hidden"
+          } style={!isProfessional ? {
             background: 'linear-gradient(135deg, rgba(12, 27, 59, 0.9) 0%, rgba(18, 43, 89, 0.8) 100%)',
             border: '2px solid rgba(0, 194, 255, 0.4)',
             boxShadow: '0 0 30px rgba(0, 194, 255, 0.2), inset 0 0 30px rgba(0, 194, 255, 0.03)'
-          }}>
+          } : {}}>
             {/* Blue glow effect behind content */}
-            <div className="absolute inset-0 opacity-20" style={{
-              background: 'radial-gradient(circle at 50% 50%, #00C2FF 0%, transparent 70%)'
-            }} />
+            {!isProfessional && (
+              <div className="absolute inset-0 opacity-20" style={{
+                background: 'radial-gradient(circle at 50% 50%, #00C2FF 0%, transparent 70%)'
+              }} />
+            )}
 
             {/* Content wrapper */}
             <div className="relative p-6 flex items-center min-h-full">
               <div className="w-full space-y-5">
-                <h3 className="text-2xl font-bold mb-6" style={{
+                <h3 className={
+                  isProfessional
+                    ? "text-2xl font-bold mb-6 text-pro-text"
+                    : "text-2xl font-bold mb-6"
+                } style={!isProfessional ? {
                   color: '#80F1FF',
                   textShadow: '0 0 15px rgba(0, 194, 255, 0.6)'
-                }}>
+                } : {}}>
                   Interaction Growth Analytics
                 </h3>
 
                 {/* Current Status */}
                 <div>
-                  <h4 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: '#00C2FF' }}>
+                  <h4 className={
+                    isProfessional
+                      ? "text-sm font-semibold mb-2 flex items-center gap-2 text-pro-primary"
+                      : "text-sm font-semibold mb-2 flex items-center gap-2"
+                  } style={!isProfessional ? { color: '#00C2FF' } : {}}>
                     <TrendingUp size={16} />
                     CURRENT STATUS
                   </h4>
-                  <p className="text-base" style={{ color: '#C4C7E5' }}>
+                  <p className={
+                    isProfessional
+                      ? "text-base text-pro-text-muted"
+                      : "text-base"
+                  } style={!isProfessional ? { color: '#C4C7E5' } : {}}>
                     {getStatusMessage()}
                   </p>
                 </div>
 
                 {/* Stats Grid */}
-                <div className="rounded-lg p-4" style={{
+                <div className={
+                  isProfessional
+                    ? "rounded-lg p-4 bg-gray-50 border border-gray-200"
+                    : "rounded-lg p-4"
+                } style={!isProfessional ? {
                   background: 'linear-gradient(135deg, rgba(0, 194, 255, 0.1) 0%, rgba(26, 224, 182, 0.1) 100%)',
                   border: '1px solid rgba(0, 194, 255, 0.3)',
                   boxShadow: '0 0 20px rgba(0, 194, 255, 0.15)'
-                }}>
+                } : {}}>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs font-semibold mb-1" style={{ color: '#00C2FF' }}>
+                      <p className={
+                        isProfessional
+                          ? "text-xs font-semibold mb-1 text-pro-primary"
+                          : "text-xs font-semibold mb-1"
+                      } style={!isProfessional ? { color: '#00C2FF' } : {}}>
                         TOTAL INTERACTIONS
                       </p>
-                      <p className="text-3xl font-bold" style={{
+                      <p className={
+                        isProfessional
+                          ? "text-3xl font-bold text-pro-text"
+                          : "text-3xl font-bold"
+                      } style={!isProfessional ? {
                         color: '#80F1FF',
                         textShadow: '0 0 10px rgba(0, 194, 255, 0.5)'
-                      }}>
+                      } : {}}>
                         {stats?.totalInteractions || 0}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold mb-1" style={{ color: '#1AE0B6' }}>
+                      <p className={
+                        isProfessional
+                          ? "text-xs font-semibold mb-1 text-pro-success"
+                          : "text-xs font-semibold mb-1"
+                      } style={!isProfessional ? { color: '#1AE0B6' } : {}}>
                         GROWTH STAGE
                       </p>
-                      <p className="text-3xl font-bold" style={{
+                      <p className={
+                        isProfessional
+                          ? "text-3xl font-bold text-pro-text"
+                          : "text-3xl font-bold"
+                      } style={!isProfessional ? {
                         color: '#80F1FF',
                         textShadow: '0 0 10px rgba(26, 224, 182, 0.5)'
-                      }}>
+                      } : {}}>
                         {growthStage}/10
                       </p>
                     </div>
@@ -169,23 +229,38 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
                 {/* Progress Bar */}
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-xs font-semibold" style={{ color: '#00C2FF' }}>
+                    <h4 className={
+                      isProfessional
+                        ? "text-xs font-semibold text-pro-primary"
+                        : "text-xs font-semibold"
+                    } style={!isProfessional ? { color: '#00C2FF' } : {}}>
                       PROGRESS TO NEXT STAGE
                     </h4>
-                    <span className="text-xs font-bold" style={{ color: '#80F1FF' }}>
+                    <span className={
+                      isProfessional
+                        ? "text-xs font-bold text-pro-text"
+                        : "text-xs font-bold"
+                    } style={!isProfessional ? { color: '#80F1FF' } : {}}>
                       {progressPercent}%
                     </span>
                   </div>
 
-                  <div className="w-full rounded-full h-3 relative overflow-hidden" style={{
+                  <div className={
+                    isProfessional
+                      ? "w-full rounded-full h-3 relative overflow-hidden bg-gray-200 border border-gray-300"
+                      : "w-full rounded-full h-3 relative overflow-hidden"
+                  } style={!isProfessional ? {
                     background: 'rgba(12, 27, 59, 0.8)',
                     border: '1px solid rgba(0, 194, 255, 0.3)',
                     boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.5)'
-                  }}>
+                  } : {}}>
                     {/* Animated gradient progress */}
                     <div
                       className="h-full rounded-full transition-all duration-500 relative"
-                      style={{
+                      style={isProfessional ? {
+                        background: '#6C5CE7',
+                        width: `${progressPercent}%`
+                      } : {
                         background: 'linear-gradient(90deg, #00C2FF 0%, #1AE0B6 50%, #00C2FF 100%)',
                         width: `${progressPercent}%`,
                         boxShadow: '0 0 15px rgba(0, 194, 255, 0.8)',
@@ -194,42 +269,56 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
                       }}
                     >
                       {/* Glow effect on progress bar */}
-                      <div className="absolute inset-0" style={{
-                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
-                        backgroundSize: '200% 100%',
-                        animation: 'shimmer 2s linear infinite'
-                      }} />
+                      {!isProfessional && (
+                        <div className="absolute inset-0" style={{
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                          backgroundSize: '200% 100%',
+                          animation: 'shimmer 2s linear infinite'
+                        }} />
+                      )}
                     </div>
                   </div>
 
-                  <p className="text-xs mt-2" style={{ color: '#AAB3D1' }}>
-                    <span style={{ color: '#1AE0B6', fontWeight: 'bold' }}>{interactionsNeeded}</span> more interactions needed
+                  <p className={
+                    isProfessional
+                      ? "text-xs mt-2 text-pro-text-muted"
+                      : "text-xs mt-2"
+                  } style={!isProfessional ? { color: '#AAB3D1' } : {}}>
+                    <span className={isProfessional ? "text-pro-success font-bold" : ""} style={!isProfessional ? { color: '#1AE0B6', fontWeight: 'bold' } : {}}>{interactionsNeeded}</span> more interactions needed
                   </p>
                 </div>
 
                 {/* How it Works - HUD Style */}
-                <div className="pt-4 mt-4" style={{
+                <div className={
+                  isProfessional
+                    ? "pt-4 mt-4 border-t border-gray-200"
+                    : "pt-4 mt-4"
+                } style={!isProfessional ? {
                   borderTop: '1px solid rgba(0, 194, 255, 0.2)'
-                }}>
-                  <h4 className="text-xs font-semibold mb-3 tracking-wider" style={{ color: '#00C2FF' }}>
+                } : {}}>
+                  <h4 className={
+                    isProfessional
+                      ? "text-xs font-semibold mb-3 tracking-wider text-pro-primary"
+                      : "text-xs font-semibold mb-3 tracking-wider"
+                  } style={!isProfessional ? { color: '#00C2FF' } : {}}>
                     SYSTEM MECHANICS
                   </h4>
                   <ul className="text-sm space-y-3">
                     <li className="flex items-start gap-3">
-                      <Users size={18} style={{ color: '#00C2FF', flexShrink: 0, marginTop: '2px' }} />
-                      <span style={{ color: '#C4C7E5' }}>
+                      <Users size={18} className={isProfessional ? "text-pro-primary" : ""} style={!isProfessional ? { color: '#00C2FF', flexShrink: 0, marginTop: '2px' } : { flexShrink: 0, marginTop: '2px' }} />
+                      <span className={isProfessional ? "text-pro-text-muted" : ""} style={!isProfessional ? { color: '#C4C7E5' } : {}}>
                         Each interaction contributes to growth progression
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <Leaf size={18} style={{ color: '#1AE0B6', flexShrink: 0, marginTop: '2px' }} />
-                      <span style={{ color: '#C4C7E5' }}>
+                      <Leaf size={18} className={isProfessional ? "text-pro-success" : ""} style={!isProfessional ? { color: '#1AE0B6', flexShrink: 0, marginTop: '2px' } : { flexShrink: 0, marginTop: '2px' }} />
+                      <span className={isProfessional ? "text-pro-text-muted" : ""} style={!isProfessional ? { color: '#C4C7E5' } : {}}>
                         Visual indicators emerge at key milestones
                       </span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <Flower2 size={18} style={{ color: '#00C2FF', flexShrink: 0, marginTop: '2px' }} />
-                      <span style={{ color: '#C4C7E5' }}>
+                      <Flower2 size={18} className={isProfessional ? "text-pro-primary" : ""} style={!isProfessional ? { color: '#00C2FF', flexShrink: 0, marginTop: '2px' } : { flexShrink: 0, marginTop: '2px' }} />
+                      <span className={isProfessional ? "text-pro-text-muted" : ""} style={!isProfessional ? { color: '#C4C7E5' } : {}}>
                         Sustained engagement maintains optimal state
                       </span>
                     </li>
@@ -341,15 +430,21 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
           </div>
 
           {/* Right side - Plant visualization with dark theme */}
-          <div className="relative rounded-xl overflow-hidden" style={{
+          <div className={
+            isProfessional
+              ? "relative rounded-lg overflow-hidden bg-white border border-gray-200 shadow-sm"
+              : "relative rounded-xl overflow-hidden"
+          } style={!isProfessional ? {
             background: 'linear-gradient(135deg, rgba(12, 27, 59, 0.9) 0%, rgba(18, 43, 89, 0.8) 100%)',
             border: '2px solid rgba(0, 194, 255, 0.4)',
             boxShadow: '0 0 30px rgba(0, 194, 255, 0.2), inset 0 0 30px rgba(0, 194, 255, 0.03)'
-          }}>
+          } : {}}>
             {/* Dark vignette effect */}
-            <div className="absolute inset-0 pointer-events-none" style={{
-              background: 'radial-gradient(ellipse at center, transparent 30%, rgba(12, 27, 59, 0.7) 100%)'
-            }} />
+            {!isProfessional && (
+              <div className="absolute inset-0 pointer-events-none" style={{
+                background: 'radial-gradient(ellipse at center, transparent 30%, rgba(12, 27, 59, 0.7) 100%)'
+              }} />
+            )}
 
             <svg
               viewBox="0 -50 800 750"
@@ -364,6 +459,28 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
                   <stop offset="100%" style={{ stopColor: '#122B59', stopOpacity: 1 }} />
                 </linearGradient>
 
+                {/* Light room background for Professional theme */}
+                <linearGradient id="lightBgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style={{ stopColor: '#F9FAFB', stopOpacity: 1 }} />
+                  <stop offset="100%" style={{ stopColor: '#F3F4F6', stopOpacity: 1 }} />
+                </linearGradient>
+
+                {/* Sunset sky gradient */}
+                <linearGradient id="sunsetSkyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style={{ stopColor: '#FFB84D', stopOpacity: 1 }} />
+                  <stop offset="30%" style={{ stopColor: '#FF9A6C', stopOpacity: 1 }} />
+                  <stop offset="60%" style={{ stopColor: '#FF7E8F', stopOpacity: 1 }} />
+                  <stop offset="100%" style={{ stopColor: '#B794F6', stopOpacity: 1 }} />
+                </linearGradient>
+
+                {/* Sunset glow */}
+                <radialGradient id="sunsetGlow" cx="50%" cy="50%">
+                  <stop offset="0%" style={{ stopColor: '#FFE5B4', stopOpacity: 0.9 }} />
+                  <stop offset="30%" style={{ stopColor: '#FFB84D', stopOpacity: 0.6 }} />
+                  <stop offset="70%" style={{ stopColor: '#FF9A6C', stopOpacity: 0.3 }} />
+                  <stop offset="100%" style={{ stopColor: 'transparent', stopOpacity: 0 }} />
+                </radialGradient>
+
                 {/* Night window with cyan glow */}
                 <radialGradient id="nightWindowGlow" cx="30%" cy="20%">
                   <stop offset="0%" style={{ stopColor: '#00C2FF', stopOpacity: 0.3 }} />
@@ -375,6 +492,12 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
                 <linearGradient id="darkWindowsillGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" style={{ stopColor: '#1A2D4A', stopOpacity: 1 }} />
                   <stop offset="100%" style={{ stopColor: '#0F1F35', stopOpacity: 1 }} />
+                </linearGradient>
+
+                {/* Light windowsill for Professional theme */}
+                <linearGradient id="lightWindowsillGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style={{ stopColor: '#E5E7EB', stopOpacity: 1 }} />
+                  <stop offset="100%" style={{ stopColor: '#D1D5DB', stopOpacity: 1 }} />
                 </linearGradient>
 
                 {/* Cool shadow with blue tint */}
@@ -394,6 +517,18 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
                 <radialGradient id="darkSoilGradient" cx="50%" cy="30%">
                   <stop offset="0%" style={{ stopColor: '#1A2634', stopOpacity: 1 }} />
                   <stop offset="100%" style={{ stopColor: '#0F1821', stopOpacity: 1 }} />
+                </radialGradient>
+
+                {/* Light soil for Professional theme */}
+                <radialGradient id="lightSoilGradient" cx="50%" cy="30%">
+                  <stop offset="0%" style={{ stopColor: '#6B5D4F', stopOpacity: 1 }} />
+                  <stop offset="100%" style={{ stopColor: '#4A3F35', stopOpacity: 1 }} />
+                </radialGradient>
+
+                {/* Warm shadow for light theme */}
+                <radialGradient id="warmShadowGradient" cx="50%" cy="50%">
+                  <stop offset="0%" style={{ stopColor: '#9CA3AF', stopOpacity: 0.2 }} />
+                  <stop offset="100%" style={{ stopColor: '#9CA3AF', stopOpacity: 0 }} />
                 </radialGradient>
 
                 {/* Stalk gradient - original green colors */}
@@ -462,25 +597,43 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
                 </linearGradient>
               </defs>
 
-              {/* Dark navy background */}
-              <rect x="0" y="-50" width="800" height="750" fill="url(#darkBgGradient)" />
+              {/* Room background */}
+              <rect x="0" y="-50" width="800" height="750" fill={isProfessional ? "url(#lightBgGradient)" : "url(#darkBgGradient)"} />
 
-              {/* Warm ambient room lighting */}
-              <ellipse cx="400" cy="300" rx="500" ry="400" fill="url(#warmRoomLight)" />
+              {/* Room lighting */}
+              {!isProfessional && <ellipse cx="400" cy="300" rx="500" ry="400" fill="url(#warmRoomLight)" />}
+              {!isProfessional && <rect x="0" y="-50" width="800" height="750" fill="url(#blueGreenLight)" style={{ mixBlendMode: 'screen' }} opacity="0.8" />}
 
-              {/* Blue/green directional light overlay from upper right corner - fades diagonally */}
-              <rect x="0" y="-50" width="800" height="750" fill="url(#blueGreenLight)" style={{ mixBlendMode: 'screen' }} opacity="0.8" />
+              {/* Window with sunset for Professional theme or daytime for others */}
+              <rect
+                x="40"
+                y="10"
+                width="270"
+                height="320"
+                fill={isProfessional ? "url(#sunsetSkyGradient)" : "url(#daySkyGradient)"}
+                stroke={isProfessional ? "#D1D5DB" : "#1A3A5A"}
+                strokeWidth="10"
+                rx="5"
+              />
 
-              {/* Daytime window with faded sunset tones */}
-              <rect x="40" y="10" width="270" height="320" fill="url(#daySkyGradient)" stroke="#1A3A5A" strokeWidth="10" rx="5" />
+              {/* Sunset in window for Professional theme */}
+              {isProfessional && (
+                <>
+                  <ellipse cx="175" cy="220" rx="90" ry="90" fill="url(#sunsetGlow)" />
+                  <circle cx="175" cy="220" r="45" fill="#FFD700" opacity="0.8" />
+                  <circle cx="175" cy="220" r="35" fill="#FFA500" opacity="0.9" />
+                </>
+              )}
 
-              {/* Faded sunset overlay on window */}
-              <rect x="40" y="10" width="270" height="320" fill="url(#sunsetOverlay)" rx="5" />
-
-              {/* Faded sun at bottom (sunset position) */}
-              <ellipse cx="175" cy="270" rx="110" ry="110" fill="url(#fadedSunGlow)" />
-              <circle cx="175" cy="270" r="38" fill="#FFF4E0" opacity="0.4" />
-              <circle cx="175" cy="270" r="30" fill="#FFE4B5" opacity="0.5" />
+              {/* Faded sunset for non-Professional themes */}
+              {!isProfessional && (
+                <>
+                  <rect x="40" y="10" width="270" height="320" fill="url(#sunsetOverlay)" rx="5" />
+                  <ellipse cx="175" cy="270" rx="110" ry="110" fill="url(#fadedSunGlow)" />
+                  <circle cx="175" cy="270" r="38" fill="#FFF4E0" opacity="0.4" />
+                  <circle cx="175" cy="270" r="30" fill="#FFE4B5" opacity="0.5" />
+                </>
+              )}
 
               {/* Soft clouds with warm tint */}
               <ellipse cx="80" cy="80" rx="30" ry="18" fill="rgba(255, 240, 230, 0.6)" />
@@ -491,23 +644,58 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
               <ellipse cx="140" cy="97" rx="20" ry="12" fill="rgba(255, 240, 230, 0.45)" />
 
               {/* Window panes */}
-              <line x1="175" y1="20" x2="175" y2="320" stroke="#1A3A5A" strokeWidth="6" />
-              <line x1="50" y1="170" x2="300" y2="170" stroke="#1A3A5A" strokeWidth="6" />
+              <line x1="175" y1="20" x2="175" y2="320" stroke={isProfessional ? "#D1D5DB" : "#1A3A5A"} strokeWidth="6" />
+              <line x1="50" y1="170" x2="300" y2="170" stroke={isProfessional ? "#D1D5DB" : "#1A3A5A"} strokeWidth="6" />
 
-              {/* Window glass reflection with cyan tint */}
-              <rect x="60" y="30" width="100" height="130" fill="rgba(0, 194, 255, 0.05)" />
-              <rect x="185" y="30" width="100" height="130" fill="rgba(0, 194, 255, 0.03)" />
+              {/* Window glass reflection */}
+              {!isProfessional && (
+                <>
+                  <rect x="60" y="30" width="100" height="130" fill="rgba(0, 194, 255, 0.05)" />
+                  <rect x="185" y="30" width="100" height="130" fill="rgba(0, 194, 255, 0.03)" />
+                </>
+              )}
+              {isProfessional && (
+                <>
+                  <rect x="60" y="30" width="100" height="130" fill="rgba(255, 255, 255, 0.3)" />
+                  <rect x="185" y="30" width="100" height="130" fill="rgba(255, 255, 255, 0.2)" />
+                </>
+              )}
 
-              {/* Windowsill - darker */}
-              <rect x="30" y="330" width="330" height="15" fill="url(#darkWindowsillGradient)" stroke="#1A3A5A" strokeWidth="2" />
-              <rect x="25" y="345" width="340" height="8" fill="#1A2D4A" stroke="#0F1F35" strokeWidth="2" />
+              {/* Windowsill */}
+              <rect
+                x="30"
+                y="330"
+                width="330"
+                height="15"
+                fill={isProfessional ? "url(#lightWindowsillGradient)" : "url(#darkWindowsillGradient)"}
+                stroke={isProfessional ? "#9CA3AF" : "#1A3A5A"}
+                strokeWidth="2"
+              />
+              <rect
+                x="25"
+                y="345"
+                width="340"
+                height="8"
+                fill={isProfessional ? "#E5E7EB" : "#1A2D4A"}
+                stroke={isProfessional ? "#D1D5DB" : "#0F1F35"}
+                strokeWidth="2"
+              />
 
               {/* Surface the pot sits on */}
-              <rect x="100" y="630" width="600" height="25" fill="url(#darkWindowsillGradient)" stroke="#1A3A5A" strokeWidth="3" rx="2" />
+              <rect
+                x="100"
+                y="630"
+                width="600"
+                height="25"
+                fill={isProfessional ? "url(#lightWindowsillGradient)" : "url(#darkWindowsillGradient)"}
+                stroke={isProfessional ? "#9CA3AF" : "#1A3A5A"}
+                strokeWidth="3"
+                rx="2"
+              />
 
-              {/* Cool shadow under pot with cyan tint */}
-              <ellipse cx="400" cy="645" rx="140" ry="15" fill="url(#coolShadowGradient)" />
-              <ellipse cx="400" cy="632" rx="80" ry="8" fill="rgba(0, 255, 255, 0.05)" />
+              {/* Shadow under pot */}
+              <ellipse cx="400" cy="645" rx="140" ry="15" fill={isProfessional ? "url(#warmShadowGradient)" : "url(#coolShadowGradient)"} />
+              <ellipse cx="400" cy="632" rx="80" ry="8" fill={isProfessional ? "rgba(156, 163, 175, 0.1)" : "rgba(0, 255, 255, 0.05)"} />
 
               {/* Pot - brighter terracotta */}
               <path
@@ -520,11 +708,11 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
               {/* Pot Rim with highlight from directional light */}
               <ellipse cx="400" cy="500" rx="180" ry="25" fill="url(#potRimHighlight)" stroke="#000000" strokeWidth="3" />
 
-              {/* Blue-green light catch on right side of pot rim */}
-              <ellipse cx="480" cy="498" rx="60" ry="12" fill="rgba(0, 224, 184, 0.15)" opacity="0.8" />
+              {/* Light catch on right side of pot rim */}
+              {!isProfessional && <ellipse cx="480" cy="498" rx="60" ry="12" fill="rgba(0, 224, 184, 0.15)" opacity="0.8" />}
 
-              {/* Soil - very dark */}
-              <ellipse cx="400" cy="500" rx="165" ry="22" fill="url(#darkSoilGradient)" />
+              {/* Soil */}
+              <ellipse cx="400" cy="500" rx="165" ry="22" fill={isProfessional ? "url(#lightSoilGradient)" : "url(#darkSoilGradient)"} />
 
               {/* Pebbles - natural look */}
               <ellipse cx="270" cy="502" rx="5" ry="4" fill="url(#darkStone1)" stroke="#3A4A5F" strokeWidth="1.5" opacity="0.8" />
@@ -544,16 +732,18 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
                 strokeWidth="2"
               />
 
-              {/* Blue-green light highlight on right edge of stalk */}
-              <rect
-                x="404"
-                y="80"
-                width="4"
-                height="420"
-                fill="rgba(0, 224, 184, 0.2)"
-                rx="2"
-                opacity="0.7"
-              />
+              {/* Light highlight on right edge of stalk */}
+              {!isProfessional && (
+                <rect
+                  x="404"
+                  y="80"
+                  width="4"
+                  height="420"
+                  fill="rgba(0, 224, 184, 0.2)"
+                  rx="2"
+                  opacity="0.7"
+                />
+              )}
 
               {/* Daisy flower - brighter and more vibrant */}
               {hasFlower && (
@@ -567,8 +757,8 @@ const PottedPlantVisualization = ({ stats, showHeading = false }) => {
                     opacity="1"
                     style={{ filter: 'saturate(1.1) brightness(1.15)' }}
                   />
-                  {/* Blue-green light tint on right side of flower */}
-                  <ellipse cx="450" cy="40" rx="50" ry="60" fill="rgba(0, 224, 184, 0.12)" opacity="0.7" />
+                  {/* Light tint on right side of flower */}
+                  {!isProfessional && <ellipse cx="450" cy="40" rx="50" ry="60" fill="rgba(0, 224, 184, 0.12)" opacity="0.7" />}
                 </>
               )}
 

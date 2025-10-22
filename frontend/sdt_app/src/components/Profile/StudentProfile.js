@@ -347,44 +347,41 @@ const StudentProfile = () => {
   const renderTile = (tile) => {
     const Icon = tile.icon;
 
+    // Professional theme uses THEME.md colors based on tile type
+    const getTileColor = () => {
+      if (!isProfessional) return null;
+
+      switch(tile.id) {
+        case 'tl': return '#6C5CE7'; // Primary - Engagement
+        case 'bl': return '#FFB020'; // Accent - Interactivity
+        case 'tr': return '#3AA3FF'; // Info - Academic Performance
+        case 'br': return '#2ECC71'; // Success - Overall Performance
+        default: return '#6C5CE7';
+      }
+    };
+
+    const tileColor = getTileColor();
+
     // Theme-aware tile styling
     const tileContainerClass = isKSGVariant
       ? `bg-gradient-to-br ${tile.bgGradient}`
       : isProfessional
-      ? 'bg-white'
+      ? ''
       : `bg-gradient-to-br ${tile.bgGradient}`;
 
     const tileBorderClass = isKSGVariant
       ? `border ${tile.borderColor}`
       : isProfessional
-      ? 'border border-gray-200'
+      ? ''
       : `border ${tile.borderColor}`;
 
     const tileShadowClass = isKSGVariant
       ? 'shadow-lg hover:shadow-xl hover:shadow-card-accent-end/30'
       : isProfessional
-      ? 'shadow-pro-card hover:shadow-pro-float'
+      ? ''
       : 'shadow-lg hover:shadow-xl hover:shadow-card-accent-end/30';
 
-    const tileRoundingClass = isProfessional ? 'rounded-lg' : 'rounded-xl';
-
-    const textColorClass = isKSGVariant
-      ? tile.textColor
-      : isProfessional
-      ? 'text-pro-text'
-      : tile.textColor;
-
-    const statusDotClass = isKSGVariant
-      ? 'bg-good-status-dot'
-      : isProfessional
-      ? 'bg-pro-success'
-      : 'bg-good-status-dot';
-
-    const statusTextClass = isKSGVariant
-      ? 'text-good-text-label'
-      : isProfessional
-      ? 'text-pro-success'
-      : 'text-good-text-label';
+    const tileRoundingClass = isProfessional ? 'rounded-[14px]' : 'rounded-xl';
 
     return (
       <div
@@ -397,18 +394,56 @@ const StudentProfile = () => {
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') showImage(tile.mediaSuffix); }}
         aria-label={`${tile.label} preview`}
       >
-        <div className={`relative ${tileContainerClass} ${tileRoundingClass} p-4 ${tileBorderClass} ${tileShadowClass} transition-all duration-300 h-full flex flex-col justify-center`}>
-          <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${tile.gradient} rounded-full blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-300`} />
-          <div className="relative flex items-center gap-3">
-            <div className={`w-10 h-10 flex items-center justify-center rounded-lg bg-gradient-to-br ${tile.gradient} shadow-md`}>
-              <Icon className="w-5 h-5 text-white" />
+        <div
+          className={`relative ${tileContainerClass} ${tileRoundingClass} p-6 h-full flex flex-col justify-between min-h-[160px] ${isProfessional ? 'hover:scale-105 hover:-translate-y-1' : ''}`}
+          style={isProfessional ? {
+            backgroundColor: tileColor,
+            boxShadow: '0 6px 14px rgba(31, 36, 48, 0.06)',
+            transition: 'all 240ms cubic-bezier(0.22, 1, 0.36, 1)'
+          } : {}}
+        >
+          {/* Large faded icon in background */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-10 group-hover:opacity-15 transition-opacity duration-300 pointer-events-none">
+            <Icon className={isProfessional ? "w-32 h-32 text-white" : "w-32 h-32 text-white"} />
+          </div>
+
+          {/* Background gradient blur effect for non-professional themes */}
+          {!isProfessional && (
+            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${tile.gradient} rounded-full blur-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-300`} />
+          )}
+
+          {/* Content - centered both vertically and horizontally */}
+          <div className="relative z-10 flex flex-col items-center justify-center text-center flex-1 space-y-4">
+            <div
+              className="font-bold leading-tight"
+              style={isProfessional ? {
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '28px',
+                fontWeight: 700,
+                color: '#FFFFFF'
+              } : {
+                fontSize: '28px',
+                color: tile.textColor
+              }}
+            >
+              {tile.label}
             </div>
-            <div className="flex-1 min-w-0">
-              <div className={`text-sm font-bold ${textColorClass} mb-0.5`}>{tile.label}</div>
-              <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${tile.dotColor} animate-pulse shadow-lg`} />
-                <span className={`text-xs ${tile.statusColor} font-semibold`}>{tile.status}</span>
-              </div>
+            <div
+              className={isProfessional ? `font-bold ${tile.statusColor}` : "font-bold"}
+              style={isProfessional ? {
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '24px',
+                fontWeight: 700,
+                WebkitTextStroke: '2px white',
+                paintOrder: 'stroke fill'
+              } : {
+                fontSize: '24px',
+                color: tile.statusColor,
+                WebkitTextStroke: '2px white',
+                paintOrder: 'stroke fill'
+              }}
+            >
+              {tile.status}
             </div>
           </div>
         </div>
@@ -450,11 +485,11 @@ const StudentProfile = () => {
       }>
         {!isProfessional && (
           <div className="bg-indigo-950/50 backdrop-blur-sm rounded-xl p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
               {/* Left Column - First Two Tiles */}
-              <div className="space-y-6 flex flex-col">
+              <div className="space-y-8 flex flex-col">
                 {tiles.slice(0, 2).map((tile) => (
-                  <div key={tile.id} className="flex-1">
+                  <div key={tile.id} className="flex-1 p-2">
                     {renderTile(tile)}
                   </div>
                 ))}
@@ -462,13 +497,13 @@ const StudentProfile = () => {
 
               {/* Center - Video/Image Display */}
               <div
-                className="relative aspect-[3/4] flex items-center justify-center bg-avatar-frame rounded-lg overflow-hidden"
+                className="relative aspect-[3/4] bg-avatar-frame rounded-lg overflow-hidden"
                 onMouseEnter={handleCenterMouseEnter}
               >
                 <video
                   id="heroVideo"
                   ref={heroVideoRef}
-                  className="max-w-full max-h-full object-contain"
+                  className="absolute inset-0 w-full h-full object-contain"
                   playsInline
                   muted
                   preload="auto"
@@ -479,15 +514,15 @@ const StudentProfile = () => {
                   <img
                     src={activeImageSrc}
                     alt="Preview"
-                    className="max-w-full max-h-full object-contain"
+                    className="absolute inset-0 w-full h-full object-contain"
                   />
                 )}
               </div>
 
               {/* Right Column - Last Two Tiles */}
-              <div className="space-y-6 flex flex-col">
+              <div className="space-y-8 flex flex-col">
                 {tiles.slice(2).map((tile) => (
-                  <div key={tile.id} className="flex-1">
+                  <div key={tile.id} className="flex-1 p-2">
                     {renderTile(tile)}
                   </div>
                 ))}
@@ -496,11 +531,11 @@ const StudentProfile = () => {
           </div>
         )}
         {isProfessional && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             {/* Left Column - First Two Tiles */}
-            <div className="space-y-6 flex flex-col">
+            <div className="space-y-8 flex flex-col">
               {tiles.slice(0, 2).map((tile) => (
-                <div key={tile.id} className="flex-1">
+                <div key={tile.id} className="flex-1 p-2">
                   {renderTile(tile)}
                 </div>
               ))}
@@ -508,13 +543,13 @@ const StudentProfile = () => {
 
             {/* Center - Video/Image Display */}
             <div
-              className="relative aspect-[3/4] flex items-center justify-center bg-gray-100 rounded-lg border border-gray-200 overflow-hidden"
+              className="relative aspect-[3/4] bg-gray-100 rounded-lg border border-gray-200 overflow-hidden"
               onMouseEnter={handleCenterMouseEnter}
             >
               <video
                 id="heroVideo"
                 ref={heroVideoRef}
-                className="max-w-full max-h-full object-contain"
+                className="absolute inset-0 w-full h-full object-contain"
                 playsInline
                 muted
                 preload="auto"
@@ -525,15 +560,15 @@ const StudentProfile = () => {
                 <img
                   src={activeImageSrc}
                   alt="Preview"
-                  className="max-w-full max-h-full object-contain"
+                  className="absolute inset-0 w-full h-full object-contain"
                 />
               )}
             </div>
 
             {/* Right Column - Last Two Tiles */}
-            <div className="space-y-6 flex flex-col">
+            <div className="space-y-8 flex flex-col">
               {tiles.slice(2).map((tile) => (
-                <div key={tile.id} className="flex-1">
+                <div key={tile.id} className="flex-1 p-2">
                   {renderTile(tile)}
                 </div>
               ))}

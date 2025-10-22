@@ -1,6 +1,38 @@
 // Interaction Simulation Engine for Student Digital Twin
 // Generates realistic student interaction data based on personality and academic patterns
 
+// Hard-coded student profiles matching StudentProfile.js
+const HARD_CODED_PROFILES = {
+  '38925958': { // Michael - GOOD interactivity
+    name: 'Michael',
+    interactivityLevel: 'GOOD',
+    weeklyInteractions: 15,
+    engagementMultiplier: 1.2,
+    participationScore: 85
+  },
+  '41425626': { // Zai - TOO LOW interactivity
+    name: 'Zai',
+    interactivityLevel: 'TOO LOW',
+    weeklyInteractions: 3,
+    engagementMultiplier: 0.3,
+    participationScore: 35
+  },
+  '40954129': { // Stefan - TOO LOW interactivity
+    name: 'Stefan',
+    interactivityLevel: 'TOO LOW',
+    weeklyInteractions: 4,
+    engagementMultiplier: 0.4,
+    participationScore: 40
+  },
+  '40977676': { // Maderi - GOOD interactivity
+    name: 'Maderi',
+    interactivityLevel: 'GOOD',
+    weeklyInteractions: 14,
+    engagementMultiplier: 1.1,
+    participationScore: 82
+  }
+};
+
 class InteractionSimulator {
   constructor(studentId) {
     this.studentId = studentId;
@@ -11,6 +43,9 @@ class InteractionSimulator {
 
     // Clear any cached data for fresh start
     this.cachedDashboardData = null;
+
+    // Get hard-coded profile if available
+    this.hardCodedProfile = HARD_CODED_PROFILES[String(studentId)] || null;
 
     // Clear existing session data to regenerate with anonymous names
     if (sessionStorage.getItem(this.sessionKey)) {
@@ -63,6 +98,33 @@ class InteractionSimulator {
     const seed = this.hashCode(this.studentId + this.sessionSeed);
     const random = this.seededRandom(seed);
 
+    // Use hard-coded profile data if available
+    if (this.hardCodedProfile) {
+      const participationScore = this.hardCodedProfile.participationScore;
+      let currentGPA, riskLevel;
+
+      // Set GPA and risk level based on interactivity level
+      if (this.hardCodedProfile.interactivityLevel === 'GOOD') {
+        currentGPA = 3.5 + random() * 0.3; // 3.5-3.8
+        riskLevel = 'low';
+      } else { // TOO LOW
+        currentGPA = 2.2 + random() * 0.5; // 2.2-2.7
+        riskLevel = 'high';
+      }
+
+      return {
+        id: this.studentId,
+        name: this.hardCodedProfile.name,
+        academicLevel: 'Junior',
+        major: 'Computer Science',
+        currentGPA: Math.round(currentGPA * 100) / 100,
+        riskLevel: riskLevel,
+        personalityType: this.hardCodedProfile.interactivityLevel === 'GOOD' ? 'extroverted' : 'introverted',
+        participationScore: participationScore
+      };
+    }
+
+    // Default random generation for other students
     const personalityType = this.personalityTypes[Math.floor(random() * this.personalityTypes.length)];
     const academicLevels = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'];
     const majors = ['Computer Science', 'Engineering', 'Business', 'Psychology', 'Biology', 'Mathematics'];
@@ -95,8 +157,14 @@ class InteractionSimulator {
     const seed = this.hashCode(this.studentId + 'engagement' + this.sessionSeed);
     const random = this.seededRandom(seed);
 
-    const baseFrequency = this.studentProfile.personalityType === 'extroverted' ? 9 :
-                         this.studentProfile.personalityType === 'introverted' ? 6 : 7.5;
+    // Use hard-coded engagement multiplier if available
+    let baseFrequency;
+    if (this.hardCodedProfile) {
+      baseFrequency = 6 * this.hardCodedProfile.engagementMultiplier;
+    } else {
+      baseFrequency = this.studentProfile.personalityType === 'extroverted' ? 9 :
+                      this.studentProfile.personalityType === 'introverted' ? 6 : 7.5;
+    }
 
     for (let i = 0; i < weeks; i++) {
       const weekDate = new Date();
@@ -105,13 +173,30 @@ class InteractionSimulator {
       const trend = Math.sin(i * 0.5) * 0.3; // Natural variation
       const noise = (random() - 0.5) * 2;
 
+      const interactionFreq = Math.max(1, baseFrequency + trend + noise);
+
+      // Adjust collaboration score and risk based on hard-coded profile
+      let collaborationScore, overallRiskScore;
+      if (this.hardCodedProfile) {
+        if (this.hardCodedProfile.interactivityLevel === 'GOOD') {
+          collaborationScore = Math.floor(75 + random() * 15); // 75-90
+          overallRiskScore = Math.floor(10 + random() * 20); // 10-30 (low risk)
+        } else { // TOO LOW
+          collaborationScore = Math.floor(30 + random() * 20); // 30-50
+          overallRiskScore = Math.floor(60 + random() * 30); // 60-90 (high risk)
+        }
+      } else {
+        collaborationScore = Math.floor(60 + random() * 30 + (this.studentProfile.currentGPA - 2.5) * 20);
+        overallRiskScore = Math.floor(10 + random() * 40);
+      }
+
       history.push({
         week: `W${i + 1}`,
         date: weekDate,
-        interactionFrequency: Math.max(1, baseFrequency + trend + noise),
+        interactionFrequency: interactionFreq,
         socialNetworkPosition: Math.max(0.1, Math.min(1, 0.5 + (random() - 0.5) * 0.4)),
-        collaborationScore: Math.floor(60 + random() * 30 + (this.studentProfile.currentGPA - 2.5) * 20),
-        overallRiskScore: Math.floor(10 + random() * 40),
+        collaborationScore: collaborationScore,
+        overallRiskScore: overallRiskScore,
         sessionCount: Math.floor(3 + random() * 4)
       });
     }
@@ -124,8 +209,15 @@ class InteractionSimulator {
     const seed = this.hashCode(this.studentId + 'interactions' + this.sessionSeed);
     const random = this.seededRandom(seed);
 
-    // Generate 20-50 interactions over the last 30 days
-    const numInteractions = Math.floor(20 + random() * 30);
+    // Use hard-coded weekly interactions if available
+    let numInteractions;
+    if (this.hardCodedProfile) {
+      // Generate interactions based on weekly count * 4 weeks
+      numInteractions = this.hardCodedProfile.weeklyInteractions * 4;
+    } else {
+      // Generate 20-50 interactions over the last 30 days
+      numInteractions = Math.floor(20 + random() * 30);
+    }
 
     // Generate pool of interaction partners
     const partners = this.generateInteractionPartners(random);

@@ -37,33 +37,33 @@ function getOutcomeColors(label) {
   switch (label) {
     case 'Pass':
       return {
-        border: '#22c55e',
-        background: 'rgba(34, 197, 94, 0.1)',
-        text: '#bbf7d0'
+        border: '#2ECC71',
+        background: '#2ECC71',
+        text: '#FFFFFF'
       };
     case 'Distinction':
       return {
-        border: '#38bdf8',
-        background: 'rgba(56, 189, 248, 0.1)',
-        text: '#bae6fd'
+        border: '#3AA3FF',
+        background: '#3AA3FF',
+        text: '#FFFFFF'
       };
     case 'Withdrawn':
       return {
-        border: '#f97316',
-        background: 'rgba(249, 115, 22, 0.1)',
-        text: '#fed7aa'
+        border: '#FFB020',
+        background: '#FFB020',
+        text: '#FFFFFF'
       };
     case 'Fail':
       return {
-        border: '#ef4444',
-        background: 'rgba(239, 68, 68, 0.1)',
-        text: '#fecaca'
+        border: '#FF4D4F',
+        background: '#FF4D4F',
+        text: '#FFFFFF'
       };
     default:
       return {
-        border: 'rgba(148, 163, 184, 0.4)',
-        background: 'rgba(148, 163, 184, 0.1)',
-        text: '#e2e8f0'
+        border: '#6B7280',
+        background: '#6B7280',
+        text: '#FFFFFF'
       };
   }
 }

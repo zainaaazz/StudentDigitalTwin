@@ -462,13 +462,13 @@ const StudentProfile = () => {
 
               {/* Center - Video/Image Display */}
               <div
-                className="relative aspect-[3/4] flex items-center justify-center p-4 bg-avatar-frame rounded-lg"
+                className="relative aspect-[3/4] flex items-center justify-center bg-avatar-frame rounded-lg overflow-hidden"
                 onMouseEnter={handleCenterMouseEnter}
               >
                 <video
                   id="heroVideo"
                   ref={heroVideoRef}
-                  className="w-full h-full object-cover rounded-lg"
+                  className="max-w-full max-h-full object-contain"
                   playsInline
                   muted
                   preload="auto"
@@ -479,7 +479,7 @@ const StudentProfile = () => {
                   <img
                     src={activeImageSrc}
                     alt="Preview"
-                    className="w-full h-full object-cover rounded-lg"
+                    className="max-w-full max-h-full object-contain"
                   />
                 )}
               </div>
@@ -508,13 +508,13 @@ const StudentProfile = () => {
 
             {/* Center - Video/Image Display */}
             <div
-              className="relative aspect-[3/4] flex items-center justify-center p-4 bg-gray-100 rounded-lg border border-gray-200"
+              className="relative aspect-[3/4] flex items-center justify-center bg-gray-100 rounded-lg border border-gray-200 overflow-hidden"
               onMouseEnter={handleCenterMouseEnter}
             >
               <video
                 id="heroVideo"
                 ref={heroVideoRef}
-                className="w-full h-full object-cover rounded-lg"
+                className="max-w-full max-h-full object-contain"
                 playsInline
                 muted
                 preload="auto"
@@ -525,7 +525,7 @@ const StudentProfile = () => {
                 <img
                   src={activeImageSrc}
                   alt="Preview"
-                  className="w-full h-full object-cover rounded-lg"
+                  className="max-w-full max-h-full object-contain"
                 />
               )}
             </div>

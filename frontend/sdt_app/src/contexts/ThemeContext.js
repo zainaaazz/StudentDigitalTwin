@@ -12,9 +12,9 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Load theme from localStorage or default to 'ksg'
+    // Load theme from localStorage or default to 'professional'
     const savedTheme = localStorage.getItem('interactivityTheme');
-    return savedTheme || 'ksg';
+    return savedTheme || 'professional';
   });
 
   useEffect(() => {

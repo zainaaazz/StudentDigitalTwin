@@ -134,21 +134,6 @@ const StudentAnalyticsDashboard = () => {
         />
       </div>
 
-      {effectiveSelectedStudent !== 'all' && (
-        <div className={`${cardStyles.container} p-6 mt-6 relative z-10`}>
-          <div className="flex items-center gap-2 mb-4">
-            <svg className={`w-5 h-5 ${isKSGVariant ? 'text-ksg-teal' : isProfessional ? 'text-pro-primary' : 'text-md-lavender-neon'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 className={`text-lg font-semibold ${textStyles.heading}`}>Digital Twin Status</h3>
-          </div>
-          <StudentBehaviorIndicator
-            analytics={analytics}
-            selectedStudent={effectiveSelectedStudent}
-            userRole={userRole}
-          />
-        </div>
-      )}
 
       {effectiveSelectedStudent !== 'all' && (
         <div className={`${cardStyles.container} p-6 mt-6 relative z-10`}>
